@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
+    "react-helmet-async": "^2.0.5",
+    "xlsx-style": "^0.8.13"
+  }
+}

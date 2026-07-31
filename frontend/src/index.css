@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-100 text-gray-800;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold;
+}
+
+
+.menu-dropdown-item {
+  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium;
+}
+.menu-dropdown-item-active {
+  @apply bg-blue-50 font-medium text-blue-600;
+}
+.menu-dropdown-item-inactive {
+  @apply text-gray-700 hover:bg-gray-100;
+}
+
+.table {
+  @apply min-w-full bg-white border border-gray-200;
+}
+
+.table th, .table td {
+  @apply border border-gray-200 px-4 py-2;
+}
+
+.table th {
+  @apply bg-gray-200;
+}
+
+.card {
+  @apply bg-white shadow-md rounded-lg p-4;
+}
+
+.sidebar {
+  @apply w-64 bg-gray-800 text-white h-full;
+}
+
+.main-content {
+  @apply flex-1 p-6;
+}.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  
+  scrollbar-width: none; 
+}
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
+
+@media print {
+  .screen-only {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}@page {
+  size: A4;
+  margin: 0;
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
+
+@media print {
+  .screen-only {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
+
