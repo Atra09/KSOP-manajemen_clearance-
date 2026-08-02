@@ -41,6 +41,63 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
     return "NIHIL";
   };
 
+  const formatLocationTwoLines = (locStr) => {
+    if (!locStr) return { main: "-", sub: null };
+    let str = String(locStr).trim();
+
+    // Support standard and fullwidth parentheses
+    str = str.replace(/（/g, "(").replace(/）/g, ")");
+
+    const openIndex = str.indexOf("(");
+    const closeIndex = str.indexOf(")");
+
+    if (openIndex !== -1 && closeIndex !== -1 && closeIndex > openIndex) {
+      const mainText = str.substring(0, openIndex).trim();
+      const subText = str.substring(openIndex + 1, closeIndex).trim();
+      return {
+        main: mainText || str,
+        sub: subText || null,
+      };
+    }
+
+    return {
+      main: str,
+      sub: null,
+    };
+  };
+
+  const getOriginLocation = (data) => {
+    const candidateSandar = data.sandar?.nama_pelabuhan || "";
+    const candidateTolak = data.tolak?.nama_pelabuhan || "";
+    const candidateDatang = data.datang_dari?.nama_kecamatan || "";
+
+    if (candidateSandar.includes("(") || candidateSandar.includes("（")) return candidateSandar;
+    if (candidateTolak.includes("(") || candidateTolak.includes("（")) return candidateTolak;
+    if (candidateDatang.includes("(") || candidateDatang.includes("（")) return candidateDatang;
+
+    return candidateTolak || candidateSandar || candidateDatang || "-";
+  };
+
+  const getDestinationLocation = (data) => {
+    const candidateTujuan = data.tujuan_akhir?.nama_kecamatan || "";
+    const candidateSinggah = data.tempat_singgah?.nama_kecamatan || "";
+
+    if (candidateTujuan.includes("(") || candidateTujuan.includes("（")) return candidateTujuan;
+    if (candidateSinggah.includes("(") || candidateSinggah.includes("（")) return candidateSinggah;
+
+    return candidateTujuan || candidateSinggah || "-";
+  };
+
+  const renderLocation = (locStr, mainStyle = {}) => {
+    const { main, sub } = formatLocationTwoLines(locStr);
+    return (
+      <div style={{ lineHeight: 1.1, ...mainStyle }}>
+        <div>{main}</div>
+        {sub && <div>{sub}</div>}
+      </div>
+    );
+  };
+
   // === Render A4 Page ===
   return (
     <div
@@ -155,7 +212,7 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
           fontSize: "12pt",
         }}
       >
-        {data.kapal?.bendera?.kode_negara}
+        {(data.kapal?.bendera?.nama_negara || data.kapal?.bendera?.kode_negara || "-")?.toUpperCase()}
       </div>
 
       <div
@@ -223,13 +280,13 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
       <div
         style={{
           position: "absolute",
-          top: "179.2mm",
+          top: "178mm",
           left: "42mm",
           fontWeight: "bold",
-          fontSize: "12pt",
+          fontSize: "11pt",
         }}
       >
-        KALIANGET
+        {renderLocation(getOriginLocation(data))}
       </div>
 
       <div
@@ -259,13 +316,13 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
       <div
         style={{
           position: "absolute",
-          top: "179.2mm",
+          top: "178mm",
           left: "153mm",
           fontWeight: "bold",
-          fontSize: "12pt",
+          fontSize: "11pt",
         }}
       >
-        {data.tujuan_akhir?.nama_kecamatan}
+        {renderLocation(getDestinationLocation(data))}
       </div>
 
       <div
@@ -301,7 +358,7 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
           fontSize: "12pt",
         }}
       >
-        KALIANGET
+        {formatLocationTwoLines(getOriginLocation(data)).main}
       </div>
 
       <div

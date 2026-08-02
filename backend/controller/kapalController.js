@@ -101,15 +101,10 @@ const deleteKapal = async (req, res) => {
     try {
         let kapalData = await kapal.findOne({
             where: { id_kapal: req.params.id },
-            attributes: ['nama_kapal', 'createdAt']
+            attributes: ['nama_kapal']
         })
 
-        let kapalDate = new Date(kapalData.createdAt)
-        let now = new Date()
-
-        let dateDifference = Math.floor((now - kapalDate) / (1000 * 60 * 60 * 24))
-
-        if (dateDifference > 10) return res.status(500).json({ msg: "data tidak bisa dihapus" })
+        if (!kapalData) return res.status(500).json({ msg: "data tidak ditemukan" })
 
         let result = await kapal.destroy({ where: { id_kapal: req.params.id } })
 

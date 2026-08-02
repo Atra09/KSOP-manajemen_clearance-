@@ -81,15 +81,10 @@ const deleteAgen = async (req, res) => {
     try {
         let agenData = await agen.findOne({
             where: { id_agen: req.params.id },
-            attributes: ['nama_agen', 'createdAt']
+            attributes: ['nama_agen']
         })
 
-        let agenDate = new Date(agenData.createdAt)
-        let now = new Date()
-
-        let dateDifference = Math.floor((now - agenDate) / (1000 * 60 * 60 * 24))
-
-        if (dateDifference > 10) return res.status(500).json({ msg: "data tidak bisa dihapus" })
+        if (!agenData) return res.status(500).json({ msg: "data tidak ditemukan" })
 
         let result = await agen.destroy({ where: { id_agen: req.params.id } })
 

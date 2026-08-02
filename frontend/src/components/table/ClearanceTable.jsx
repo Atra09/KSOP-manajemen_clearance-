@@ -106,14 +106,13 @@ const ClearanceTable = ({ clearanceItems = [], onSuccess, onSort, sortConfig }) 
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            {renderHeader("No.Register", "no_urut")}
             {renderHeader("No. SPB", "no_spb")}
+            {renderHeader("No. Register", "no_urut")}
             {renderHeader("No. PPK", "ppk")}
             {renderHeader("Kapal", "nama_kapal")}
             {renderHeader("Nahkoda", "nama_nahkoda")}
             {renderHeader("Tujuan", "tujuan_akhir")}
-            {renderHeader("Tgl", "tanggal_berangkat")}
-            {renderHeader("Waktu", "pukul_kapal_berangkat")}
+            {renderHeader("Waktu Keberangkatan", "pukul_kapal_berangkat")}
             {renderHeader("Agen", "nama_agen")}
             <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
           </tr>
@@ -122,16 +121,18 @@ const ClearanceTable = ({ clearanceItems = [], onSuccess, onSort, sortConfig }) 
           {clearanceItems?.length > 0 ? (
             clearanceItems.map((item) => (
               <tr key={item.id_perjalanan} className="hover:bg-gray-50 transition-colors">
-                <td className="px-3 py-3 whitespace-nowrap text-gray-600">{item.no_urut || '-'}</td>
-                <td className="px-3 py-3 whitespace-nowrap font-medium text-gray-900">{item.spb?.no_spb || '-'}</td>
+                <td className="px-3 py-3 whitespace-nowrap font-semibold text-indigo-600">{item.spb?.no_spb || '-'}</td>
+                <td className="px-3 py-3 whitespace-nowrap text-gray-600 font-medium">{item.no_urut || '-'}</td>
                 <td className="px-3 py-3 whitespace-nowrap text-gray-500">{item.ppk || '-'}</td>
-                <td className="px-3 py-3 whitespace-nowrap text-gray-500">{item.kapal?.nama_kapal || '-'}</td>
+                <td className="px-3 py-3 whitespace-nowrap font-medium text-gray-900">{item.kapal?.nama_kapal || '-'}</td>
                 <td className="px-3 py-3 whitespace-nowrap text-gray-500">{item.nahkoda?.nama_nahkoda || '-'}</td>
                 <td className="px-3 py-3 whitespace-nowrap text-gray-500">{item.tujuan_akhir?.nama_kecamatan || '-'}</td>
-                <td className="px-3 py-3 whitespace-nowrap text-gray-500">
-                  {item.tanggal_berangkat ? new Date(item.tanggal_berangkat).toLocaleDateString('en-GB').replace(/\//g, '-') : '-'}
+                <td className="px-3 py-3 whitespace-nowrap text-gray-700">
+                  <div className="font-medium text-gray-900">{item.pukul_kapal_berangkat || '-'}</div>
+                  <div className="text-xs text-gray-500">
+                    {item.tanggal_berangkat ? new Date(item.tanggal_berangkat).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
+                  </div>
                 </td>
-                <td className="px-3 py-3 whitespace-nowrap text-gray-500 text-center">{item.pukul_kapal_berangkat || '-'}</td>
                 <td className="px-3 py-3 whitespace-nowrap text-gray-500">{item.agen?.nama_agen || '-'}</td>
                 <td className="px-3 py-3 flex justify-end">
                   <ActionDropdown item={item} onSuccess={onSuccess} />
@@ -140,7 +141,7 @@ const ClearanceTable = ({ clearanceItems = [], onSuccess, onSort, sortConfig }) 
             ))
           ) : (
             <tr>
-              <td colSpan="10" className="px-3 py-4 text-center text-gray-500 italic">Tidak ada data clearance yang cocok.</td>
+              <td colSpan="9" className="px-3 py-4 text-center text-gray-500 italic">Tidak ada data clearance yang cocok.</td>
             </tr>
           )}
         </tbody>

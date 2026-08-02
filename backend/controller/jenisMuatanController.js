@@ -84,13 +84,6 @@ const deleteJenisMuatan = async (req, res) => {
             attributes: ['nama_jenis_muatan', 'createdAt']
         })
 
-        let jenisMuatanDate = new Date(jenisMuatanData.createdAt)
-        let now = new Date()
-
-        let dateDifference = Math.floor((now - jenisMuatanDate) / (1000 * 60 * 60 * 24))
-
-        if (dateDifference > 10) return res.status(500).json({ msg: "data tidak bisa dihapus" })
-
         let result = await jenisMuatan.destroy({ where: { id_jenis_muatan: req.params.id } })
 
         if (result == 0) return res.status(500).json({ msg: "data tidak ditemukan" })

@@ -85,15 +85,10 @@ const deleteKecamatan = async (req, res) => {
     try {
         let kecamatanData = await kecamatan.findOne({
             where: { id_kecamatan: req.params.id },
-            attributes: ['nama_kecamatan', 'createdAt']
+            attributes: ['nama_kecamatan']
         })
 
-        let kecamatanDate = new Date(kecamatanData.createdAt)
-        let now = new Date()
-
-        let dateDifference = Math.floor((now - kecamatanDate) / (1000 * 60 * 60 * 24))
-
-        if (dateDifference > 10) return res.status(500).json({ msg: "data tidak bisa dihapus" })
+        if (!kecamatanData) return res.status(500).json({ msg: "data tidak ditemukan" })
 
         let result = await kecamatan.destroy({ where: { id_kecamatan: req.params.id } })
 

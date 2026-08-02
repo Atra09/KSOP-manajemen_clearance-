@@ -43,7 +43,10 @@ const getPerjalananByFilter = async (req, res) => {
         if (wilker && wilker.toLowerCase() != dataWilker.toLowerCase() && dataWilker.toLowerCase() != "pusat")
             return res.status(500).json({ msg: "Tidak ada akses" });
 
-        let orderBySort = ["id_perjalanan", "DESC"]
+        let orderBySort = [
+            Sequelize.literal('CAST(`spb`.`no_spb` AS UNSIGNED) ASC'),
+            [{ model: spb }, 'no_spb', 'ASC']
+        ];
         let wherePerjalanan = {};
         let whereKapal = {};
         let whereKategoriMuatan = [];
@@ -111,7 +114,10 @@ const getPerjalananByFilter = async (req, res) => {
             JOIN kategori_muatan km 
                 ON km.id_kategori_muatan = m.id_kategori_muatan
             WHERE m.id_perjalanan = perjalanan.id_perjalanan
-            AND km.nama_kategori_muatan = '${n}'
+            AND (
+                km.nama_kategori_muatan = '${n}'
+                OR REPLACE(km.nama_kategori_muatan, ' ', '+') = '${n}'
+            )
         )
     `))
             );
@@ -123,13 +129,18 @@ const getPerjalananByFilter = async (req, res) => {
         // }
 
         if (tanggal_awal && tanggal_akhir) {
+            const start = new Date(`${tanggal_awal}T00:00:00`);
+            const end = new Date(`${tanggal_akhir}T23:59:59`);
             wherePerjalanan.tanggal_berangkat = {
-                [Op.between]: [new Date(tanggal_awal), new Date(tanggal_akhir)]
+                [Op.between]: [start, end]
             };
         } else if (tanggal_awal) {
-            wherePerjalanan.tanggal_berangkat = { [Op.gte]: new Date(tanggal_awal) };
+            const start = new Date(`${tanggal_awal}T00:00:00`);
+            const end = new Date(`${tanggal_awal}T23:59:59`);
+            wherePerjalanan.tanggal_berangkat = { [Op.between]: [start, end] };
         } else if (tanggal_akhir) {
-            wherePerjalanan.tanggal_berangkat = { [Op.lte]: new Date(tanggal_akhir) };
+            const end = new Date(`${tanggal_akhir}T23:59:59`);
+            wherePerjalanan.tanggal_berangkat = { [Op.lte]: end };
         }
 
         if (searchTerm) {
@@ -141,32 +152,42 @@ const getPerjalananByFilter = async (req, res) => {
             ];
         }
 
-        if (sort && data_name) {
-            switch (data_name) {
-                case 'nama_kapal':
-                    orderBySort = [{ model: kapal }, 'nama_kapal', sort];
-                    break;
-                case 'no_spb':
-                    orderBySort = [{ model: spb }, 'no_spb', sort];
-                    break;
-                case 'nama_nahkoda':
-                    orderBySort = [{ model: nahkoda }, 'nama_nahkoda', sort];
-                    break;
-                case 'nama_agen':
-                    orderBySort = [{ model: agen }, 'nama_agen', sort];
-                    break;
-                case 'tujuan_akhir':
-                    orderBySort = [{ model: kecamatan, as: 'tujuan_akhir' }, 'nama_kecamatan', sort];
-                    break;
-                default:
-                    orderBySort = [data_name, sort];
-            }
+        const sortDir = (sort && sort.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+        const sortCol = data_name || 'no_spb';
+
+        switch (sortCol) {
+            case 'nama_kapal':
+                orderBySort = [[{ model: kapal }, 'nama_kapal', sortDir]];
+                break;
+            case 'no_spb':
+                orderBySort = [
+                    Sequelize.literal(`CAST(\`spb\`.\`no_spb\` AS UNSIGNED) ${sortDir}`),
+                    [{ model: spb }, 'no_spb', sortDir]
+                ];
+                break;
+            case 'nama_nahkoda':
+                orderBySort = [[{ model: nahkoda }, 'nama_nahkoda', sortDir]];
+                break;
+            case 'nama_agen':
+                orderBySort = [[{ model: agen }, 'nama_agen', sortDir]];
+                break;
+            case 'tujuan_akhir':
+                orderBySort = [[{ model: kecamatan, as: 'tujuan_akhir' }, 'nama_kecamatan', sortDir]];
+                break;
+            case 'no_urut':
+                orderBySort = [[Sequelize.literal('CAST(`no_urut` AS UNSIGNED)'), sortDir], ['no_urut', sortDir]];
+                break;
+            default:
+                orderBySort = [
+                    Sequelize.literal(`CAST(\`spb\`.\`no_spb\` AS UNSIGNED) ${sortDir}`),
+                    [{ model: spb }, 'no_spb', sortDir]
+                ];
         }
 
         console.log(whereKategoriMuatan)
 
         let result = await perjalanan.findAll({
-            order: [orderBySort],
+            order: orderBySort,
             where: {
                 ...wherePerjalanan,
             },
@@ -176,7 +197,7 @@ const getPerjalananByFilter = async (req, res) => {
                     attributes: ['nama_kapal', 'gt', 'nt', 'nomor_selar', 'tanda_selar', 'nomor_imo', 'call_sign'],
                     include: [
                         { model: jenis, attributes: ['nama_jenis'] },
-                        { model: negara, as: "bendera", attributes: ['kode_negara'] }
+                        { model: negara, as: "bendera", attributes: ['kode_negara', 'nama_negara'] }
                     ],
                     required: true,
                     where: whereKapal
@@ -188,16 +209,11 @@ const getPerjalananByFilter = async (req, res) => {
                     model: muatan,
                     as: "muatans",
                     attributes: ["jenis_perjalanan", "ton", "unit", "m3"],
-                    // required: isMultiMuatan
-                    //     ? false
-                    //     : (namaMuatanArray.length > 0 || kategori) ? true : false,
                     include: [
                         {
                             model: kategoriMuatan,
                             as: "kategori_muatan",
                             attributes: ["nama_kategori_muatan", "status_kategori_muatan"],
-                            // where: { [Op.and]: whereKategoriMuatan },
-                            // required: whereKategoriMuatan.length > 0,
                             include: [{
                                 model: jenisMuatan,
                                 as: "jenis_muatan",
@@ -210,7 +226,6 @@ const getPerjalananByFilter = async (req, res) => {
                     model: muatanKendaraan,
                     as: "muatan_kendaraan",
                     separate: true,
-                    // required: (golonganKendaraanArray.length > 0) ? true : false,
                     attributes: ['jenis_perjalanan', 'golongan_kendaraan', "ton", "unit", "m3"]
                 },
                 { model: pembayaran, as: "pembayaran", attributes: ['ntpn', 'nilai', 'tipe_pembayaran'] },
@@ -227,10 +242,33 @@ const getPerjalananByFilter = async (req, res) => {
 
         let unique = [...new Map(result.map(v => [v.id_perjalanan, v])).values()];
 
+        const parseSpbNumber = (str) => {
+            if (!str) return 0;
+            const match = String(str).match(/\d+/);
+            return match ? parseInt(match[0], 10) : 0;
+        };
+
+        if (sortCol === 'no_spb') {
+            unique.sort((a, b) => {
+                let spbA = a.spb?.no_spb || '';
+                let spbB = b.spb?.no_spb || '';
+                let numA = parseSpbNumber(spbA);
+                let numB = parseSpbNumber(spbB);
+                if (numA !== numB) {
+                    return sortDir === 'DESC' ? numB - numA : numA - numB;
+                }
+                return sortDir === 'DESC'
+                    ? spbB.localeCompare(spbA, undefined, { numeric: true })
+                    : spbA.localeCompare(spbB, undefined, { numeric: true });
+            });
+        }
+
         let pageNumber = Number(page) || 1;
         let limitNumber = Number(limit);
 
-        let paginated = unique.slice((pageNumber - 1) * limitNumber, pageNumber * limitNumber);
+        let paginated = (limitNumber > 0)
+            ? unique.slice((pageNumber - 1) * limitNumber, pageNumber * limitNumber)
+            : unique;
 
         return res.status(200).json({
             datas: paginated,
@@ -277,12 +315,11 @@ const getPerjalanan = async (req, res) => {
 
         let pagination = {}
 
-        if (limit) {
-            pagination.limit = Number(limit)
-        }
-
-        if (page) {
-            pagination.offset = (limit * page) - limit
+        if (limit && Number(limit) > 0) {
+            pagination.limit = Number(limit);
+            if (page) {
+                pagination.offset = (Number(limit) * (Number(page) - 1));
+            }
         }
 
         const datas = await perjalanan.findAll({
@@ -292,7 +329,7 @@ const getPerjalanan = async (req, res) => {
                 {
                     model: kapal, attributes: ['nama_kapal', 'gt', 'nt', 'nomor_selar', 'tanda_selar', 'nomor_imo', 'call_sign'], include: [
                         { model: jenis, attributes: ['nama_jenis'] },
-                        { model: negara, as: "bendera", attributes: ['kode_negara'] }
+                        { model: negara, as: "bendera", attributes: ['kode_negara', 'nama_negara'] }
                     ]
                 },
                 { model: spb, attributes: ['no_spb', 'no_spb_asal'] },
@@ -346,7 +383,7 @@ const getPerjalananById = async (req, res) => {
                 {
                     model: kapal, attributes: ['nama_kapal', 'gt', 'nt', 'nomor_selar', 'tanda_selar', 'nomor_imo', 'call_sign'], include: [
                         { model: jenis, attributes: ['nama_jenis'] },
-                        { model: negara, as: "bendera", attributes: ['kode_negara'] }
+                        { model: negara, as: "bendera", attributes: ['kode_negara', 'nama_negara'] }
                     ]
                 },
                 { model: spb, attributes: ['no_spb', 'no_spb_asal'] },
@@ -536,17 +573,9 @@ const deletePerjalanan = async (req, res) => {
     try {
         let perjalananData = await perjalanan.findOne({
             where: { id_perjalanan: req.params.id },
-            include: {
-                model: spb
-            }
+            include: { model: spb }
         })
-
-        let perjalananDate = new Date(perjalananData.createdAt)
-        let now = new Date()
-
-        let dateDifference = Math.floor((now - perjalananDate) / (1000 * 60 * 60 * 24))
-
-        if (dateDifference > 10) return res.status(500).json({ msg: "data tidak bisa dihapus" })
+        if (!perjalananData) return res.status(500).json({ msg: "data tidak ditemukan" })
 
         let result = await perjalanan.destroy({ where: { id_perjalanan: req.params.id }, transaction: t })
 

@@ -81,15 +81,10 @@ const deleteNegara = async (req, res) => {
     try {
         let negaraData = await negara.findOne({
             where: { id_negara: req.params.id },
-            attributes: ['nama_negara', 'createdAt']
+            attributes: ['nama_negara']
         })
 
-        let negaraDate = new Date(negaraData.createdAt)
-        let now = new Date()
-
-        let dateDifference = Math.floor((now - negaraDate) / (1000 * 60 * 60 * 24))
-
-        if (dateDifference > 10) return res.status(500).json({ msg: "data tidak bisa dihapus" })
+        if (!negaraData) return res.status(500).json({ msg: "data tidak ditemukan" })
 
         let result = await negara.destroy({ where: { id_negara: req.params.id } })
 

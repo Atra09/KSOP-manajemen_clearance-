@@ -43,8 +43,8 @@ function Clearance() {
     });
 
     const [sortConfig, setSortConfig] = useState({
-        key: 'id_perjalanan', 
-        direction: 'DESC'
+        key: 'no_spb', 
+        direction: 'ASC'
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -104,36 +104,69 @@ function Clearance() {
         setSortConfig({ key, direction });
     };
 
+    const getQueryParams = useCallback((limitOverride = null) => {
+        const queryLimit = limitOverride !== null ? limitOverride : (rowsPerPage === 'Semua' ? 0 : parseInt(rowsPerPage, 10));
+        const queryPage = limitOverride !== null ? 1 : currentPage;
+
+        const params = {
+            page: queryPage,
+            limit: queryLimit,
+            searchTerm: filters.searchTerm,
+            nama_kapal: filters.selectedShip,
+            tanggal_awal: filters.startDate,
+            tanggal_akhir: filters.endDate,
+            kategori: filters.selectedCategory,
+            wilker: filters.selectedWilayah,
+            sort: sortConfig.direction,
+            data_name: sortConfig.key
+        };
+
+        const goods = filters.selectedGoods
+            .filter(g => g.value.startsWith('good_'))
+            .map(g => g.value.split('_')[1]);
+            
+        const vehicles = filters.selectedGoods
+            .filter(g => g.value.startsWith('vehicle_'))
+            .map(g => g.value.split('_')[1]);
+
+        if (goods.length > 0) params.nama_muatan = goods;
+        if (vehicles.length > 0) params.golongan_kendaraan = vehicles;
+
+        return params;
+    }, [currentPage, rowsPerPage, filters, sortConfig]);
+
+    const fetchAllExportData = async () => {
+        try {
+            const params = getQueryParams(0);
+            const response = await axiosInstance.get('/perjalanan/filter', { 
+                params,
+                paramsSerializer: (params) => {
+                    const searchParams = new URLSearchParams();
+                    for (const key in params) {
+                        const value = params[key];
+                        if (Array.isArray(value)) {
+                            value.forEach(v => searchParams.append(key, v));
+                        } else if (value !== null && value !== undefined && value !== '') {
+                            searchParams.append(key, value);
+                        }
+                    }
+                    return searchParams.toString();
+                }
+            });
+            return response.data.datas || [];
+        } catch (error) {
+            console.error("Gagal mengambil data ekspor:", error);
+            return pageData;
+        }
+    };
+
     const fetchData = useCallback(async () => {
         if (!authLoading) setLoading(true);
 
         const queryLimit = (rowsPerPage === 'Semua' ? 0 : parseInt(rowsPerPage, 10));
-        const queryPage = currentPage;
         
         try {
-            const params = {
-                page: queryPage,
-                limit: queryLimit,
-                searchTerm: filters.searchTerm,
-                nama_kapal: filters.selectedShip,
-                tanggal_awal: filters.startDate,
-                tanggal_akhir: filters.endDate,
-                kategori: filters.selectedCategory,
-                wilker: filters.selectedWilayah,
-                sort: sortConfig.direction,
-                data_name: sortConfig.key
-            };
-
-            const goods = filters.selectedGoods
-                .filter(g => g.value.startsWith('good_'))
-                .map(g => g.value.split('_')[1]);
-                
-            const vehicles = filters.selectedGoods
-                .filter(g => g.value.startsWith('vehicle_'))
-                .map(g => g.value.split('_')[1]);
-
-            if (goods.length > 0) params.nama_muatan = goods;
-            if (vehicles.length > 0) params.golongan_kendaraan = vehicles;
+            const params = getQueryParams();
 
             const response = await axiosInstance.get('/perjalanan/filter', { 
                 params,
@@ -166,7 +199,7 @@ function Clearance() {
         } finally {
             if (!authLoading) setLoading(false);
         }
-    }, [currentPage, rowsPerPage, filters, authLoading, sortConfig]);
+    }, [authLoading, rowsPerPage, getQueryParams]);
 
     useEffect(() => {
         fetchData();
@@ -214,7 +247,22 @@ function Clearance() {
         const loadingToast = toast.loading("Membuat file Excel... Ini mungkin butuh beberapa detik.");
 
         try {
-            let data = pageData.map(d => {
+            const exportRecords = await fetchAllExportData();
+            
+            const parseSpbNum = (str) => {
+                if (!str) return 0;
+                const match = String(str).match(/\d+/);
+                return match ? parseInt(match[0], 10) : 0;
+            };
+
+            exportRecords.sort((a, b) => {
+                let numA = parseSpbNum(a.spb?.no_spb);
+                let numB = parseSpbNum(b.spb?.no_spb);
+                if (numA !== numB) return numA - numB;
+                return String(a.spb?.no_spb || '').localeCompare(String(b.spb?.no_spb || ''), undefined, { numeric: true });
+            });
+
+            let data = exportRecords.map(d => {
                 const {
                     tanggal_clearance, ppk, spb, no_urut, kapal, nahkoda, jumlah_crew,
                     kedudukan_kapal, tanggal_datang, datang_dari, tanggal_berangkat,
@@ -261,7 +309,7 @@ function Clearance() {
                     "No. Urut": no_urut,
                     "Nama Kapal": safeKapal.nama_kapal || '-',
                     "Jenis": safeJeni.nama_jenis || '-',
-                    "bendera": safeBendera.kode_negara || '-',
+                    "bendera": safeBendera.nama_negara || safeBendera.kode_negara || '-',
                     "nahkoda": safeNahkoda.nama_nahkoda || '-',
                     "CREW": jumlah_crew,
                     "TERBILANG": `(${angkaHuruf.toUpperCase()})`,
@@ -419,7 +467,22 @@ function Clearance() {
             const merges = [ { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }, { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }, { s: { r: 0, c: 9 }, e: { r: 1, c: 9 } }, { s: { r: 0, c: 12 }, e: { r: 1, c: 12 } }, { s: { r: 0, c: 25 }, e: { r: 1, c: 25 } }, { s: { r: 0, c: 30 }, e: { r: 1, c: 30 } }, { s: { r: 0, c: 31 }, e: { r: 1, c: 31 } }, { s: { r: 0, c: 2 }, e: { r: 0, c: 6 } }, { s: { r: 0, c: 7 }, e: { r: 0, c: 8 } }, { s: { r: 0, c: 10 }, e: { r: 0, c: 11 } }, { s: { r: 0, c: 13 }, e: { r: 0, c: 18 } }, { s: { r: 0, c: 19 }, e: { r: 0, c: 24 } }, { s: { r: 0, c: 26 }, e: { r: 0, c: 27 } }, { s: { r: 0, c: 28 }, e: { r: 0, c: 29 } } ];
             let runningRowIndex = 3;
 
-            pageData.forEach((trip, index) => {
+            const exportRecords = await fetchAllExportData();
+
+            const parseSpbNum = (str) => {
+                if (!str) return 0;
+                const match = String(str).match(/\d+/);
+                return match ? parseInt(match[0], 10) : 0;
+            };
+
+            exportRecords.sort((a, b) => {
+                let numA = parseSpbNum(a.spb?.no_spb);
+                let numB = parseSpbNum(b.spb?.no_spb);
+                if (numA !== numB) return numA - numB;
+                return String(a.spb?.no_spb || '').localeCompare(String(b.spb?.no_spb || ''), undefined, { numeric: true });
+            });
+
+            exportRecords.forEach((trip, index) => {
                 const groupStartRow = runningRowIndex;
                 const labuh = getPayment(trip.pembayaran, 'labuh');
                 const rambu = getPayment(trip.pembayaran, 'rambu');
@@ -430,7 +493,7 @@ function Clearance() {
                     const tahun = tglClearance.getFullYear();
                     formattedSPB = `N.7 K.M.17 ${trip.spb.no_spb} ${bulan} ${tahun}`;
                 }
-                const baseData = [ index + 1, trip.spb?.no_spb_asal || '-', trip.kapal?.nama_kapal || '-', trip.kapal?.jeni?.nama_jenis || '-', trip.kapal?.gt ? Number(trip.kapal.gt) : null, trip.kapal?.call_sign || '-', trip.kapal?.bendera?.kode_negara || '-', trip.datang_dari?.nama_kecamatan || '-', formatDateTime(trip.tanggal_datang, null), trip.sandar?.nama_pelabuhan || '-', trip.tujuan_akhir?.nama_kecamatan || '-', formatDateTime(trip.tanggal_berangkat, trip.pukul_kapal_berangkat), trip.tolak?.nama_pelabuhan || '-', ];
+                const baseData = [ index + 1, trip.spb?.no_spb_asal || '-', trip.kapal?.nama_kapal || '-', trip.kapal?.jeni?.nama_jenis || '-', trip.kapal?.gt ? Number(trip.kapal.gt) : null, trip.kapal?.call_sign || '-', trip.kapal?.bendera?.nama_negara || trip.kapal?.bendera?.kode_negara || '-', trip.datang_dari?.nama_kecamatan || '-', formatDateTime(trip.tanggal_datang, null), trip.sandar?.nama_pelabuhan || '-', trip.tujuan_akhir?.nama_kecamatan || '-', formatDateTime(trip.tanggal_berangkat, trip.pukul_kapal_berangkat), trip.tolak?.nama_pelabuhan || '-', ];
                 const endData = [ formattedSPB, labuh.ntpn, labuh.nilai, rambu.ntpn, rambu.nilai, trip.status_muatan_berangkat || '-', trip.agen?.nama_agen || '-' ];
                 const allCargo = aggregateCargo(trip);
                 const emptyCargoRow = Array(12).fill(null);
