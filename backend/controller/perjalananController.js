@@ -44,8 +44,8 @@ const getPerjalananByFilter = async (req, res) => {
             return res.status(500).json({ msg: "Tidak ada akses" });
 
         let orderBySort = [
-            Sequelize.literal('CAST(`spb`.`no_spb` AS UNSIGNED) ASC'),
-            [{ model: spb }, 'no_spb', 'ASC']
+            Sequelize.literal('CAST(`spb`.`no_spb` AS UNSIGNED) DESC'),
+            [{ model: spb }, 'no_spb', 'DESC']
         ];
         let wherePerjalanan = {};
         let whereKapal = {};
@@ -152,7 +152,7 @@ const getPerjalananByFilter = async (req, res) => {
             ];
         }
 
-        const sortDir = (sort && sort.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+        const sortDir = (sort && sort.toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
         const sortCol = data_name || 'no_spb';
 
         switch (sortCol) {

@@ -44,7 +44,7 @@ function Clearance() {
 
     const [sortConfig, setSortConfig] = useState({
         key: 'no_spb', 
-        direction: 'ASC'
+        direction: 'DESC'
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -258,8 +258,8 @@ function Clearance() {
             exportRecords.sort((a, b) => {
                 let numA = parseSpbNum(a.spb?.no_spb);
                 let numB = parseSpbNum(b.spb?.no_spb);
-                if (numA !== numB) return numA - numB;
-                return String(a.spb?.no_spb || '').localeCompare(String(b.spb?.no_spb || ''), undefined, { numeric: true });
+                if (numA !== numB) return numB - numA;
+                return String(b.spb?.no_spb || '').localeCompare(String(a.spb?.no_spb || ''), undefined, { numeric: true });
             });
 
             let data = exportRecords.map(d => {
