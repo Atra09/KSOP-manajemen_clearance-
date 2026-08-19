@@ -2,6 +2,7 @@ const { DataTypes } = require("sequelize")
 const { db } = require("../config/db")
 const jenis = require("./jenisModel")
 const negara = require("./negaraModel")
+const asalKapal = require("./asalKapalModel")
 
 const kapal = db.define('kapal', {
     id_kapal: {
@@ -24,6 +25,15 @@ const kapal = db.define('kapal', {
         references: {
             model: negara,
             key: "id_negara"
+        },
+        onDelete: "SET NULL",
+        onUpdate: "CASCADE"
+    },
+    id_asal_kapal: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: asalKapal,
+            key: "id_asal_kapal"
         },
         onDelete: "SET NULL",
         onUpdate: "CASCADE"

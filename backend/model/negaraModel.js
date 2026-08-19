@@ -7,8 +7,14 @@ const negara = db.define('negara', {
         primaryKey: true,
         autoIncrement: true
     },
-    nama_negara: DataTypes.STRING,
-    kode_negara: DataTypes.STRING
+    nama_negara: {
+        type: DataTypes.STRING,
+        unique: true
+    },
+    kode_negara: {
+        type: DataTypes.STRING,
+        unique: true
+    }
 }, 
 {
     freezeTableName: true

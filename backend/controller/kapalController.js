@@ -2,6 +2,7 @@ const { Op, fn, col } = require("sequelize")
 const jenis = require("../model/jenisModel")
 const kapal = require("../model/kapalModel")
 const negara = require("../model/negaraModel")
+const asalKapal = require("../model/asalKapalModel")
 const logUserController = require("./logUserController")
 
 const getKapalOptions = async (req, res) => {
@@ -25,6 +26,9 @@ const getKapal = async (req, res) => {
     try {
         const datas = await kapal.findAll({
             order: [['id_kapal', 'DESC']],
+            include: [
+                { model: asalKapal, as: "asal_kapal", attributes: ['id_asal_kapal', 'nama_asal_kapal'] }
+            ],
             where: {
                 nama_kapal: {
                     [Op.like] : `%${search}%`

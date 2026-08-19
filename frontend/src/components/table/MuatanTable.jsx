@@ -55,6 +55,20 @@ const MuatanTable = ({ muatanItems = [], jenisList = [], onEdit, onDelete }) => 
         return jenis ? jenis.nama_jenis_muatan : '-';
     };
 
+    const getKlasifikasiName = (item) => {
+        if (item.klasifikasi_muatan && item.klasifikasi_muatan.nama_klasifikasi_muatan) {
+            return item.klasifikasi_muatan.nama_klasifikasi_muatan;
+        }
+        return '-';
+    };
+
+    const getSatuanName = (item) => {
+        if (item.satuan_muatan && item.satuan_muatan.nama_satuan_muatan) {
+            return item.satuan_muatan.nama_satuan_muatan;
+        }
+        return 'kg';
+    };
+
     return (
         <div className="overflow-x-auto bg-white rounded-lg shadow">
             <table className="min-w-full divide-y divide-gray-200">
@@ -63,6 +77,9 @@ const MuatanTable = ({ muatanItems = [], jenisList = [], onEdit, onDelete }) => 
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">No.</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Kategori</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Muatan</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Klasifikasi</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Satuan</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bobot per Unit</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Kategori</th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
@@ -76,6 +93,23 @@ const MuatanTable = ({ muatanItems = [], jenisList = [], onEdit, onDelete }) => 
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {getJenisMuatanName(item.id_jenis_muatan)}
                                 </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
+                                    {getKlasifikasiName(item) !== '-' ? (
+                                        <span className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded text-xs">
+                                            {getKlasifikasiName(item)}
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-400">-</span>
+                                    )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
+                                    <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
+                                        {getSatuanName(item)}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {item.bobot_per_unit_kg > 0 ? `${item.bobot_per_unit_kg} kg/unit` : '-'}
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     <StatusBadge status={item.status_kategori_muatan} />
                                 </td>
@@ -86,7 +120,7 @@ const MuatanTable = ({ muatanItems = [], jenisList = [], onEdit, onDelete }) => 
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
+                            <td colSpan="8" className="px-6 py-4 text-center text-sm text-gray-500">
                                 Tidak ada data kategori muatan yang tersedia.
                             </td>
                         </tr>

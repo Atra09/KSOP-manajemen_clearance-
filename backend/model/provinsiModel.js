@@ -8,7 +8,10 @@ const provinsi = db.define('provinsi', {
         primaryKey: true,
         autoIncrement: true
     },
-    nama_provinsi: DataTypes.STRING,
+    nama_provinsi: {
+        type: DataTypes.STRING,
+        unique: true
+    },
     id_negara: {
         type: DataTypes.INTEGER,
         references: {

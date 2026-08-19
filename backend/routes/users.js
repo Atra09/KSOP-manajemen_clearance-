@@ -19,13 +19,33 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ['.png', '.jpg', '.jpeg']
-  const ext = path.extname(file.originalname)
+  const ext = path.extname(file.originalname).toLowerCase()
 
-  if(!allowedTypes.includes(ext.toLowerCase())) return cb(new Error("Format file tidak sesuai"))
-    cb(null, true)
+  if (!allowedTypes.includes(ext)) {
+    return cb(new Error("Format file tidak sesuai! Hanya file PNG, JPG, dan JPEG yang diperbolehkan."))
+  }
+  cb(null, true)
 }
 
-const upload = multer({storage, fileFilter})
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+})
+
+const uploadFotoSingle = (req, res, next) => {
+  upload.single("foto")(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ msg: "Ukuran file terlalu besar! Maksimal 5MB." })
+      }
+      return res.status(400).json({ msg: err.message })
+    } else if (err) {
+      return res.status(400).json({ msg: err.message })
+    }
+    next()
+  })
+}
 
 router.post('/login', login);
 
@@ -33,9 +53,10 @@ router.use(verifyToken)
 
 router.get('/', adminAuth, getUser);
 router.get('/:id', userAuth, getUserById);
-router.post('/store', adminAuth, upload.single("foto"), storeUser)
-router.patch('/update/:id', userAuth, upload.single("foto"), updateUser)
+router.post('/store', adminAuth, uploadFotoSingle, storeUser)
+router.patch('/update/:id', userAuth, uploadFotoSingle, updateUser)
 router.patch('/change-password', changePassword)
 router.delete('/delete/:id', userAuth, deleteUser)
 
 module.exports = router;
+

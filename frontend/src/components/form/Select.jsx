@@ -112,7 +112,7 @@ const Select = ({ options, value, onChange, name, id, required, placeholder = "C
         width: `${menuPosition.width}px`,
         zIndex: 9999,
       }}
-      className="bg-white border border-gray-300 rounded-lg shadow-lg flex flex-col overflow-hidden"
+      className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg flex flex-col overflow-hidden"
       onWheel={(e) => {
         const ul = ulRef.current;
         if (!ul) return;
@@ -127,11 +127,11 @@ const Select = ({ options, value, onChange, name, id, required, placeholder = "C
         }
       }}
     >
-      <div className="p-2 border-b border-gray-100 bg-white sticky top-0 z-10">
+      <div className="p-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-10">
         <input
           ref={searchInputRef}
           type="text"
-          className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder={placeholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -148,8 +148,8 @@ const Select = ({ options, value, onChange, name, id, required, placeholder = "C
             (!option.disabled || (index === 0 && !searchTerm)) && (
               <li
                 key={option.value}
-                className={`px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer ${
-                  option.value === value ? 'bg-indigo-50 font-medium text-indigo-700' : ''
+                className={`px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-700 dark:hover:text-indigo-300 cursor-pointer ${
+                  option.value === value ? 'bg-indigo-50 dark:bg-indigo-950/80 font-medium text-indigo-700 dark:text-indigo-400' : ''
                 }`}
                 onClick={() => {
                   onChange({ target: { name, value: option.value } });
@@ -193,15 +193,15 @@ const Select = ({ options, value, onChange, name, id, required, placeholder = "C
       
       <button
         type="button"
-        className={`w-full h-11 px-4 text-left bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-between ${
-            isOpen ? 'border-indigo-500 ring-2 ring-indigo-500' : 'border-gray-300'
+        className={`w-full h-11 px-4 text-left bg-white dark:bg-gray-800 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-between ${
+            isOpen ? 'border-indigo-500 ring-2 ring-indigo-500' : 'border-gray-300 dark:border-gray-700'
         }`}
         onClick={toggleDropdown}
       >
-        <span className="truncate block mr-2 text-gray-700">
+        <span className="truncate block mr-2 text-gray-700 dark:text-gray-200">
             {selectedLabel}
         </span>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>

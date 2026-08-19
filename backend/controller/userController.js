@@ -112,44 +112,53 @@ const storeUser = async (req, res) => {
 const updateUser = async (req, res, next) => {
     try {
         let user = await users.findByPk(req.user.id)
-        let userData = await users.findOne({
-            where: { id_user: req.params.id },
-            attributes: ['username']
-        })
-        let data = await users.findOne({ where: { username: req.body.username } })
-        if (data && data.id_user != req.params.id) return res.status(500).json({ msg: "Username sudah ada" })
+        let targetUser = await users.findByPk(req.params.id)
+        if (!targetUser) return res.status(404).json({ msg: "Data pengguna tidak ditemukan" })
+
+        if (req.body.username && req.body.username !== targetUser.username) {
+            let existingUsername = await users.findOne({ where: { username: req.body.username } })
+            if (existingUsername && existingUsername.id_user != req.params.id) {
+                return res.status(400).json({ msg: "Username sudah ada" })
+            }
+        }
 
         if (req.file) {
-            let data = await users.findByPk(req.params.id)
-            if (data.foto) {
-                let oldFile = path.join(__dirname, "../public", data.foto)
-                console.log(oldFile)
-                fs.unlinkSync(oldFile)
+            if (targetUser.foto) {
+                let oldFile = path.join(__dirname, "../public", targetUser.foto)
+                if (fs.existsSync(oldFile)) {
+                    try {
+                        fs.unlinkSync(oldFile)
+                    } catch (err) {
+                        console.error("Gagal menghapus foto lama:", err)
+                    }
+                }
             }
             req.body.foto = `images/profil/${req.file.filename}`
         }
-        if (user.role != "superuser" && req.body.password) {
-            delete req.body.password
-            console.log()
-        } else if (req.body.password) {
+
+        if (req.body.password && req.body.password.trim() !== '') {
             req.body.password = await bcrypt.hash(req.body.password, salt)
+        } else {
+            delete req.body.password
         }
-        let result = await users.update({ ...req.body }, { where: { id_user: req.params.id } })
 
-        if (result == 0) return res.status(500).json({ msg: "data tidak ditemukan" })
+        let [result] = await users.update({ ...req.body }, { where: { id_user: req.params.id } })
 
-        let log = await logUserController.storeLogUser(
-            req.user.username,
-            "UPDATE",
-            "user",
-            `Mengubah data user ${(userData.username == req.body.username) ?
-                userData.username : userData.username + "->" + req.body.username}`
-        )
+        try {
+            await logUserController.storeLogUser(
+                req.user.username,
+                "UPDATE",
+                "user",
+                `Mengubah data user ${targetUser.username}`
+            )
+        } catch (logError) {
+            console.error("Log user error (non-blocking):", logError)
+        }
 
         return res.status(200).json({ msg: "Berhasil memperbarui data" })
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({ msg: "terjadi kesalahan pada fungsi" })
+        console.error("Update User Error:", error)
+        return res.status(500).json({ msg: "Terjadi kesalahan pada fungsi" })
     }
 }
 

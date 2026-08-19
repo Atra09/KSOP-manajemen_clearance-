@@ -56,71 +56,76 @@ export default function SignInForm() {
     };
 
     return (
-        <div className="flex w-full flex-1 flex-col overflow-y-auto lg:w-1/2">
-            <div className="mx-auto flex flex-1 w-full max-w-md flex-col justify-center">
-                <div>
-                    <div className="mb-8">
-                        <h1 className="mb-2 text-2xl font-semibold text-gray-800 sm:text-3xl">
-                            Sign In
-                        </h1>
-                        <p className="text-sm text-gray-500">
-                            Masukkan username dan password Anda untuk masuk!
-                        </p>
-                    </div>
-                    <form onSubmit={handleSubmit}>
-                        <div className="space-y-6">
-                            {error && (
-                                <div className="p-3 text-sm text-center text-red-800 bg-red-100 border border-red-300 rounded-lg">
-                                    {error}
-                                </div>
-                            )}
-
-                            <div>
-                                <Label htmlFor="username">Username</Label>
-                                <InputField 
-                                    id="username" 
-                                    name="username" 
-                                    type="text" 
-                                    placeholder="Masukkan username Anda" 
-                                    value={formData.username}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="password">Password</Label>
-                                <div className="relative">
-                                    <InputField
-                                        id="password"
-                                        name="password"
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Masukkan password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                    <span
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 z-10 -translate-y-1/2 cursor-pointer"
-                                    >
-                                        {showPassword ? (
-                                            <EyeIcon className="h-5 w-5 fill-gray-500" />
-                                        ) : (
-                                            <EyeCloseIcon className="h-5 w-5 fill-gray-500" />
-                                        )}
-                                    </span>
-                                </div>
-                            </div>
-                            <hr class="border-t border-gray-500 w-1/2 mx-auto my-6"></hr>
-                            <div>
-                                <Button className="w-full" type="submit" disabled={loading}>
-                                    {loading ? 'Memproses...' : 'Sign In'}
-                                </Button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+        <div className="w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8 sm:p-10">
+            <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    KSOP-K Si-Cekatan
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Sistem Clearance Kapal Tradisional
+                </p>
             </div>
+
+            <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                    Sign In
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Masukkan username dan password Anda untuk masuk!
+                </p>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+                <div className="space-y-5">
+                    {error && (
+                        <div className="p-3 text-sm text-center text-red-800 bg-red-100 border border-red-300 rounded-lg">
+                            {error}
+                        </div>
+                    )}
+
+                    <div>
+                        <Label htmlFor="username">Username</Label>
+                        <InputField 
+                            id="username" 
+                            name="username" 
+                            type="text" 
+                            placeholder="Masukkan username Anda" 
+                            value={formData.username}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="password">Password</Label>
+                        <div className="relative">
+                            <InputField
+                                id="password"
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Masukkan password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                            />
+                            <span
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 z-10 -translate-y-1/2 cursor-pointer"
+                            >
+                                {showPassword ? (
+                                    <EyeIcon className="h-5 w-5 fill-gray-500" />
+                                ) : (
+                                    <EyeCloseIcon className="h-5 w-5 fill-gray-500" />
+                                )}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="pt-2">
+                        <Button className="w-full py-3 text-base font-medium shadow-md" type="submit" disabled={loading}>
+                            {loading ? 'Memproses...' : 'Sign In'}
+                        </Button>
+                    </div>
+                </div>
+            </form>
         </div>
     );
 }

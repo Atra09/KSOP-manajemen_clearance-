@@ -3,46 +3,229 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gray-100 text-gray-800;
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-200;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  @apply font-bold;
+  @apply font-bold dark:text-gray-100;
 }
-
 
 .menu-dropdown-item {
   @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium;
 }
 .menu-dropdown-item-active {
-  @apply bg-blue-50 font-medium text-blue-600;
+  @apply bg-blue-50 font-medium text-blue-600 dark:bg-indigo-950/80 dark:text-indigo-400;
 }
 .menu-dropdown-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100;
+  @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800;
 }
 
 .table {
-  @apply min-w-full bg-white border border-gray-200;
+  @apply min-w-full bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-200;
 }
 
 .table th, .table td {
-  @apply border border-gray-200 px-4 py-2;
+  @apply border border-gray-200 px-4 py-2 dark:border-gray-800;
 }
 
 .table th {
-  @apply bg-gray-200;
+  @apply bg-gray-200 dark:bg-gray-800 dark:text-gray-200;
 }
 
 .card {
-  @apply bg-white shadow-md rounded-lg p-4;
+  @apply bg-white shadow-md rounded-lg p-4 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100;
 }
 
 .sidebar {
-  @apply w-64 bg-gray-800 text-white h-full;
+  @apply w-64 bg-gray-800 text-white h-full dark:bg-gray-900;
 }
 
 .main-content {
-  @apply flex-1 p-6;
+  @apply flex-1 p-6 dark:bg-gray-950;
+}
+
+/* Global Dark Mode Overrides for Cards, Tables, Inputs, and Charts */
+html.dark .bg-white {
+  background-color: #111827 !important;
+  color: #f3f4f6 !important;
+}
+
+html.dark .bg-gray-50 {
+  background-color: #1f2937 !important;
+}
+
+html.dark .bg-gray-100 {
+  background-color: #374151 !important;
+}
+
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: #374151 !important;
+}
+
+html.dark .text-gray-800,
+html.dark .text-gray-900,
+html.dark .text-gray-700 {
+  color: #f3f4f6 !important;
+}
+
+html.dark .text-gray-500,
+html.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-color: #374151 !important;
+}
+
+/* Bulletproof Global Table Styles in Dark Mode */
+html.dark table,
+html.dark table * {
+  border-color: #374151 !important;
+}
+
+html.dark table {
+  background-color: #111827 !important;
+  color: #e5e7eb !important;
+}
+
+html.dark table thead,
+html.dark table thead tr,
+html.dark table thead th {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  border-color: #374151 !important;
+}
+
+html.dark table tbody,
+html.dark table tbody tr {
+  background-color: #111827 !important;
+  color: #e5e7eb !important;
+}
+
+html.dark table tbody tr:hover,
+html.dark table tbody tr:hover td {
+  background-color: #1f2937 !important;
+}
+
+html.dark table td {
+  color: #d1d5db !important;
+}
+
+html.dark table td .text-gray-900,
+html.dark table td .text-gray-800,
+html.dark table td .text-gray-700 {
+  color: #f9fafb !important;
+}
+
+html.dark table td .text-gray-500,
+html.dark table td .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+/* Table Wrappers & Containers */
+html.dark div.overflow-x-auto,
+html.dark .ring-1,
+html.dark .shadow {
+  background-color: #111827 !important;
+  border-color: #374151 !important;
+  --tw-ring-color: #374151 !important;
+}
+
+/* Dropdowns & Popovers inside Dark Mode */
+html.dark [role="menu"],
+html.dark [role="combobox"],
+html.dark [role="listbox"],
+html.dark .dropdown,
+html.dark div.shadow-lg {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f3f4f6 !important;
+}
+
+html.dark [role="menu"] a,
+html.dark [role="menu"] button,
+html.dark li {
+  color: #e5e7eb !important;
+}
+
+html.dark [role="menu"] a:hover,
+html.dark [role="menu"] button:hover,
+html.dark li:hover {
+  background-color: #374151 !important;
+  color: #ffffff !important;
+}
+
+/* React Select Dark Mode Overrides */
+html.dark .basic-multi-select,
+html.dark .select__control,
+html.dark .select__control--is-focused {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f3f4f6 !important;
+  box-shadow: none !important;
+}
+
+html.dark .select__menu,
+html.dark .select__menu-list {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+html.dark .select__option {
+  background-color: #1f2937 !important;
+  color: #e5e7eb !important;
+}
+
+html.dark .select__option--is-focused,
+html.dark .select__option--is-selected {
+  background-color: #374151 !important;
+  color: #ffffff !important;
+}
+
+html.dark .select__multi-value {
+  background-color: #374151 !important;
+}
+
+html.dark .select__multi-value__label {
+  color: #f3f4f6 !important;
+}
+
+html.dark .select__multi-value__remove {
+  color: #9ca3af !important;
+}
+
+html.dark .select__multi-value__remove:hover {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+html.dark .select__placeholder,
+html.dark .select__single-value,
+html.dark .select__input-container {
+  color: #9ca3af !important;
+}
+
+/* ApexCharts Dark Mode Styles */
+html.dark .apexcharts-text {
+  fill: #9ca3af !important;
+}
+
+html.dark .apexcharts-title-text {
+  fill: #f3f4f6 !important;
+}
+
+html.dark .apexcharts-legend-text {
+  color: #d1d5db !important;
+}
+
+html.dark .apexcharts-gridline {
+  stroke: #374151 !important;
 }.no-scrollbar::-webkit-scrollbar {
   display: none;
 }

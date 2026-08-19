@@ -64,5 +64,4 @@ export {
   EyeIcon, EyeCloseIcon, TimeIcon, CopyIcon, ChevronLeftIcon, UserCircleIcon, TaskIcon, ListIcon, TableIcon, PageIcon,
   PieChartIcon, BoxCubeIcon, PlugInIcon, DocsIcon, MailIcon, HorizontaLDots, ChevronUpIcon, ChatIcon, AngleLeftIcon,
   AngleRightIcon,
-  // FoxIcon, // <-- HAPUS BARIS INI JUGA
 };

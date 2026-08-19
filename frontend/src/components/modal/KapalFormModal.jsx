@@ -6,7 +6,7 @@ import Select from '../form/Select';
 import Button from '../ui/Button';
 import axiosInstance from '../../api/axiosInstance'; 
 
-const KapalFormModal = ({ activeTab, onClose, currentItem, jenisKapalOptions = [], negaraOptions = [], onSuccess }) => {
+const KapalFormModal = ({ activeTab, onClose, currentItem, jenisKapalOptions = [], negaraOptions = [], asalKapalOptions = [], onSuccess }) => {
   const [formData, setFormData] = useState({});
   const isEditMode = Boolean(currentItem);
 
@@ -16,9 +16,11 @@ const KapalFormModal = ({ activeTab, onClose, currentItem, jenisKapalOptions = [
     } else {
       if (activeTab === 'kapal') {
         setFormData({
-          nama_kapal: '', id_jenis: '', id_bendera: '', gt: '', nt: '',
+          nama_kapal: '', id_jenis: '', id_bendera: '', id_asal_kapal: '', gt: '', nt: '',
           nomor_selar: '', tanda_selar: '', nomor_imo: '', call_sign: ''
         });
+      } else if (activeTab === 'asalKapal') {
+        setFormData({ nama_asal_kapal: '' });
       } else {
         setFormData({ nama_jenis: '' });
       }
@@ -39,10 +41,17 @@ const KapalFormModal = ({ activeTab, onClose, currentItem, jenisKapalOptions = [
     ];
   }, [negaraOptions]);
 
+  const formattedAsalKapalOptions = useMemo(() => {
+    return [
+      { value: '', label: 'Pilih Kedudukan Kapal', disabled: true },
+      ...asalKapalOptions.map(item => ({ value: item.id_asal_kapal, label: item.nama_asal_kapal }))
+    ];
+  }, [asalKapalOptions]);
+
   const getTitle = () => {
     const action = isEditMode ? 'Edit' : 'Tambah';
-    const title = activeTab === 'kapal' ? 'Data Kapal' : 'Jenis Kapal';
-    return `${action} ${title}`;
+    const titleMap = { kapal: 'Data Kapal', jenisKapal: 'Jenis Kapal', asalKapal: 'Kedudukan Kapal' };
+    return `${action} ${titleMap[activeTab] || 'Data'}`;
   };
 
   const handleChange = (e) => {
@@ -51,8 +60,10 @@ const KapalFormModal = ({ activeTab, onClose, currentItem, jenisKapalOptions = [
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const endpoint = activeTab === 'kapal' ? 'kapal' : 'jenis';
-    const idField = activeTab === 'kapal' ? 'id_kapal' : 'id_jenis';
+    const endpointMap = { kapal: 'kapal', jenisKapal: 'jenis', asalKapal: 'asal-kapal' };
+    const idFieldMap = { kapal: 'id_kapal', jenisKapal: 'id_jenis', asalKapal: 'id_asal_kapal' };
+    const endpoint = endpointMap[activeTab] || 'kapal';
+    const idField = idFieldMap[activeTab] || 'id_kapal';
     
     try {
       const url = isEditMode
@@ -86,6 +97,7 @@ const KapalFormModal = ({ activeTab, onClose, currentItem, jenisKapalOptions = [
           <div className="md:col-span-2"><Label htmlFor="nama_kapal">Nama Kapal</Label><InputField name="nama_kapal" id="nama_kapal" value={formData.nama_kapal || ''} onChange={handleChange} required /></div>
           <div><Label htmlFor="id_jenis">Jenis Kapal</Label><Select name="id_jenis" id="id_jenis" value={formData.id_jenis || ''} onChange={handleChange} options={formattedJenisKapalOptions} required /></div>
           <div><Label htmlFor="id_bendera">Bendera</Label><Select name="id_bendera" id="bendera" value={formData.id_bendera || ''} onChange={handleChange} options={formattedBenderaOptions} required /></div>
+          <div><Label htmlFor="id_asal_kapal">Kedudukan Kapal</Label><Select name="id_asal_kapal" id="id_asal_kapal" value={formData.id_asal_kapal || ''} onChange={handleChange} options={formattedAsalKapalOptions} /></div>
           <div><Label htmlFor="gt">Gross Tonnage (GT)</Label><InputField type="number" name="gt" id="gt" value={formData.gt || ''} onChange={handleChange} required /></div>
           <div><Label htmlFor="nt">Net Tonnage (NT)</Label><InputField type="number" name="nt" id="nt" value={formData.nt || ''} onChange={handleChange} required /></div>
           <div><Label htmlFor="nomor_selar">Nomor Selar</Label><InputField name="nomor_selar" id="nomor_selar" value={formData.nomor_selar || ''} onChange={handleChange} required /></div>
@@ -101,6 +113,15 @@ const KapalFormModal = ({ activeTab, onClose, currentItem, jenisKapalOptions = [
         <div>
           <Label htmlFor="nama_jenis">Nama Jenis Kapal</Label>
           <InputField name="nama_jenis" id="nama_jenis" value={formData.nama_jenis || ''} onChange={handleChange} placeholder="Contoh: General Cargo" required />
+        </div>
+      );
+    }
+
+    if (activeTab === 'asalKapal') {
+      return (
+        <div>
+          <Label htmlFor="nama_asal_kapal">Nama Kedudukan Kapal</Label>
+          <InputField name="nama_asal_kapal" id="nama_asal_kapal" value={formData.nama_asal_kapal || ''} onChange={handleChange} placeholder="Contoh: SUMENEP, SURABAYA, KANGEAN" required />
         </div>
       );
     }

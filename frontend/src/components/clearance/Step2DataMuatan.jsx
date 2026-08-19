@@ -11,6 +11,7 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
     { value: 'II', label: 'Golongan II' },
     { value: 'III', label: 'Golongan III' },
     { value: 'IV', label: 'Golongan IV' },
+    
     { value: 'V', label: 'Golongan V' },
     { value: 'VI', label: 'Golongan VI' },
   ];
@@ -26,12 +27,46 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
   const handleRowChange = (type, index, e) => {
     let { name, value } = e.target;
 
-    if ((name === 'ton' || name === 'm3' || name === 'unit') && value !== '' && !/^[0-9]*\.?[0-9]*$/.test(value)) {
+    if ((name === 'ton' || name === 'm3' || name === 'unit' || name === 'liter' || name === 'quantity' || name === 'estimated_ton') && value !== '' && !/^[0-9]*\.?[0-9]*$/.test(value)) {
         return;
     }
 
     const list = [...(formData[type] || [])];
-    list[index] = { ...list[index], [name]: value };
+    const currentRow = { ...list[index] };
+    const isKendaraan = currentRow.type === 'kendaraan';
+    const selectedCat = !isKendaraan ? muatanOptions?.find(k => String(k.id) === String(currentRow.id_kategori_muatan)) : null;
+    const bobotKg = parseFloat(selectedCat?.bobot_per_unit_kg || 0);
+
+    // Reset values when category changes
+    if (name === 'id_kategori_muatan') {
+        currentRow.id_kategori_muatan = value;
+        currentRow.quantity = '';
+        currentRow.estimated_ton = '';
+        currentRow.unit = null;
+        currentRow.ton = null;
+        currentRow.liter = null;
+        currentRow.m3 = null;
+    } else if (name === 'quantity') {
+        currentRow.quantity = value;
+        if (bobotKg > 0 && value !== '' && !isNaN(parseFloat(value))) {
+            const calc = (parseFloat(value) * bobotKg) / 1000;
+            currentRow.estimated_ton = Number.isInteger(calc) ? calc.toString() : parseFloat(calc.toFixed(3)).toString();
+        } else if (value === '') {
+            currentRow.estimated_ton = '';
+        }
+    } else if (name === 'estimated_ton') {
+        currentRow.estimated_ton = value;
+        if (bobotKg > 0 && value !== '' && !isNaN(parseFloat(value))) {
+            const calculatedQty = Math.round((parseFloat(value) * 1000) / bobotKg);
+            currentRow.quantity = calculatedQty.toString();
+        } else if (value === '') {
+            currentRow.quantity = '';
+        }
+    } else {
+        currentRow[name] = value;
+    }
+
+    list[index] = currentRow;
     setFormData(prev => ({ ...prev, [type]: list }));
   };
 
@@ -46,9 +81,9 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
     let newItem;
 
     if (itemType === 'kendaraan') {
-      newItem = { type: 'kendaraan', golongan_kendaraan: '', ton: '', m3: '', unit: '', jenis_perjalanan: jenisPerjalanan };
+      newItem = { type: 'kendaraan', golongan_kendaraan: '', unit: '', jenis_perjalanan: jenisPerjalanan };
     } else {
-      newItem = { type: 'barang', id_kategori_muatan: '', ton: '', m3: '', unit: '', jenis_perjalanan: jenisPerjalanan };
+      newItem = { type: 'barang', id_kategori_muatan: '', quantity: '', estimated_ton: '', jenis_perjalanan: jenisPerjalanan };
     }
 
     setFormData(prev => ({
@@ -59,10 +94,21 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
 
   const renderRow = (item, index, listType) => {
     const isKendaraan = item.type === 'kendaraan';
+    const selectedCat = !isKendaraan ? muatanOptions?.find(k => String(k.id) === String(item.id_kategori_muatan)) : null;
+    const unitLabel = selectedCat?.nama_satuan_muatan || 'unit';
+    const bobotKg = parseFloat(selectedCat?.bobot_per_unit_kg || 0);
+
+    const currentQtyValue = item.quantity !== undefined && item.quantity !== null 
+      ? item.quantity 
+      : (item.unit ?? item.ton ?? item.liter ?? item.m3 ?? '');
+
+    const currentTonValue = item.estimated_ton !== undefined && item.estimated_ton !== null
+      ? item.estimated_ton
+      : '';
     
     return (
-      <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-4 mt-4 items-end">
-        <div>
+      <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-4 items-end bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+        <div className={isKendaraan ? "md:col-span-6" : "md:col-span-4"}>
           <Label>{isKendaraan ? 'Golongan Kendaraan' : 'Nama Muatan'}</Label>
           {isKendaraan ? (
             <Select 
@@ -83,47 +129,53 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
           )}
         </div>
 
-        <div>
-          <Label>Ton (Opsional)</Label>
-          <InputField 
-            name="ton" 
-            type="text" 
-            inputMode="decimal"
-            value={item.ton || ''} 
-            onChange={e => handleRowChange(listType, index, e)} 
-            placeholder="0"
-          />
-        </div>
-
-        <div>
-          <Label>M³ (Opsional)</Label>
-          <InputField 
-            name="m3" 
-            type="text" 
-            inputMode="decimal"
-            value={item.m3 || ''} 
-            onChange={e => handleRowChange(listType, index, e)} 
-            placeholder="0"
-          />
-        </div>
-
-        <div>
-          <Label>Unit (Opsional)</Label>
-          <InputField 
-            name="unit" 
-            type="text" 
-            inputMode="decimal"
-            value={item.unit || ''} 
-            onChange={e => handleRowChange(listType, index, e)} 
-            placeholder="0"
-          />
-        </div>
+        {isKendaraan ? (
+          <div className="md:col-span-4">
+            <Label>Jumlah (unit)</Label>
+            <InputField 
+              name="unit" 
+              type="text" 
+              inputMode="decimal"
+              value={item.unit || ''} 
+              onChange={e => handleRowChange(listType, index, e)} 
+              placeholder="0"
+            />
+          </div>
+        ) : (
+          <>
+            <div className="md:col-span-3">
+              <Label>{item.id_kategori_muatan ? `Jumlah (${unitLabel})` : 'Jumlah (Pilih Muatan)'}</Label>
+              <InputField 
+                name="quantity" 
+                type="text" 
+                inputMode="decimal"
+                value={currentQtyValue} 
+                onChange={e => handleRowChange(listType, index, e)} 
+                placeholder="0"
+                disabled={!item.id_kategori_muatan}
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Label>Estimasi Bobot (Ton)</Label>
+              <InputField 
+                name="estimated_ton" 
+                type="text" 
+                inputMode="decimal"
+                value={currentTonValue} 
+                onChange={e => handleRowChange(listType, index, e)} 
+                placeholder={bobotKg > 0 ? "0.00" : "-"} 
+                disabled={!item.id_kategori_muatan}
+              />
+            </div>
+          </>
+        )}
         
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 flex justify-end">
             <button 
                 type="button" 
                 onClick={() => removeRow(listType, index)} 
-                className="bg-red-500 text-white px-3 py-2 rounded-md h-11 w-full md:w-auto"
+                className="bg-red-500 text-white px-3 py-2 rounded-md h-11 w-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                title="Hapus baris"
             >
                 Hapus
             </button>

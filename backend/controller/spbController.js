@@ -25,10 +25,20 @@ const getSpbById = async (req, res) => {
     }
 }
 
+const formatSpbNumber = (str) => {
+    if (!str) return null;
+    let trimmed = String(str).trim();
+    if (!trimmed) return null;
+    if (/^\d+$/.test(trimmed)) {
+        return trimmed.padStart(7, '0');
+    }
+    return trimmed;
+};
+
 const storeSpb = async (no_spb_asal, no_spb, t) => {
     try {
-        if (no_spb_asal == "") no_spb_asal = null
-        if (no_spb == "") no_spb = null
+        no_spb_asal = formatSpbNumber(no_spb_asal);
+        no_spb = formatSpbNumber(no_spb);
         let newSpb = await spb.create({ no_spb_asal, no_spb }, {transaction: t})
 
         return newSpb
@@ -40,8 +50,8 @@ const storeSpb = async (no_spb_asal, no_spb, t) => {
 
 const updateSpb = async (no_spb_asal, no_spb, id, t) => {
     try {
-        if (no_spb_asal == "") no_spb_asal = null
-        if (no_spb == "") no_spb = null
+        no_spb_asal = formatSpbNumber(no_spb_asal);
+        no_spb = formatSpbNumber(no_spb);
         
         let result = await spb.update({ no_spb_asal, no_spb }, { where: { id_spb: id }, transaction: t })
         console.log(result, id)

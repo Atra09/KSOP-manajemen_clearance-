@@ -40,6 +40,10 @@ var jenisMuatanRouter = require('./routes/jenisMuatan')
 var kapalRouter = require('./routes/kapal')
 var perjalananRouter = require('./routes/perjalanan')
 var pelabuhanRouter = require('./routes/pelabuhan')
+var statusPelayaranRouter = require('./routes/statusPelayaran')
+var asalKapalRouter = require('./routes/asalKapal')
+var satuanMuatanRouter = require('./routes/satuanMuatan')
+var klasifikasiMuatanRouter = require('./routes/klasifikasiMuatan')
 
 var app = express();
 
@@ -79,9 +83,13 @@ app.use('/kecamatan', kecamatanRouter);
 app.use('/jenis', jenisRouter);
 app.use('/kategori-muatan', kategoriMuatanRouter);
 app.use('/jenis-muatan', jenisMuatanRouter);
+app.use('/satuan-muatan', satuanMuatanRouter);
+app.use('/klasifikasi-muatan', klasifikasiMuatanRouter);
 app.use('/kapal', kapalRouter);
 app.use('/perjalanan', perjalananRouter);
 app.use('/pelabuhan', pelabuhanRouter);
+app.use('/status-pelayaran', statusPelayaranRouter);
+app.use('/asal-kapal', asalKapalRouter);
 app.use('/log-user', logUserRouter);
 
 // catch 404 and forward to error handler

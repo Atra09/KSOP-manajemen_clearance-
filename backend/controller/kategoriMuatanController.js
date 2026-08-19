@@ -1,5 +1,5 @@
 const { fn, col, Op } = require("sequelize");
-const kategoriMuatan = require("../model/kategoriMuatanModel")
+const { kategoriMuatan, jenisMuatan, satuanMuatan, klasifikasiMuatan } = require("../model/association");
 const logUserController = require("./logUserController")
 
 const getKategoriMuatanOptions = async (req, res) => {
@@ -36,7 +36,12 @@ const getKategoriMuatan = async (req, res) => {
                 nama_kategori_muatan: {
                     [Op.like]: `%${search}%`
                 }
-            }
+            },
+            include: [
+                { model: jenisMuatan, as: 'jenis_muatan' },
+                { model: satuanMuatan, as: 'satuan_muatan' },
+                { model: klasifikasiMuatan, as: 'klasifikasi_muatan' }
+            ]
         })
         return res.status(200).json({ msg: "Berhasil mengambil data", datas })
     } catch (error) {
@@ -48,7 +53,13 @@ const getKategoriMuatan = async (req, res) => {
 const getKategoriMuatanById = async (req, res) => {
     try {
         let id = req.params.id
-        let data = await kategoriMuatan.findByPk(id)
+        let data = await kategoriMuatan.findByPk(id, {
+            include: [
+                { model: jenisMuatan, as: 'jenis_muatan' },
+                { model: satuanMuatan, as: 'satuan_muatan' },
+                { model: klasifikasiMuatan, as: 'klasifikasi_muatan' }
+            ]
+        })
 
         if (data == null) return res.status(500).json({ msg: "data tidak ditemukan" })
 
@@ -61,7 +72,24 @@ const getKategoriMuatanById = async (req, res) => {
 
 const storeKategoriMuatan = async (req, res) => {
     try {
-        await kategoriMuatan.create({ ...req.body })
+        let payload = { ...req.body };
+        if (!payload.id_satuan_muatan || payload.id_satuan_muatan === "") {
+            payload.id_satuan_muatan = null;
+        }
+        if (!payload.id_jenis_muatan || payload.id_jenis_muatan === "") {
+            payload.id_jenis_muatan = null;
+        }
+        if (!payload.id_klasifikasi_muatan || payload.id_klasifikasi_muatan === "") {
+            payload.id_klasifikasi_muatan = null;
+        }
+
+        if (payload.bobot_per_unit_kg !== undefined && payload.bobot_per_unit_kg !== null && payload.bobot_per_unit_kg !== '') {
+            payload.bobot_per_unit_kg = parseFloat(payload.bobot_per_unit_kg) || 0;
+        } else {
+            payload.bobot_per_unit_kg = 0;
+        }
+
+        await kategoriMuatan.create(payload);
 
         let log = await logUserController.storeLogUser(
             req.user.username,
@@ -83,7 +111,25 @@ const updateKategoriMuatan = async (req, res) => {
             where: { id_kategori_muatan: req.params.id },
             attributes: ['nama_kategori_muatan']
         })
-        let result = await kategoriMuatan.update({ ...req.body }, { where: { id_kategori_muatan: req.params.id } })
+
+        let payload = { ...req.body };
+        if (!payload.id_satuan_muatan || payload.id_satuan_muatan === "") {
+            payload.id_satuan_muatan = null;
+        }
+        if (!payload.id_jenis_muatan || payload.id_jenis_muatan === "") {
+            payload.id_jenis_muatan = null;
+        }
+        if (!payload.id_klasifikasi_muatan || payload.id_klasifikasi_muatan === "") {
+            payload.id_klasifikasi_muatan = null;
+        }
+
+        if (payload.bobot_per_unit_kg !== undefined && payload.bobot_per_unit_kg !== null && payload.bobot_per_unit_kg !== '') {
+            payload.bobot_per_unit_kg = parseFloat(payload.bobot_per_unit_kg) || 0;
+        } else {
+            payload.bobot_per_unit_kg = 0;
+        }
+
+        let result = await kategoriMuatan.update(payload, { where: { id_kategori_muatan: req.params.id } })
 
         if (result == 0) return res.status(500).json({ msg: "data tidak ditemukan" })
 

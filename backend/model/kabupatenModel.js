@@ -8,7 +8,10 @@ const kabupaten = db.define('kabupaten', {
         primaryKey: true,
         autoIncrement: true
     },
-    nama_kabupaten: DataTypes.STRING,
+    nama_kabupaten: {
+        type: DataTypes.STRING,
+        unique: true
+    },
     id_provinsi: {
         type: DataTypes.INTEGER,
         references: {

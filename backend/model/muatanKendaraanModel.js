@@ -22,6 +22,7 @@ const muatanKendaraan = db.define("muatan_kendaraan", {
     unit: DataTypes.INTEGER,
     ton: DataTypes.DOUBLE,
     m3: DataTypes.DOUBLE,
+    liter: DataTypes.DOUBLE,
 },
 {
     freezeTableName: true

@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import debounce from 'lodash.debounce';
 import KapalTable from '../../components/table/KapalTable';
 import JenisKapalTable from '../../components/table/JenisKapalTable';
+import AsalKapalTable from '../../components/table/AsalKapalTable';
 import KapalFormModal from '../../components/modal/KapalFormModal';
 import SearchBar from '../../components/common/SearchBar';
 import axiosInstance from '../../api/axiosInstance';
@@ -15,6 +16,7 @@ function Kapal() {
   const [kapalData, setKapalData] = useState([]);
   const [jenisKapalData, setJenisKapalData] = useState([]);
   const [negaraData, setNegaraData] = useState([]);
+  const [asalKapalData, setAsalKapalData] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,12 +24,14 @@ function Kapal() {
   const tabs = [
     { id: 'kapal', label: 'Daftar Kapal' },
     { id: 'jenisKapal', label: 'Jenis Kapal' },
+    { id: 'asalKapal', label: 'Kedudukan Kapal' },
   ];
 
   useEffect(() => {
     fetchBendera();
     fetchKapal(); 
-    fetchJenisKapal(); 
+    fetchJenisKapal();
+    fetchAsalKapal();
   }, []);
 
   const debouncedFetch = useCallback(
@@ -36,6 +40,8 @@ function Kapal() {
         fetchKapal(query);
       } else if (tab === 'jenisKapal') {
         fetchJenisKapal(query);
+      } else if (tab === 'asalKapal') {
+        fetchAsalKapal(query);
       }
     }, 500),
     []
@@ -87,13 +93,32 @@ function Kapal() {
     }
   };
 
+  const fetchAsalKapal = async (searchQuery = '') => {
+    setLoading(true);
+    try {
+      let params = {};
+      if (searchQuery) params.search = searchQuery;
+
+      let response = await axiosInstance.get('/asal-kapal', { params });
+      setAsalKapalData(response?.data?.datas || []);
+    } catch (error) {
+      toast.error("Gagal memuat kedudukan kapal.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSuccess = () => {
     if (activeTab === 'kapal') {
         fetchKapal(searchTerm);
         fetchJenisKapal(); 
-    } else {
+        fetchAsalKapal();
+    } else if (activeTab === 'jenisKapal') {
         fetchJenisKapal(searchTerm);
         fetchKapal(); 
+    } else if (activeTab === 'asalKapal') {
+        fetchAsalKapal(searchTerm);
+        fetchKapal();
     }
   };
   
@@ -113,10 +138,13 @@ function Kapal() {
   };
 
   const handleDelete = (item) => {
-    const isKapalTab = activeTab === 'kapal';
-    const itemName = isKapalTab ? item.nama_kapal : item.nama_jenis;
-    const itemId = isKapalTab ? item.id_kapal : item.id_jenis;
-    const endpoint = isKapalTab ? 'kapal' : 'jenis';
+    const endpointMap = { kapal: 'kapal', jenisKapal: 'jenis', asalKapal: 'asal-kapal' };
+    const idFieldMap = { kapal: 'id_kapal', jenisKapal: 'id_jenis', asalKapal: 'id_asal_kapal' };
+    const nameFieldMap = { kapal: 'nama_kapal', jenisKapal: 'nama_jenis', asalKapal: 'nama_asal_kapal' };
+
+    const endpoint = endpointMap[activeTab];
+    const itemId = item[idFieldMap[activeTab]];
+    const itemName = item[nameFieldMap[activeTab]];
 
     toast((t) => (
       <div className="flex flex-col gap-3">
@@ -128,8 +156,9 @@ function Kapal() {
                 const response = await axiosInstance.delete(`/${endpoint}/delete/${itemId}`);
                 if (response.status === 200) {
                   toast.success('Data berhasil dihapus!');
-                  if (isKapalTab) fetchKapal(searchTerm);
-                  else fetchJenisKapal(searchTerm);
+                  if (activeTab === 'kapal') fetchKapal(searchTerm);
+                  else if (activeTab === 'jenisKapal') fetchJenisKapal(searchTerm);
+                  else if (activeTab === 'asalKapal') fetchAsalKapal(searchTerm);
                 }
               } catch (error) {
                 toast.error('Gagal menghapus data.');
@@ -157,6 +186,15 @@ function Kapal() {
     setSearchTerm('');
   };
 
+  const getSearchPlaceholder = () => {
+    const placeholders = {
+      kapal: "Cari nama kapal...",
+      jenisKapal: "Cari jenis kapal...",
+      asalKapal: "Cari kedudukan kapal..."
+    };
+    return placeholders[activeTab] || "Cari...";
+  };
+
   const renderContent = () => {
     if (loading) {
         return <p className="text-center text-gray-500 py-10">Memuat data...</p>;
@@ -167,6 +205,8 @@ function Kapal() {
         return <KapalTable data={kapalData} onEdit={handleEdit} onDelete={handleDelete} jenisList={jenisKapalData} benderaList={negaraData} />;
       case 'jenisKapal':
         return <JenisKapalTable data={jenisKapalData} onEdit={handleEdit} onDelete={handleDelete} />;
+      case 'asalKapal':
+        return <AsalKapalTable data={asalKapalData} onEdit={handleEdit} onDelete={handleDelete} />;
       default:
         return null;
     }
@@ -210,7 +250,7 @@ function Kapal() {
                 <SearchBar 
                     searchTerm={searchTerm} 
                     setSearchTerm={setSearchTerm} 
-                    placeholder={activeTab === 'kapal' ? "Cari nama kapal..." : "Cari jenis kapal..."}
+                    placeholder={getSearchPlaceholder()}
                 />
             </div>
           </div>
@@ -228,6 +268,7 @@ function Kapal() {
           currentItem={editingItem}
           jenisKapalOptions={jenisKapalData}
           negaraOptions={negaraData}
+          asalKapalOptions={asalKapalData}
           onSuccess={handleSuccess}
         />
       )}

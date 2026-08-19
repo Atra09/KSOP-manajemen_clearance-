@@ -9,6 +9,7 @@ const MuatanDetailTable = ({ data = [] }) => {
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ton</th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">M³</th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Liter</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -28,6 +29,9 @@ const MuatanDetailTable = ({ data = [] }) => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
                 {item.unit?.toLocaleString('id-ID') || '-'}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                {item.liter?.toLocaleString('id-ID') || '-'}
               </td>
             </tr>
           )) : (

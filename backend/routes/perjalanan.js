@@ -11,7 +11,8 @@ const {
     getTotalPerKategori,
     getTotalPerjalananThisMonth,
     getTotalPerjalananNow,
-    getPerjalananFilterOptions // <-- TAMBAHKAN INI
+    getPerjalananFilterOptions,
+    updateStatusPelayaran
 } = require("../controller/perjalananController")
 
 
@@ -28,6 +29,7 @@ router.post("/store", storePerjalanan)
 
 router.get("/:id", getPerjalananById) 
 router.patch("/update/:id", updatePerjalanan)
+router.patch("/status-pelayaran/:id", updateStatusPelayaran)
 router.delete("/delete/:id", deletePerjalanan)
 
 module.exports = router

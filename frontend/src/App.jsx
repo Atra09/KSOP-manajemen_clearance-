@@ -17,6 +17,7 @@ import Agen from "./pages/master/Agen";
 import KategoriMuatan from "./pages/master/KategoriMuatan";
 import Daerah from "./pages/master/Daerah";
 import Pelabuhan from "./pages/master/Pelabuhan";
+import StatusPelayaran from "./pages/master/StatusPelayaran";
 
 import LogAktivitas from "./pages/LogAktivitas"; 
 import ManajemenUser from "./pages/ManajemenUser";
@@ -80,6 +81,7 @@ function App() {
                             <Route path="/master/muatan" element={<KategoriMuatan />} />
                             <Route path="/master/daerah" element={<Daerah />} />
                             <Route path="/master/pelabuhan" element={<Pelabuhan />} />
+                            <Route path="/master/status-pelayaran" element={<StatusPelayaran />} />
                         </Route>
                         
                         <Route element={<ProtectedRouteRole allowedRoles={['koordinator', 'superuser']} />}>

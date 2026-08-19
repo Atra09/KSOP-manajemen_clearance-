@@ -8,7 +8,10 @@ const kecamatan = db.define('kecamatan', {
         primaryKey: true,
         autoIncrement: true
     },
-    nama_kecamatan: DataTypes.STRING,
+    nama_kecamatan: {
+        type: DataTypes.STRING,
+        unique: true
+    },
     id_kabupaten: {
         type: DataTypes.INTEGER,
         references: {

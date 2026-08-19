@@ -116,7 +116,15 @@ const perjalanan = db.define("perjalanan", {
     status_muatan_berangkat: DataTypes.ENUM("NIHIL", "SESUAI MANIFEST"),
     penumpang_turun: DataTypes.INTEGER,
     penumpang_naik: DataTypes.INTEGER,
-    wilayah_kerja: DataTypes.ENUM("dungkek", "pusat")
+    wilayah_kerja: DataTypes.ENUM("dungkek", "pusat"),
+    status_pelayaran: {
+        type: DataTypes.STRING,
+        defaultValue: "Terbit"
+    },
+    id_status_pelayaran: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    }
 },
     {
         freezeTableName: true

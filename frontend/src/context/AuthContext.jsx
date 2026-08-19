@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         window.location.href = '/signin';
     };
 
-    const value = { user, loading, login, logout };
+    const value = { user, loading, login, logout, refetchUser: fetchUserData };
 
     return (
         <AuthContext.Provider value={value}>

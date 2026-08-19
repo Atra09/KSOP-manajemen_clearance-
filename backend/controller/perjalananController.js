@@ -3,6 +3,7 @@ const kapal = require("../model/kapalModel")
 const nahkoda = require("../model/nahkodaModel")
 const perjalanan = require("../model/perjalananModel")
 const kabupaten = require("../model/kabupatenModel")
+const asalKapal = require("../model/asalKapalModel")
 const { Op, Sequelize, literal, col, fn } = require("sequelize")
 const agen = require("../model/agenModel")
 let spbController = require("./spbController")
@@ -20,6 +21,7 @@ const users = require("../model/userModel")
 const pelabuhan = require("../model/pelabuhanModel")
 const jenisMuatan = require("../model/jenisMuatanModel")
 const pembayaran = require("../model/pembayaranModel")
+const statusPelayaran = require("../model/statusPelayaranModel")
 
 const getPerjalananByFilter = async (req, res) => {
     let {
@@ -162,7 +164,9 @@ const getPerjalananByFilter = async (req, res) => {
             case 'no_spb':
                 orderBySort = [
                     Sequelize.literal(`CAST(\`spb\`.\`no_spb\` AS UNSIGNED) ${sortDir}`),
-                    [{ model: spb }, 'no_spb', sortDir]
+                    [{ model: spb }, 'no_spb', sortDir],
+                    [Sequelize.literal('CAST(`no_urut` AS UNSIGNED)'), sortDir],
+                    ['no_urut', sortDir]
                 ];
                 break;
             case 'nama_nahkoda':
@@ -180,7 +184,9 @@ const getPerjalananByFilter = async (req, res) => {
             default:
                 orderBySort = [
                     Sequelize.literal(`CAST(\`spb\`.\`no_spb\` AS UNSIGNED) ${sortDir}`),
-                    [{ model: spb }, 'no_spb', sortDir]
+                    [{ model: spb }, 'no_spb', sortDir],
+                    [Sequelize.literal('CAST(`no_urut` AS UNSIGNED)'), sortDir],
+                    ['no_urut', sortDir]
                 ];
         }
 
@@ -197,7 +203,8 @@ const getPerjalananByFilter = async (req, res) => {
                     attributes: ['nama_kapal', 'gt', 'nt', 'nomor_selar', 'tanda_selar', 'nomor_imo', 'call_sign'],
                     include: [
                         { model: jenis, attributes: ['nama_jenis'] },
-                        { model: negara, as: "bendera", attributes: ['kode_negara', 'nama_negara'] }
+                        { model: negara, as: "bendera", attributes: ['kode_negara', 'nama_negara'] },
+                        { model: asalKapal, as: "asal_kapal", attributes: ['nama_asal_kapal'] }
                     ],
                     required: true,
                     where: whereKapal
@@ -235,6 +242,7 @@ const getPerjalananByFilter = async (req, res) => {
                 { model: kecamatan, as: "datang_dari", attributes: ['nama_kecamatan'] },
                 { model: kecamatan, as: "tempat_singgah", attributes: ['nama_kecamatan'] },
                 { model: kecamatan, as: "tujuan_akhir", attributes: ['nama_kecamatan'] },
+                { model: statusPelayaran, as: "status_pelayaran_rel" },
             ],
             subQuery: false,
             distinct: true,
@@ -383,7 +391,8 @@ const getPerjalananById = async (req, res) => {
                 {
                     model: kapal, attributes: ['nama_kapal', 'gt', 'nt', 'nomor_selar', 'tanda_selar', 'nomor_imo', 'call_sign'], include: [
                         { model: jenis, attributes: ['nama_jenis'] },
-                        { model: negara, as: "bendera", attributes: ['kode_negara', 'nama_negara'] }
+                        { model: negara, as: "bendera", attributes: ['kode_negara', 'nama_negara'] },
+                        { model: asalKapal, as: "asal_kapal", attributes: ['nama_asal_kapal'] }
                     ]
                 },
                 { model: spb, attributes: ['no_spb', 'no_spb_asal'] },
@@ -424,9 +433,19 @@ const storePerjalanan = async (req, res) => {
     const t = await db.transaction()
     try {
         let { muatan, muatan_kendaraan, pembayaran } = req.body
-        let kapalData = await kapal.findByPk(req.body.id_kapal)
+        let kapalData = await kapal.findByPk(req.body.id_kapal, {
+            include: [{ model: asalKapal, as: "asal_kapal" }]
+        })
         let nahkodaData = await nahkoda.findByPk(req.body.id_nahkoda)
-        let kabupatenData = await kabupaten.findByPk(req.body.id_kedudukan_kapal)
+        let kabupatenData = req.body.id_kedudukan_kapal ? await kabupaten.findByPk(req.body.id_kedudukan_kapal) : null
+        if (!kabupatenData && kapalData?.asal_kapal?.nama_asal_kapal) {
+            kabupatenData = await kabupaten.findOne({ where: { nama_kabupaten: kapalData.asal_kapal.nama_asal_kapal } })
+            if (kabupatenData) req.body.id_kedudukan_kapal = kabupatenData.id_kabupaten
+        }
+        if (!kabupatenData) {
+            kabupatenData = await kabupaten.findOne()
+            if (kabupatenData) req.body.id_kedudukan_kapal = kabupatenData.id_kabupaten
+        }
         let agenData = await agen.findByPk(req.body.id_agen)
         let userData = await users.findByPk(req.user.id)
         let uniqueId = [
@@ -488,7 +507,7 @@ const storePerjalanan = async (req, res) => {
         t.commit()
         return res.status(200).json({ msg: "Berhasil menambahkan data" })
     } catch (error) {
-        t.rollback
+        t.rollback()
         console.log(error)
         return res.status(500).json({ msg: "terjadi kesalahan pada fungsi" })
     }
@@ -503,9 +522,19 @@ const updatePerjalanan = async (req, res) => {
                 model: spb,
             }
         })
-        let kapalData = await kapal.findByPk(req.body.id_kapal)
+        let kapalData = await kapal.findByPk(req.body.id_kapal, {
+            include: [{ model: asalKapal, as: "asal_kapal" }]
+        })
         let nahkodaData = await nahkoda.findByPk(req.body.id_nahkoda)
-        let kabupatenData = await kabupaten.findByPk(req.body.id_kedudukan_kapal)
+        let kabupatenData = req.body.id_kedudukan_kapal ? await kabupaten.findByPk(req.body.id_kedudukan_kapal) : null
+        if (!kabupatenData && kapalData?.asal_kapal?.nama_asal_kapal) {
+            kabupatenData = await kabupaten.findOne({ where: { nama_kabupaten: kapalData.asal_kapal.nama_asal_kapal } })
+            if (kabupatenData) req.body.id_kedudukan_kapal = kabupatenData.id_kabupaten
+        }
+        if (!kabupatenData) {
+            kabupatenData = await kabupaten.findOne()
+            if (kabupatenData) req.body.id_kedudukan_kapal = kabupatenData.id_kabupaten
+        }
         let agenData = await agen.findByPk(req.body.id_agen)
         let userData = await users.findByPk(req.user.id)
         let uniqueId = [
@@ -635,14 +664,14 @@ const getTotalPerjalananNow = async (req, res) => {
 
 const getTotalPerjalananPerMonth = async (req, res) => {
     try {
-        const currentYear = new Date().getFullYear()
+        const targetYear = req.query.year ? parseInt(req.query.year) : new Date().getFullYear()
         const datas = await perjalanan.findAll(
             {
                 attributes: [
                     [fn("MONTH", col("tanggal_clearance")), 'bulan'],
                     [fn("COUNT", col("id_perjalanan")), 'jumlah_perjalanan'],
                 ],
-                where: literal(`YEAR(tanggal_clearance) = ${currentYear}`),
+                where: literal(`YEAR(tanggal_clearance) = ${targetYear}`),
                 group: [fn('MONTH', col("tanggal_clearance"))],
                 order: [[fn('MONTH', col("tanggal_clearance")), 'ASC']]
             }
@@ -669,13 +698,23 @@ const getTotalPerjalananPerMonth = async (req, res) => {
 
 const getTotalPerKategori = async (req, res) => {
     try {
-        const currentMonth = new Date().getMonth() + 1
-        const datas = await await perjalanan.findAll({
+        const targetYear = req.query.year ? parseInt(req.query.year) : null;
+        const targetMonth = req.query.month ? parseInt(req.query.month) : null;
+
+        const whereConditions = [];
+        if (targetYear) {
+            whereConditions.push(literal(`YEAR(perjalanan.tanggal_clearance) = ${targetYear}`));
+        }
+        if (targetMonth) {
+            whereConditions.push(literal(`MONTH(perjalanan.tanggal_clearance) = ${targetMonth}`));
+        }
+
+        const datas = await perjalanan.findAll({
             attributes: [
                 [col('muatans.kategori_muatan.status_kategori_muatan'), "status_kategori_muatan"],
                 [fn("COUNT", col("muatans.kategori_muatan.status_kategori_muatan")), 'jumlah_kategori_muatan'],
             ],
-            where: literal(`MONTH(perjalanan.tanggal_clearance) = ${currentMonth}`),
+            where: whereConditions.length > 0 ? { [Op.and]: whereConditions } : undefined,
             include: [{
                 as: "muatans",
                 model: muatan,
@@ -701,23 +740,22 @@ const getTotalPerKategori = async (req, res) => {
                 status_kategori_muatan: "Berbahaya",
                 jumlah_kategori_muatan: 0
             },
-        ]
-
-        console.log(datas)
+        ];
 
         datas.forEach(d => {
-            if (d.status_kategori_muatan.toLowerCase() == "berbahaya") {
-                console.log("hai")
-                defaultDatas[1].jumlah_kategori_muatan = d.jumlah_kategori_muatan
+            const status = d.status_kategori_muatan ? String(d.status_kategori_muatan).toLowerCase() : '';
+            const count = parseInt(d.jumlah_kategori_muatan, 10) || 0;
+            if (status === "berbahaya") {
+                defaultDatas[1].jumlah_kategori_muatan += count;
             } else {
-                defaultDatas[0].jumlah_kategori_muatan = d.jumlah_kategori_muatan
+                defaultDatas[0].jumlah_kategori_muatan += count;
             }
-        })
+        });
 
-        return res.status(200).json({ msg: "Berhasil mengambil data", defaultDatas })
+        return res.status(200).json({ msg: "Berhasil mengambil data", defaultDatas });
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({ msg: "terjadi kesalahan pada fungsi" })
+        console.log(error);
+        return res.status(500).json({ msg: "terjadi kesalahan pada fungsi" });
     }
 }
 
@@ -743,6 +781,60 @@ const getPerjalananFilterOptions = async (req, res) => {
     }
 };
 
+const updateStatusPelayaran = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status_pelayaran } = req.body;
+
+        if (!status_pelayaran || (typeof status_pelayaran !== 'string' && typeof status_pelayaran !== 'number')) {
+            return res.status(400).json({ msg: "Status pelayaran wajib diisi." });
+        }
+
+        const dataPerjalanan = await perjalanan.findByPk(id);
+        if (!dataPerjalanan) {
+            return res.status(404).json({ msg: "Data perjalanan tidak ditemukan." });
+        }
+
+        // Find status record in status_pelayaran table
+        let matchedStatus = null;
+        if (typeof status_pelayaran === 'number') {
+            matchedStatus = await statusPelayaran.findByPk(status_pelayaran);
+        } else {
+            matchedStatus = await statusPelayaran.findOne({
+                where: Sequelize.where(Sequelize.fn('UPPER', Sequelize.col('kode_status')), status_pelayaran.toUpperCase())
+            });
+        }
+
+        const oldStatus = dataPerjalanan.status_pelayaran || 'Terbit';
+        const newKodeStatus = matchedStatus ? matchedStatus.kode_status : String(status_pelayaran).toUpperCase();
+        const newStatusId = matchedStatus ? matchedStatus.id_status : null;
+
+        await dataPerjalanan.update({ 
+            status_pelayaran: newKodeStatus,
+            id_status_pelayaran: newStatusId
+        });
+
+        try {
+            if (req.user && req.user.id) {
+                await logUserController.createLogUser(
+                    req.user.id,
+                    `Mengubah status pelayaran perjalanan ID ${id} dari ${oldStatus} menjadi ${newKodeStatus}`
+                );
+            }
+        } catch (logErr) {
+            console.error("Log user error:", logErr);
+        }
+
+        return res.status(200).json({
+            msg: `Status pelayaran berhasil diubah menjadi ${newKodeStatus}`,
+            data: dataPerjalanan
+        });
+    } catch (error) {
+        console.error("Update status pelayaran error:", error);
+        return res.status(500).json({ msg: "Terjadi kesalahan saat mengubah status pelayaran." });
+    }
+};
+
 module.exports = {
     getPerjalananByFilter,
     getPerjalanan,
@@ -754,5 +846,6 @@ module.exports = {
     getTotalPerjalananPerMonth,
     getTotalPerKategori,
     getTotalPerjalananNow,
-    getPerjalananFilterOptions
+    getPerjalananFilterOptions,
+    updateStatusPelayaran
 }

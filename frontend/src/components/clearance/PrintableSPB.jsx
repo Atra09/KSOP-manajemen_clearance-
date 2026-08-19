@@ -22,7 +22,7 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
       day: "numeric",
       month: "long",
       year: "numeric",
-    });
+    }).toUpperCase();
   };
 
   const formatTime = (timeString) => {

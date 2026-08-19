@@ -117,7 +117,7 @@ const DetailClearance = () => {
                                 <DetailItem label="Datang Dari" value={data.datang_dari?.nama_kecamatan || '-'} />
                                 <DetailItem label="Sandar Di" value={data.sandar?.nama_pelabuhan || '-'} />
                                 <DetailItem label="Tanggal Datang" value={formatDate(data.tanggal_datang)} />
-                                <DetailItem label="Kedudukan Kapal" value={data.kedudukan_kapal?.nama_kabupaten || '-'} />
+                                <DetailItem label="Kedudukan Kapal" value={data.kapal?.asal_kapal?.nama_asal_kapal || data.kedudukan_kapal?.nama_kabupaten || '-'} />
                             </div>
                         </div>
 

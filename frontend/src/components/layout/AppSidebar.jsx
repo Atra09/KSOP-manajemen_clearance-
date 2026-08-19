@@ -37,6 +37,7 @@ const AppSidebar = () => {
         { name: 'Daerah', path: '/master/daerah' },
         { name: 'Kategori Muatan', path: '/master/muatan' },
         { name: 'Pelabuhan', path: '/master/pelabuhan' },
+        { name: 'Status Pelayaran', path: '/master/status-pelayaran' },
       ],
     },
     { 
@@ -102,14 +103,14 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-50 flex h-screen flex-col border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-in-out
+      className={`fixed top-0 left-0 z-50 flex h-screen flex-col border-r border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 px-5 transition-all duration-300 ease-in-out
         ${isExpanded || isMobileOpen ? 'w-[290px]' : isHovered ? 'w-[290px]' : 'w-[90px]'}
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
       `}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex h-16 items-center justify-center border-b border-gray-200">
+      <div className="flex h-16 items-center justify-center border-b border-gray-200 dark:border-gray-800">
         <Link to="/" className="flex items-center gap-3">
           <img
             src="/images/kementrianperhubungan.png"
@@ -117,7 +118,7 @@ const AppSidebar = () => {
             className="h-11 w-auto"
           />
           {isSidebarWide && (
-            <span className="text-xl font-bold text-gray-800">
+            <span className="text-xl font-bold text-gray-800 dark:text-white">
               Si-Cekatan
             </span>
           )}
@@ -126,7 +127,7 @@ const AppSidebar = () => {
 
       <div className="flex flex-col flex-grow py-8 overflow-y-auto no-scrollbar">
         <nav className="flex-grow">
-          <h2 className={`mb-4 flex text-xs uppercase text-gray-400
+          <h2 className={`mb-4 flex text-xs uppercase text-gray-400 dark:text-gray-500
             ${!isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start'}
           `}>
             {isSidebarWide ? 'Menu' : <HorizontaLDots className="w-6 h-6" />}
@@ -142,12 +143,12 @@ const AppSidebar = () => {
                     <>
                       <button
                         onClick={() => handleSubmenuToggle(item.id)}
-                        className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium
-                          ${isParentActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}
+                        className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors
+                          ${isParentActive ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/60 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}
                           ${!isExpanded && !isHovered ? 'lg:justify-center' : ''}
                         `}
                       >
-                        <span className={`menu-item-icon-size ${isParentActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700'}`}>
+                        <span className={`menu-item-icon-size ${isParentActive ? 'text-blue-600 dark:text-indigo-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200'}`}>
                           {item.icon}
                         </span>
                         {isSidebarWide && (
@@ -166,7 +167,7 @@ const AppSidebar = () => {
                           <ul className="mt-2 ml-9 space-y-1">
                             {item.subItems.map(subItem => (
                               <li key={subItem.name}>
-                                <Link to={subItem.path} className={`menu-dropdown-item ${isActive(subItem.path) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'}`}>
+                                <Link to={subItem.path} className={`menu-dropdown-item ${isActive(subItem.path) ? 'menu-dropdown-item-active dark:bg-indigo-950/80 dark:text-indigo-300' : 'menu-dropdown-item-inactive dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'}`}>
                                   {subItem.name}
                                 </Link>
                               </li>
@@ -178,12 +179,12 @@ const AppSidebar = () => {
                   ) : (
                     <Link
                       to={item.path}
-                      className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium
-                        ${isActive(item.path) ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}
+                      className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors
+                        ${isActive(item.path) ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/60 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}
                         ${!isExpanded && !isHovered ? 'lg:justify-center' : ''}
                       `}
                     >
-                      <span className={`menu-item-icon-size ${isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700'}`}>
+                      <span className={`menu-item-icon-size ${isActive(item.path) ? 'text-blue-600 dark:text-indigo-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200'}`}>
                         {item.icon}
                       </span>
                       {isSidebarWide && (

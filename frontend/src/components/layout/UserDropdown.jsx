@@ -94,7 +94,15 @@ export default function UserDropdown() {
         onClick={() => setIsOpen((prev) => !prev)} 
         className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-800 shadow-sm hover:bg-gray-50"
       >
-        <img src={photoSrc} alt="User" className="h-8 w-8 rounded-full object-cover" />
+        <img 
+          src={photoSrc} 
+          alt="User" 
+          className="h-8 w-8 rounded-full object-cover" 
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "/images/user/owner.jpeg";
+          }}
+        />
         <span className="hidden font-medium sm:block">{user.nama_lengkap.split(' ')[0]}</span>
         <svg 
           className={`stroke-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} 

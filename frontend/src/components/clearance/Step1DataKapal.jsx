@@ -21,8 +21,21 @@ const Step1DataKapal = ({
             return;
         }
 
-        if (name === 'kapalId') {
-            handleKapalChange(value);
+        if (name === 'id_kapal' || name === 'kapalId') {
+            const selectedKapal = kapalOptions.find(k => k.id === parseInt(value));
+            let kedudukanId = '';
+            if (selectedKapal && selectedKapal.asal_kapal?.nama_asal_kapal) {
+                const asalName = selectedKapal.asal_kapal.nama_asal_kapal.trim().toLowerCase();
+                const matchKab = kabupatenOptions.find(k => k.nama.trim().toLowerCase() === asalName);
+                if (matchKab) {
+                    kedudukanId = matchKab.id;
+                }
+            }
+            setFormData(prev => ({
+                ...prev,
+                id_kapal: value,
+                ...(kedudukanId ? { id_kedudukan_kapal: kedudukanId } : {})
+            }));
         }
         else if (name === "no_spb_asal" || name === "no_spb") {
             setFormData(prev => ({
@@ -145,7 +158,21 @@ const Step1DataKapal = ({
             <div className="border-b pb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Data Perjalanan</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <div><Label htmlFor="kedudukanKapal">Kedudukan Kapal</Label><Select id="kedudukanKapal" name="id_kedudukan_kapal" value={formData.id_kedudukan_kapal || ''} onChange={handleChange} options={createOptions(kabupatenOptions, 'Pilih Kedudukan')} required /></div>
+                    <div>
+                        <Label htmlFor="kedudukanKapal">Kedudukan Kapal</Label>
+                        <InputField
+                            id="kedudukanKapal"
+                            type="text"
+                            value={
+                                (kapalOptions.find(k => k.id === parseInt(formData.id_kapal))?.asal_kapal?.nama_asal_kapal)
+                                || kabupatenOptions.find(k => k.id === parseInt(formData.id_kedudukan_kapal))?.nama 
+                                || (formData.id_kapal ? 'Kedudukan Kapal Belum Diatur' : 'Pilih Kapal Terlebih Dahulu')
+                            }
+                            disabled
+                            readOnly
+                            className="bg-gray-100 font-semibold text-gray-700 cursor-not-allowed border-gray-300"
+                        />
+                    </div>
                     <div><Label htmlFor="datangDari">Datang Dari</Label><Select id="datangDari" name="id_datang_dari" value={formData.id_datang_dari || ''} onChange={handleChange} options={createOptions(kecamatanOptions, 'Pilih Asal')} required /></div>
                     <div><Label htmlFor="tanggalDatang">Tanggal Datang</Label><InputField id="tanggalDatang" name="tanggal_datang" type="date" value={formData.tanggal_datang || ''} onChange={handleChange} required /></div>
 

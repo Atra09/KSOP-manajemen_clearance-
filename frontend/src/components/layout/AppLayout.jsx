@@ -9,7 +9,7 @@ const LayoutContent = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (
-    <div className="min-h-screen bg-gray-50 xl:flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 transition-colors xl:flex">
       <div className="screen-only">
         <AppSidebar />
         <Backdrop />

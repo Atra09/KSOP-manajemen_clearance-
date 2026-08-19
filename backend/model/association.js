@@ -16,6 +16,10 @@ const muatanKendaraan = require("./muatanKendaraanModel");
 const pelabuhan = require("./pelabuhanModel");
 const jenisMuatan = require("./jenisMuatanModel");
 const pembayaran = require("./pembayaranModel");
+const statusPelayaran = require("./statusPelayaranModel");
+const asalKapal = require("./asalKapalModel");
+const satuanMuatan = require("./satuanMuatanModel");
+const klasifikasiMuatan = require("./klasifikasiMuatanModel");
 
 jenis.hasMany(kapal, { foreignKey: "id_jenis", onDelete: "SET NULL", onUpdate: "CASCADE" })
 
@@ -24,6 +28,10 @@ kapal.belongsTo(jenis, { foreignKey: "id_jenis", onDelete: "SET NULL", onUpdate:
 negara.hasMany(kapal, { foreignKey: "id_bendera", onDelete: "SET NULL", onUpdate: "CASCADE" })
 
 kapal.belongsTo(negara, { as: "bendera", foreignKey: "id_bendera", onDelete: "SET NULL", onUpdate: "CASCADE" })
+
+asalKapal.hasMany(kapal, { foreignKey: "id_asal_kapal", onDelete: "SET NULL", onUpdate: "CASCADE" })
+
+kapal.belongsTo(asalKapal, { as: "asal_kapal", foreignKey: "id_asal_kapal", onDelete: "SET NULL", onUpdate: "CASCADE" })
 
 spb.hasOne(perjalanan, { foreignKey: "id_spb", onDelete: "SET NULL", onUpdate: "CASCADE" })
 
@@ -89,6 +97,14 @@ jenisMuatan.hasMany(kategoriMuatan, {foreignKey: "id_jenis_muatan", onDelete: "S
 
 kategoriMuatan.belongsTo(jenisMuatan, {as: "jenis_muatan", foreignKey: "id_jenis_muatan", onDelete: "SET NULL", onUpdate: "CASCADE"})
 
+satuanMuatan.hasMany(kategoriMuatan, {foreignKey: "id_satuan_muatan", onDelete: "SET NULL", onUpdate: "CASCADE"})
+
+kategoriMuatan.belongsTo(satuanMuatan, {as: "satuan_muatan", foreignKey: "id_satuan_muatan", onDelete: "SET NULL", onUpdate: "CASCADE"})
+
+klasifikasiMuatan.hasMany(kategoriMuatan, {foreignKey: "id_klasifikasi_muatan", onDelete: "SET NULL", onUpdate: "CASCADE"})
+
+kategoriMuatan.belongsTo(klasifikasiMuatan, {as: "klasifikasi_muatan", foreignKey: "id_klasifikasi_muatan", onDelete: "SET NULL", onUpdate: "CASCADE"})
+
 kategoriMuatan.hasMany(muatan, { foreignKey: "id_kategori_muatan", onDelete: "SET NULL", onUpdate: "CASCADE" })
 
 muatan.belongsTo(kategoriMuatan, { as: "kategori_muatan", foreignKey: "id_kategori_muatan", onDelete: "SET NULL", onUpdate: "CASCADE" })
@@ -97,5 +113,9 @@ perjalanan.hasMany(muatanKendaraan, { as: "muatan_kendaraan", foreignKey: "id_pe
 
 muatanKendaraan.belongsTo(perjalanan, { foreignKey: "id_perjalanan", onDelete: "CASCADE", onUpdate: "CASCADE" })
 
+statusPelayaran.hasMany(perjalanan, { foreignKey: "id_status_pelayaran", onDelete: "SET NULL", onUpdate: "CASCADE" })
 
-module.exports = { agen, kecamatan, kabupaten, negara, jenis, kapal, kategoriMuatan, muatan, nahkoda, perjalanan, pelabuhan, spb, users, logUser, pembayaran, jenisMuatan }
+perjalanan.belongsTo(statusPelayaran, { as: "status_pelayaran_rel", foreignKey: "id_status_pelayaran", onDelete: "SET NULL", onUpdate: "CASCADE" })
+
+
+module.exports = { agen, kecamatan, kabupaten, negara, jenis, kapal, kategoriMuatan, muatan, nahkoda, perjalanan, pelabuhan, spb, users, logUser, pembayaran, jenisMuatan, statusPelayaran, asalKapal, muatanKendaraan, satuanMuatan, klasifikasiMuatan }
