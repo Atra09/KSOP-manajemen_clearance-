@@ -1,5 +1,6 @@
 const { Op } = require("sequelize")
 const pelabuhan = require("../model/pelabuhanModel")
+const perjalanan = require("../model/perjalananModel")
 const logUserController = require("./logUserController")
 
 const getPelabuhan = async (req, res) => {
@@ -83,9 +84,26 @@ const deletePelabuhan = async (req, res) => {
             where: { id_pelabuhan: req.params.id },
             attributes: ['nama_pelabuhan', 'createdAt']
         })
+
+        if (!pelabuhanData) return res.status(404).json({ msg: "data tidak ditemukan" })
+
+        const countPerjalanan = await perjalanan.count({
+            where: {
+                [Op.or]: [
+                    { id_tolak: req.params.id },
+                    { id_sandar: req.params.id }
+                ]
+            }
+        });
+        if (countPerjalanan > 0) {
+            return res.status(400).json({
+                msg: `Data pelabuhan '${pelabuhanData.nama_pelabuhan}' tidak dapat dihapus karena sedang digunakan dalam ${countPerjalanan} data transaksi clearance/perjalanan.`
+            });
+        }
+
         let result = await pelabuhan.destroy({ where: { id_pelabuhan: req.params.id } })
 
-        if (result == 0) return res.status(500).json({ msg: "data tidak ditemukan" })
+        if (result == 0) return res.status(404).json({ msg: "data tidak ditemukan" })
 
         let log = await logUserController.storeLogUser(
             req.user.username,

@@ -8,11 +8,11 @@ import Step2DataMuatan from '../../components/clearance/Step2DataMuatan';
 const initialState = {
     ppk: '',
     spb: { no_spb_asal: '', no_spb: '' },
-    no_urut: '', 
+    no_urut: '',
     tanggal_clearance: '',
     pukul_agen_clearance: '',
     id_kapal: '', id_nahkoda: '', jumlah_crew: '',
-    id_kedudukan_kapal: '', id_datang_dari: '', tanggal_datang: '', tanggal_berangkat: '', pukul_kapal_berangkat: '', 
+    id_kedudukan_kapal: '', id_datang_dari: '', tanggal_datang: '', tanggal_berangkat: '', pukul_kapal_berangkat: '',
     id_tempat_singgah: '',
     id_tujuan_akhir: '', id_agen: '',
     id_tolak: '',
@@ -51,12 +51,14 @@ const FormClearance = () => {
         muatanList.forEach(m => {
             const key = m[keyField];
             if (!grouped[key]) {
-                const qty = m.ton || m.liter || m.m3 || m.unit || '';
+                const qty = m.unit ?? m.liter ?? m.m3 ?? m.ton ?? '';
+                const estTon = (m.ton !== null && m.ton !== undefined) ? m.ton : '';
                 grouped[key] = {
                     type: type,
                     jenis_perjalanan: m.jenis_perjalanan,
                     ...(type === 'barang' ? { id_kategori_muatan: m.id_kategori_muatan, kategori_muatan: m.kategori_muatan } : { golongan_kendaraan: m.golongan_kendaraan }),
                     quantity: qty,
+                    estimated_ton: estTon,
                     ton: m.ton || null,
                     m3: m.m3 || null,
                     unit: m.unit || null,
@@ -82,7 +84,7 @@ const FormClearance = () => {
                     axiosInstance.get('/kecamatan'),
                     axiosInstance.get('/nahkoda'),
                     axiosInstance.get('/kategori-muatan'),
-                    axiosInstance.get('/pelabuhan') 
+                    axiosInstance.get('/pelabuhan')
                 ]);
 
                 setAgenData(agenRes.data.datas.map(d => ({ nama: d.nama_agen, id: d.id_agen })));
@@ -90,8 +92,8 @@ const FormClearance = () => {
                 setKapalData(kapalRes.data.datas.map(d => ({ nama: d.nama_kapal, id: d.id_kapal, asal_kapal: d.asal_kapal })));
                 setKecamatanData(kecamatanRes.data.datas.map(d => ({ nama: d.nama_kecamatan, id: d.id_kecamatan })));
                 setNahkodaData(nahkodaRes.data.datas.map(d => ({ nama: d.nama_nahkoda, id: d.id_nahkoda })));
-                setKategoriMuatanData(kategoriMuatanRes.data.datas.map(d => ({ 
-                    nama: d.nama_kategori_muatan, 
+                setKategoriMuatanData(kategoriMuatanRes.data.datas.map(d => ({
+                    nama: d.nama_kategori_muatan,
                     id: d.id_kategori_muatan,
                     bobot_per_unit_kg: d.bobot_per_unit_kg || 0,
                     nama_satuan_muatan: d.satuan_muatan?.nama_satuan_muatan || 'unit'
@@ -110,7 +112,7 @@ const FormClearance = () => {
 
                     const allDatang = [...barangDatang, ...kendaraanDatang];
                     const allBerangkat = [...barangBerangkat, ...kendaraanBerangkat];
-                    
+
                     const pembayaran_rambu = clearanceData.pembayaran?.find(p => p.tipe_pembayaran === 'rambu') || { ntpn: '', nilai: '' };
                     const pembayaran_labuh = clearanceData.pembayaran?.find(p => p.tipe_pembayaran === 'labuh') || { ntpn: '', nilai: '' };
 
@@ -147,7 +149,7 @@ const FormClearance = () => {
     const nextStep = () => setStep(prev => prev + 1);
     const prevStep = () => setStep(prev => prev - 1);
 
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formRef.current?.checkValidity()) {
@@ -155,18 +157,18 @@ const FormClearance = () => {
             return;
         }
 
-        let { 
-            barangBerangkat, barangDatang, 
-            pembayaran_rambu, pembayaran_labuh, 
-            ...cleanData 
+        let {
+            barangBerangkat, barangDatang,
+            pembayaran_rambu, pembayaran_labuh,
+            ...cleanData
         } = formData;
-        
+
         if (cleanData.id_tempat_singgah === '') cleanData.id_tempat_singgah = null;
         if (cleanData.id_tolak === '' || cleanData.id_tolak === null) cleanData.id_tolak = null;
         if (cleanData.id_sandar === '' || cleanData.id_sandar === null) cleanData.id_sandar = null;
         if (cleanData.penumpang_naik === '') cleanData.penumpang_naik = null;
         if (cleanData.penumpang_turun === '') cleanData.penumpang_turun = null;
-        
+
         let allMuatanForm = [];
         if (formData.status_muatan_berangkat === 'NIHIL') {
             allMuatanForm = [...formData.barangDatang];
@@ -210,7 +212,7 @@ const FormClearance = () => {
                         liter: liter
                     });
                 }
-            } 
+            }
             // Jika item adalah KENDARAAN
             else if (item.type === 'kendaraan') {
                 if (item.golongan_kendaraan) {
@@ -230,7 +232,7 @@ const FormClearance = () => {
                 }
             }
         });
-            
+
         // Proses Pembayaran
         const pembayaran = [];
         if (pembayaran_rambu.ntpn && pembayaran_rambu.nilai) {
@@ -247,7 +249,7 @@ const FormClearance = () => {
             pembayaran: pembayaran
         };
 
-        console.log("Data yang dikirim ke backend:", newData); 
+        console.log("Data yang dikirim ke backend:", newData);
 
         const config = {
             headers: {
@@ -265,7 +267,7 @@ const FormClearance = () => {
             const response = isEditMode
                 ? await axiosInstance.patch(`/perjalanan/update/${id}`, newData)
                 : await axiosInstance.post('/perjalanan/store', newData);
-                
+
             if (response.status === 200) {
                 toast.success(`Data Clearance berhasil ${isEditMode ? 'diperbarui' : 'disimpan'}!`);
                 if (isEditMode) {

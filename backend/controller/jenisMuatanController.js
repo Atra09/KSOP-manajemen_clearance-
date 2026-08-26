@@ -1,5 +1,6 @@
 const { Op } = require("sequelize")
 const jenisMuatan = require("../model/jenisMuatanModel")
+const kategoriMuatan = require("../model/kategoriMuatanModel")
 const logUserController = require("./logUserController")
 
 const getJenisMuatan = async (req, res) => {
@@ -84,9 +85,18 @@ const deleteJenisMuatan = async (req, res) => {
             attributes: ['nama_jenis_muatan', 'createdAt']
         })
 
+        if (!jenisMuatanData) return res.status(404).json({ msg: "data tidak ditemukan" });
+
+        const countKategori = await kategoriMuatan.count({ where: { id_jenis_muatan: req.params.id } });
+        if (countKategori > 0) {
+            return res.status(400).json({
+                msg: `Data jenis muatan '${jenisMuatanData.nama_jenis_muatan}' tidak dapat dihapus karena sedang digunakan oleh ${countKategori} kategori muatan.`
+            });
+        }
+
         let result = await jenisMuatan.destroy({ where: { id_jenis_muatan: req.params.id } })
 
-        if (result == 0) return res.status(500).json({ msg: "data tidak ditemukan" })
+        if (result == 0) return res.status(404).json({ msg: "data tidak ditemukan" })
 
         let log = await logUserController.storeLogUser(
             req.user.username,

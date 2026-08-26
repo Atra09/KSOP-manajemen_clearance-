@@ -1,5 +1,5 @@
 const { fn, col, Op } = require("sequelize");
-const { kategoriMuatan, jenisMuatan, satuanMuatan, klasifikasiMuatan } = require("../model/association");
+const { kategoriMuatan, jenisMuatan, satuanMuatan, klasifikasiMuatan, muatan } = require("../model/association");
 const logUserController = require("./logUserController")
 
 const getKategoriMuatanOptions = async (req, res) => {
@@ -155,11 +155,18 @@ const deleteKategoriMuatan = async (req, res) => {
             attributes: ['nama_kategori_muatan']
         })
 
-        if (!kategoriData) return res.status(500).json({ msg: "data tidak ditemukan" })
+        if (!kategoriData) return res.status(404).json({ msg: "data tidak ditemukan" })
+
+        const countMuatan = await muatan.count({ where: { id_kategori_muatan: req.params.id } });
+        if (countMuatan > 0) {
+            return res.status(400).json({
+                msg: `Data kategori '${kategoriData.nama_kategori_muatan}' tidak dapat dihapus karena sedang digunakan dalam ${countMuatan} data transaksi muatan.`
+            });
+        }
 
         let result = await kategoriMuatan.destroy({ where: { id_kategori_muatan: req.params.id } })
 
-        if (result == 0) return res.status(500).json({ msg: "data tidak ditemukan" })
+        if (result == 0) return res.status(404).json({ msg: "data tidak ditemukan" })
 
         let log = await logUserController.storeLogUser(
             req.user.username,

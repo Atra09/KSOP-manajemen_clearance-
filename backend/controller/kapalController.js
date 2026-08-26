@@ -3,6 +3,7 @@ const jenis = require("../model/jenisModel")
 const kapal = require("../model/kapalModel")
 const negara = require("../model/negaraModel")
 const asalKapal = require("../model/asalKapalModel")
+const perjalanan = require("../model/perjalananModel")
 const logUserController = require("./logUserController")
 
 const getKapalOptions = async (req, res) => {
@@ -108,11 +109,18 @@ const deleteKapal = async (req, res) => {
             attributes: ['nama_kapal']
         })
 
-        if (!kapalData) return res.status(500).json({ msg: "data tidak ditemukan" })
+        if (!kapalData) return res.status(404).json({ msg: "data tidak ditemukan" })
+
+        const countPerjalanan = await perjalanan.count({ where: { id_kapal: req.params.id } });
+        if (countPerjalanan > 0) {
+            return res.status(400).json({
+                msg: `Data kapal '${kapalData.nama_kapal}' tidak dapat dihapus karena sedang digunakan dalam ${countPerjalanan} data transaksi clearance/perjalanan.`
+            });
+        }
 
         let result = await kapal.destroy({ where: { id_kapal: req.params.id } })
 
-        if (result == 0) return res.status(500).json({ msg: "data tidak ditemukan" })
+        if (result == 0) return res.status(404).json({ msg: "data tidak ditemukan" })
 
         let log = await logUserController.storeLogUser(
             req.user.username,

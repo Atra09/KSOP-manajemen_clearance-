@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { klasifikasiMuatan } = require("../model/association");
+const { klasifikasiMuatan, kategoriMuatan } = require("../model/association");
 const logUserController = require("./logUserController");
 
 const getKlasifikasiMuatan = async (req, res) => {
@@ -97,6 +97,13 @@ const deleteKlasifikasiMuatan = async (req, res) => {
         let item = await klasifikasiMuatan.findByPk(req.params.id);
 
         if (!item) return res.status(404).json({ msg: "Data tidak ditemukan" });
+
+        const countKategori = await kategoriMuatan.count({ where: { id_klasifikasi_muatan: req.params.id } });
+        if (countKategori > 0) {
+            return res.status(400).json({
+                msg: `Data klasifikasi muatan '${item.nama_klasifikasi_muatan}' tidak dapat dihapus karena sedang digunakan oleh ${countKategori} kategori muatan.`
+            });
+        }
 
         await item.destroy();
 

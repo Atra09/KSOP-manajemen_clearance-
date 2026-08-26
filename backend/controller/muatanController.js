@@ -48,37 +48,42 @@ const processSingleMuatan = async (item) => {
     const nama_satuan_muatan = String(cat?.satuan_muatan?.nama_satuan_muatan || 'unit').toLowerCase().trim();
     const bobot_per_unit_kg = parseFloat(cat?.bobot_per_unit_kg || 0);
 
-    const jumlah = parseFloat(item.jumlah !== undefined && item.jumlah !== null && item.jumlah !== '' 
+    let rawUnit = item.unit !== undefined && item.unit !== null && item.unit !== '' ? parseFloat(item.unit) : null;
+    let rawTon = item.ton !== undefined && item.ton !== null && item.ton !== '' ? parseFloat(item.ton) : (item.estimated_ton !== undefined && item.estimated_ton !== null && item.estimated_ton !== '' ? parseFloat(item.estimated_ton) : null);
+    let rawLiter = item.liter !== undefined && item.liter !== null && item.liter !== '' ? parseFloat(item.liter) : null;
+    let rawM3 = item.m3 !== undefined && item.m3 !== null && item.m3 !== '' ? parseFloat(item.m3) : null;
+
+    const generalJumlah = parseFloat(item.jumlah !== undefined && item.jumlah !== null && item.jumlah !== '' 
         ? item.jumlah 
         : (item.quantity !== undefined && item.quantity !== null && item.quantity !== '' 
             ? item.quantity 
-            : (item.unit || item.ton || item.liter || item.m3 || 0))) || 0;
+            : 0)) || null;
 
-    // 2. Initialize Variables
-    let insertUnit = null;
-    let insertTon = null;
-    let insertM3 = null;
-    let insertLiter = null;
+    let insertUnit = rawUnit;
+    let insertTon = rawTon;
+    let insertM3 = rawM3;
+    let insertLiter = rawLiter;
 
-    // 3. Primary Mapping based on Unit
+    // Primary Mapping based on Master Unit if specific field wasn't set
     if (nama_satuan_muatan === 'ton') {
-        insertTon = jumlah;
+        if (insertTon === null && generalJumlah !== null) insertTon = generalJumlah;
     } else if (nama_satuan_muatan === 'm3' || nama_satuan_muatan === 'm³') {
-        insertM3 = jumlah;
+        if (insertM3 === null && generalJumlah !== null) insertM3 = generalJumlah;
     } else if (nama_satuan_muatan === 'liter') {
-        insertLiter = jumlah;
+        if (insertLiter === null && generalJumlah !== null) insertLiter = generalJumlah;
     } else {
-        // For all other units ('unit', 'dus', 'tabung', 'biji', 'ekor', 'kg', 'box', etc.)
-        insertUnit = jumlah;
+        if (insertUnit === null && generalJumlah !== null) insertUnit = generalJumlah;
+    }
 
-        // 4. The Auto-Calculate Tonnage Logic (CRUCIAL)
-        if (bobot_per_unit_kg > 0) {
-            let calculatedTon = (jumlah * bobot_per_unit_kg) / 1000;
-            insertTon = calculatedTon;
+    // Bidirectional Auto-Calculation if bobot_per_unit_kg > 0
+    if (bobot_per_unit_kg > 0) {
+        if (insertTon !== null && (insertUnit === null || insertUnit === 0)) {
+            insertUnit = Math.round((insertTon * 1000) / bobot_per_unit_kg);
+        } else if (insertUnit !== null && (insertTon === null || insertTon === 0)) {
+            insertTon = (insertUnit * bobot_per_unit_kg) / 1000;
         }
     }
 
-    // 5. Build Final Object
     return {
         id_perjalanan: item.id_perjalanan,
         id_kategori_muatan: item.id_kategori_muatan,

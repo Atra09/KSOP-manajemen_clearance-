@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
 const satuanMuatan = require("../model/satuanMuatanModel");
+const kategoriMuatan = require("../model/kategoriMuatanModel");
 const logUserController = require("./logUserController");
 
 const getSatuanMuatan = async (req, res) => {
@@ -89,6 +90,13 @@ const deleteSatuanMuatan = async (req, res) => {
         });
 
         if (!satuanData) return res.status(404).json({ msg: "data tidak ditemukan" });
+
+        const countKategori = await kategoriMuatan.count({ where: { id_satuan_muatan: req.params.id } });
+        if (countKategori > 0) {
+            return res.status(400).json({
+                msg: `Data satuan muatan '${satuanData.nama_satuan_muatan}' tidak dapat dihapus karena sedang digunakan oleh ${countKategori} kategori muatan.`
+            });
+        }
 
         await satuanMuatan.destroy({ where: { id_satuan_muatan: req.params.id } });
 
