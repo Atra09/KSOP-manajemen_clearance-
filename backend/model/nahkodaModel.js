@@ -7,7 +7,10 @@ const nahkoda = db.define('nahkoda', {
         primaryKey: true,
         autoIncrement: true
     },
-    nama_nahkoda: DataTypes.STRING
+    nama_nahkoda: {
+        type: DataTypes.STRING,
+        unique: true
+    }
 }, 
 {
     freezeTableName: true

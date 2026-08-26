@@ -152,11 +152,17 @@ const Dashboard = () => {
     }
   };
 
-  // Build list of available years dynamically from data + fallback
+  // Build list of available years dynamically from data + fallback (filtering out invalid/typo date years)
   const availableYears = Array.from(
     new Set([
       currentYear,
-      ...allPerjalanan.map(item => item.tanggal_clearance ? new Date(item.tanggal_clearance).getFullYear() : null).filter(Boolean)
+      ...allPerjalanan
+        .map(item => {
+          if (!item.tanggal_clearance) return null;
+          const y = new Date(item.tanggal_clearance).getFullYear();
+          return (y >= 2020 && y <= 2099) ? y : null;
+        })
+        .filter(Boolean)
     ])
   ).sort((a, b) => b - a);
 

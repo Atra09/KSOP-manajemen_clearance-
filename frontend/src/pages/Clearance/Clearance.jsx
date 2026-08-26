@@ -9,6 +9,7 @@ import SearchBar from '../../components/common/SearchBar';
 import FilterDropdown from '../../components/common/FilterDropdown';
 import InputField from '../../components/form/InputField';
 import Pagination from '../../components/ui/Pagination';
+import ExportMonthlyModal from '../../components/modal/ExportMonthlyModal';
 import axiosInstance from '../../api/axiosInstance';
 import { useAuth } from '../../context/AuthContext';
 
@@ -20,6 +21,31 @@ const customStyles = {
 };
 
 const rowsPerPageOptions = ['5', '10', '20', '50', 'Semua'];
+
+const MONTH_OPTIONS = [
+    { value: '', label: 'Semua Bulan' },
+    { value: '1', label: 'Januari' },
+    { value: '2', label: 'Februari' },
+    { value: '3', label: 'Maret' },
+    { value: '4', label: 'April' },
+    { value: '5', label: 'Mei' },
+    { value: '6', label: 'Juni' },
+    { value: '7', label: 'Juli' },
+    { value: '8', label: 'Agustus' },
+    { value: '9', label: 'September' },
+    { value: '10', label: 'Oktober' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'Desember' }
+];
+
+const currentYear = new Date().getFullYear();
+const YEAR_OPTIONS = [
+    { value: '', label: 'Semua Tahun' },
+    ...Array.from({ length: 6 }, (_, i) => {
+        const y = String(currentYear - 3 + i);
+        return { value: y, label: y };
+    })
+];
 
 // ExcelJS Styling Constants
 const BORDER_THIN = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
@@ -53,15 +79,15 @@ const getStatusStyle = (statusStr) => {
 const CARGO_SUB_HEADERS = [
     "Gol. I", "Gol. II", "Gol. III", "Gol. IV", "Gol. V", "Bego",
     "Mitan", "Solar (ltr)", "Bensin (ltr)", "krosene", "Avtur", "LPG 3 kg (tb)", "LPG 12 kg (tb)",
-    "Beras (ton)", "Jagung (ton)", "Garam (ton)", "Tepung (ton)", "Gula (ton)", "Kedelei", "Palen (ton)", "Kelapa (biji)", "Kcang ijo (ton)", "Sayur & Buah (ton)", "Mangga (krg)", "Rmpt Laut (ton)",
+    "Beras (ton)", "Jagung (ton)", "Garam (ton)", "Tepung (ton)", "Gula (ton)", "Kedelei", "Palen (ton)", "Kelapa (biji)", "Kacang (ton)", "Sayur & Buah (ton)", "Mangga (krg)", "Rmpt Laut (ton)",
     "Keramik (ton)", "Semen (ton)", "Genteng (biji)", "Batu Bata (b)/Paving", "Pasir (ton)", "Bahan Bangunan Lain (ton)",
     "Barang (ton)", "Barkas (ton)", "Tbg Kosong", "Air Galon Kosong", "Ikan (ton)", "Hewan/Ternak", "Kayu m3", "Pupuk (ton)", "Bagasi Lainnya (ton)"
 ];
 
 const CARGO_COL_INDEX_MAP = {
     'Gol. I': 0, 'Gol. II': 1, 'Gol. III': 2, 'Gol. IV': 3, 'Gol. V': 4, 'Bego': 5,
-    'Mtan': 6, 'Solar (ltr)': 7, 'Bensin (ltr)': 8, 'krosene': 9, 'Avtur': 10, 'LPG 3 kg (tb)': 11, 'LPG 12 kg (tb)': 12,
-    'Beras (ton)': 13, 'Jagung (ton)': 14, 'Garam (ton)': 15, 'Tepung (ton)': 16, 'Gula (ton)': 17, 'Kedelei': 18, 'Palen (ton)': 19, 'Kelapa (biji)': 20, 'Kcang ijo (ton)': 21, 'Sayur & Buah (ton)': 22, 'Mangga (kg)': 23, 'Mangga (krg)': 23, 'Rmpt Laut (ton)': 24,
+    'Mtan': 6, 'Mitan': 6, 'Solar (ltr)': 7, 'Bensin (ltr)': 8, 'krosene': 9, 'Krosene': 9, 'Avtur': 10, 'LPG 3 kg (tb)': 11, 'LPG 12 kg (tb)': 12,
+    'Beras (ton)': 13, 'Jagung (ton)': 14, 'Garam (ton)': 15, 'Tepung (ton)': 16, 'Gula (ton)': 17, 'Kedelei': 18, 'Palen (ton)': 19, 'Kelapa (biji)': 20, 'Kacang (ton)': 21, 'Kacang': 21, 'Kcang ijo (ton)': 21, 'Kacang ijo (ton)': 21, 'Sayur & Buah (ton)': 22, 'Mangga (kg)': 23, 'Mangga (krg)': 23, 'Rmpt Laut (ton)': 24,
     'Keramik (ton)': 25, 'Semen (ton)': 26, 'Genteng (biji)': 27, 'Batu Bata (bj)/Paving': 28, 'Batu Bata (b)/Paving': 28, 'Pasir (ton)': 29, 'Bahan Bangunan Lain (ton)': 30,
     'Barang (ton)': 31, 'Barkas (ton)': 32, 'Berkas (ton)': 32, 'Tbg Kosong': 33, 'Air Galon Kosong': 34, 'Ikan (ton)': 35, 'Hewan/Ternak': 36, 'Kayu m3': 37, 'Pupuk (ton)': 38, 'Bagasi Lainnya (ton)': 39
 };
@@ -100,21 +126,114 @@ const extractCargoRowData = (d, jenis) => {
     d.muatans?.forEach(m => {
         if (m.jenis_perjalanan === jenis) {
             const targetCol = (m.kategori_muatan?.excel_column_name || '').trim();
-            const catName = (m.kategori_muatan?.nama_kategori_muatan || '').toLowerCase();
-            const val = (m.ton || m.unit || m.m3 || 0);
+            const catName = (m.kategori_muatan?.nama_kategori_muatan || '').toLowerCase().trim();
+            const colLower = targetCol.toLowerCase();
+            const combinedName = `${catName} ${colLower}`;
 
+            const valUnit = Number(m.unit) || 0;
+            const valTon = Number(m.ton) || 0;
+            const valM3 = Number(m.m3) || 0;
+            const valDefault = valTon || valUnit || valM3 || 0;
+
+            // 1. Direct index map matching from excel_column_name
             if (CARGO_COL_INDEX_MAP[targetCol] !== undefined) {
-                slots[CARGO_COL_INDEX_MAP[targetCol]] += (m.unit || m.ton || val);
-            } else {
-                if (catName.includes('solar') || catName.includes('bbm')) slots[7] += (m.unit || val);
-                else if (catName.includes('bensin') || catName.includes('pertalite')) slots[8] += (m.unit || val);
-                else if (catName.includes('lpg 3')) slots[11] += (m.unit || val);
-                else if (catName.includes('lpg 12')) slots[12] += (m.unit || val);
-                else if (catName.includes('sayur') || catName.includes('buah')) slots[22] += (m.ton || val);
-                else if (catName.includes('bangunan')) slots[30] += (m.ton || val);
-                else if (catName.includes('tabung') || catName.includes('tbg')) slots[33] += (m.unit || val);
-                else slots[39] += (m.ton || m.unit || val);
+                const idx = CARGO_COL_INDEX_MAP[targetCol];
+                let qty = valDefault;
+                if ([7, 8, 11, 12, 20, 23, 27, 28, 33, 34].includes(idx)) {
+                    qty = valUnit || valDefault;
+                } else if (idx === 37) {
+                    qty = valM3 || valTon || valDefault;
+                } else {
+                    qty = valTon || valDefault;
+                }
+                slots[idx] += qty;
+                return;
             }
+
+            // 2. Keyword fallback matching based on category name & column name
+            let slotIndex = -1;
+            let qty = valDefault;
+
+            // --- BAHAN BAKAR ---
+            if (combinedName.includes('solar') || combinedName.includes('dexlite') || combinedName.includes('biosolar')) {
+                slotIndex = 7; qty = valUnit || valDefault;
+            } else if (combinedName.includes('bensin') || combinedName.includes('pertalite') || combinedName.includes('pertamax')) {
+                slotIndex = 8; qty = valUnit || valDefault;
+            } else if (combinedName.includes('mitan') || combinedName.includes('kerosene') || combinedName.includes('minyak tanah')) {
+                slotIndex = 6; qty = valUnit || valDefault;
+            } else if (combinedName.includes('avtur')) {
+                slotIndex = 10; qty = valUnit || valDefault;
+            } else if (combinedName.includes('lpg 3') || combinedName.includes('elpiji 3')) {
+                slotIndex = 11; qty = valUnit || valDefault;
+            } else if (combinedName.includes('lpg 12') || combinedName.includes('lpg 50') || combinedName.includes('elpiji 12')) {
+                slotIndex = 12; qty = valUnit || valDefault;
+            }
+            // --- MAKANAN & PRODUK OLAHAN ---
+            else if (combinedName.includes('beras')) {
+                slotIndex = 13; qty = valTon || valDefault;
+            } else if (combinedName.includes('jagung')) {
+                slotIndex = 14; qty = valTon || valDefault;
+            } else if (combinedName.includes('garam')) {
+                slotIndex = 15; qty = valTon || valDefault;
+            } else if (combinedName.includes('tepung') || combinedName.includes('terigu')) {
+                slotIndex = 16; qty = valTon || valDefault;
+            } else if (combinedName.includes('gula')) {
+                slotIndex = 17; qty = valTon || valDefault;
+            } else if (combinedName.includes('kedelai') || combinedName.includes('kedele')) {
+                slotIndex = 18; qty = valTon || valDefault;
+            } else if (combinedName.includes('palen')) {
+                slotIndex = 19; qty = valTon || valDefault;
+            } else if (combinedName.includes('kelapa')) {
+                slotIndex = 20; qty = valUnit || valDefault;
+            } else if (combinedName.includes('kacang') || combinedName.includes('kcang')) {
+                slotIndex = 21; qty = valTon || valDefault;
+            } else if (combinedName.includes('sayur') || combinedName.includes('buah')) {
+                slotIndex = 22; qty = valTon || valDefault;
+            } else if (combinedName.includes('mangga')) {
+                slotIndex = 23; qty = valUnit || valDefault;
+            } else if (combinedName.includes('rumput laut') || combinedName.includes('rmpt laut')) {
+                slotIndex = 24; qty = valTon || valDefault;
+            }
+            // --- BAHAN BANGUNAN ---
+            else if (combinedName.includes('paving') || combinedName.includes('batu bata') || combinedName.includes('bata') || combinedName.includes('hebel')) {
+                slotIndex = 28; qty = valUnit || valDefault; // Batu Bata (b)/Paving
+            } else if (combinedName.includes('semen')) {
+                slotIndex = 26; qty = valTon || valUnit || valDefault; // Semen (ton)
+            } else if (combinedName.includes('genteng')) {
+                slotIndex = 27; qty = valUnit || valDefault; // Genteng (biji)
+            } else if (combinedName.includes('keramik') || combinedName.includes('granit')) {
+                slotIndex = 25; qty = valTon || valDefault; // Keramik (ton)
+            } else if (combinedName.includes('pasir') || combinedName.includes('sirtu') || combinedName.includes('batu split') || combinedName.includes('koral')) {
+                slotIndex = 29; qty = valTon || valDefault; // Pasir (ton)
+            } else if (
+                combinedName.includes('bangunan') || combinedName.includes('asbes') || combinedName.includes('seng') ||
+                combinedName.includes('besi') || combinedName.includes('pipa') || combinedName.includes('cat') ||
+                combinedName.includes('kaca') || combinedName.includes('triplek') || combinedName.includes('gypsum') || combinedName.includes('papan')
+            ) {
+                slotIndex = 30; qty = valTon || valDefault; // Bahan Bangunan Lain (ton)
+            }
+            // --- LAIN-LAIN ---
+            else if (combinedName.includes('pupuk') || combinedName.includes('urea') || combinedName.includes('npk') || combinedName.includes('za')) {
+                slotIndex = 38; qty = valTon || valDefault; // Pupuk (ton)
+            } else if (combinedName.includes('kayu')) {
+                slotIndex = 37; qty = valM3 || valTon || valDefault; // Kayu m3
+            } else if (combinedName.includes('hewan') || combinedName.includes('ternak') || combinedName.includes('sapi') || combinedName.includes('kambing') || combinedName.includes('domba') || combinedName.includes('ayam')) {
+                slotIndex = 36; qty = valUnit || valDefault; // Hewan/Ternak
+            } else if (combinedName.includes('ikan') || combinedName.includes('cumi') || combinedName.includes('udang') || combinedName.includes('kerapu')) {
+                slotIndex = 35; qty = valTon || valDefault; // Ikan (ton)
+            } else if (combinedName.includes('galon') || combinedName.includes('air galon')) {
+                slotIndex = 34; qty = valUnit || valDefault; // Air Galon Kosong
+            } else if (combinedName.includes('tbg kosong') || combinedName.includes('tabung kosong')) {
+                slotIndex = 33; qty = valUnit || valDefault; // Tbg Kosong
+            } else if (combinedName.includes('barkas') || combinedName.includes('rongsokan')) {
+                slotIndex = 32; qty = valTon || valDefault; // Barkas (ton)
+            } else if (combinedName.includes('barang') || combinedName.includes('kelontong')) {
+                slotIndex = 31; qty = valTon || valDefault; // Barang (ton)
+            } else {
+                slotIndex = 39; qty = valTon || valDefault; // Bagasi Lainnya (ton)
+            }
+
+            slots[slotIndex] += qty;
         }
     });
 
@@ -129,6 +248,24 @@ const extractCargoRowData = (d, jenis) => {
     return slots;
 };
 
+const INITIAL_FILTERS = {
+    searchTerm: '', selectedShip: '', startDate: '', endDate: '',
+    selectedCategory: '', selectedGoods: [], selectedWilayah: '',
+};
+
+const getInitialFilterState = (key, fallback) => {
+    try {
+        const saved = sessionStorage.getItem('clearance_filter_state');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            return parsed[key] !== undefined ? parsed[key] : fallback;
+        }
+    } catch (e) {
+        console.error("Error reading saved filter state:", e);
+    }
+    return fallback;
+};
+
 function Clearance() {
     const [pageData, setPageData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -138,18 +275,29 @@ function Clearance() {
         ships: [], categories: [], goods: [], wilayahKerja: []
     });
 
-    const [filters, setFilters] = useState({
-        searchTerm: '', selectedShip: '', startDate: '', endDate: '',
-        selectedCategory: '', selectedGoods: [], selectedWilayah: '',
-    });
-
-    const [sortConfig, setSortConfig] = useState({ key: 'no_spb', direction: 'DESC' });
-    const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState('5');
+    const [filters, setFilters] = useState(() => getInitialFilterState('filters', INITIAL_FILTERS));
+    const [sortConfig, setSortConfig] = useState(() => getInitialFilterState('sortConfig', { key: 'no_spb', direction: 'DESC' }));
+    const [currentPage, setCurrentPage] = useState(() => getInitialFilterState('currentPage', 1));
+    const [rowsPerPage, setRowsPerPage] = useState(() => getInitialFilterState('rowsPerPage', '5'));
     const [totalData, setTotalData] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
+    useEffect(() => {
+        try {
+            sessionStorage.setItem('clearance_filter_state', JSON.stringify({
+                filters,
+                currentPage,
+                rowsPerPage,
+                sortConfig
+            }));
+        } catch (e) {
+            console.error("Error saving filter state:", e);
+        }
+    }, [filters, currentPage, rowsPerPage, sortConfig]);
+
     const [isExportOpen, setIsExportOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [exportReportType, setExportReportType] = useState('register');
     const [isExporting, setIsExporting] = useState(false);
     const exportRef = useRef(null);
 
@@ -187,16 +335,32 @@ function Clearance() {
         }));
     };
 
-    const getQueryParams = useCallback((limitOverride = null) => {
+    const getQueryParams = useCallback((limitOverride = null, customParams = null) => {
         const queryLimit = limitOverride !== null ? limitOverride : (rowsPerPage === 'Semua' ? 0 : parseInt(rowsPerPage, 10));
         const queryPage = limitOverride !== null ? 1 : currentPage;
+
+        let effectiveStartDate = filters.startDate;
+        let effectiveEndDate = filters.endDate;
+
+        // If month/year filter is set in UI filters
+        if (filters.selectedMonth && filters.selectedYear) {
+            const m = String(filters.selectedMonth).padStart(2, '0');
+            const y = filters.selectedYear;
+            const lastDay = new Date(Number(y), Number(m), 0).getDate();
+            effectiveStartDate = `${y}-${m}-01`;
+            effectiveEndDate = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
+        } else if (filters.selectedYear) {
+            effectiveStartDate = `${filters.selectedYear}-01-01`;
+            effectiveEndDate = `${filters.selectedYear}-12-31`;
+        }
 
         const params = {
             page: queryPage, limit: queryLimit,
             searchTerm: filters.searchTerm, nama_kapal: filters.selectedShip,
-            tanggal_awal: filters.startDate, tanggal_akhir: filters.endDate,
+            tanggal_awal: effectiveStartDate, tanggal_akhir: effectiveEndDate,
             kategori: filters.selectedCategory, wilker: filters.selectedWilayah,
-            sort: sortConfig.direction, data_name: sortConfig.key
+            sort: sortConfig.direction, data_name: sortConfig.key,
+            ...customParams
         };
 
         const goods = filters.selectedGoods.filter(g => g.value.startsWith('good_')).map(g => g.value.split('_')[1]);
@@ -208,9 +372,10 @@ function Clearance() {
         return params;
     }, [currentPage, rowsPerPage, filters, sortConfig]);
 
-    const fetchAllExportData = async () => {
+    const fetchAllExportData = async (overrideParams = null) => {
         try {
-            const data = await fetchPerjalananData(getQueryParams(0));
+            const params = overrideParams ? getQueryParams(0, overrideParams) : getQueryParams(0);
+            const data = await fetchPerjalananData(params);
             return data.datas || [];
         } catch (error) {
             console.error("Gagal mengambil data ekspor:", error);
@@ -238,8 +403,40 @@ function Clearance() {
         fetchData();
     }, [fetchData]);
 
+    const isFilterActive = useMemo(() => {
+        return Boolean(
+            filters.searchTerm ||
+            filters.selectedShip ||
+            filters.startDate ||
+            filters.endDate ||
+            filters.selectedCategory ||
+            (filters.selectedGoods && filters.selectedGoods.length > 0) ||
+            filters.selectedWilayah
+        );
+    }, [filters]);
+
+    const handleResetFilters = () => {
+        setFilters(INITIAL_FILTERS);
+        setCurrentPage(1);
+        sessionStorage.removeItem('clearance_filter_state');
+    };
+
     const handleFilterChange = (name, value) => {
-        setFilters(prev => ({ ...prev, [name]: value }));
+        setFilters(prev => {
+            const next = { ...prev, [name]: value };
+            // Clear custom date range if month/year filter is selected
+            if (name === 'selectedMonth' || name === 'selectedYear') {
+                if (value !== '') {
+                    next.startDate = '';
+                    next.endDate = '';
+                }
+            } else if (name === 'startDate' || name === 'endDate') {
+                if (value !== '') {
+                    next.selectedMonth = '';
+                }
+            }
+            return next;
+        });
         setCurrentPage(1);
     };
 
@@ -316,17 +513,39 @@ function Clearance() {
     const getMuatanBerangkatText = (d) => getMuatanText(d, 'berangkat');
     const getMuatanDatangText = (d) => getMuatanText(d, 'datang');
 
-    const exportXLSX_BongkarMuat = async () => {
+    const handleOpenExportModal = (type = 'register') => {
+        setExportReportType(type);
+        setIsExportOpen(false);
+        setIsExportModalOpen(true);
+    };
+
+    const handleExecuteExport = async ({ month, year, monthName, reportType }) => {
+        const strMonth = String(month).padStart(2, '0');
+        const lastDay = new Date(year, month, 0).getDate();
+        const customParams = {
+            tanggal_awal: `${year}-${strMonth}-01`,
+            tanggal_akhir: `${year}-${strMonth}-${String(lastDay).padStart(2, '0')}`
+        };
+
+        if (reportType === 'bongkar_muat') {
+            await exportXLSX_BongkarMuat(customParams, monthName, year);
+        } else {
+            await exportXLSX(customParams, monthName, year);
+        }
+    };
+
+    const exportXLSX_BongkarMuat = async (overrideParams = null, monthName = null, year = null) => {
         if (isExporting) {
             toast.error("Harap tunggu, ekspor sebelumnya masih diproses.");
             return;
         }
         setIsExporting(true);
         setIsExportOpen(false);
-        const loadingToast = toast.loading("Membuat file Excel Bongkar Muat... Ini mungkin butuh beberapa detik.");
+        const periodLabel = monthName && year ? `${monthName} ${year}` : 'Periode Selected';
+        const loadingToast = toast.loading(`Membuat Excel Bongkar Muat (${periodLabel})... Ini mungkin butuh beberapa detik.`);
 
         try {
-            const exportRecords = await fetchAllExportData();
+            const exportRecords = await fetchAllExportData(overrideParams);
             const parseSpbNum = (str) => str ? (parseInt(String(str).match(/\d+/)?.[0] || 0, 10)) : 0;
 
             exportRecords.sort((a, b) => {
@@ -338,7 +557,8 @@ function Clearance() {
             });
 
             const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('Data Ekrek');
+            const sheetName = monthName && year ? `${monthName} ${year}` : 'Data Ekrek';
+            const worksheet = workbook.addWorksheet(sheetName);
             worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 3 }];
             const emptyCargoSlots = new Array(40).fill(null);
 
@@ -431,11 +651,15 @@ function Clearance() {
 
             worksheet.columns.forEach((col) => { col.width = 12; });
 
+            const fileNameStr = monthName && year
+                ? `laporan_bongkar_muat_${monthName.toLowerCase()}_${year}.xlsx`
+                : `laporan_bongkar_muat_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
             const buffer = await workbook.xlsx.writeBuffer();
-            saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `laporan_bongkar_muat_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileNameStr);
 
             toast.dismiss(loadingToast);
-            toast.success("Ekspor Laporan Bongkar Muat berhasil!");
+            toast.success(`Ekspor Laporan Bongkar Muat (${periodLabel}) berhasil!`);
         } catch (err) {
             console.error("Error writing excel buffer", err);
             toast.dismiss(loadingToast);
@@ -445,23 +669,26 @@ function Clearance() {
         }
     };
 
-    const exportXLSX = async () => {
+    const exportXLSX = async (overrideParams = null, monthName = null, year = null) => {
         if (isExporting) {
             toast.error("Harap tunggu, ekspor sebelumnya masih diproses.");
             return;
         }
         setIsExporting(true);
         setIsExportOpen(false);
-        const loadingToast = toast.loading("Membuat file Excel Register... Ini mungkin butuh beberapa detik.");
+        const periodLabel = monthName && year ? `${monthName} ${year}` : 'Periode Selected';
+        const loadingToast = toast.loading(`Membuat Excel Register (${periodLabel})... Ini mungkin butuh beberapa detik.`);
 
         try {
-            const exportRecords = await fetchAllExportData();
+            const exportRecords = await fetchAllExportData(overrideParams);
             const parseSpbNum = (str) => str ? (parseInt(String(str).match(/\d+/)?.[0] || 0, 10)) : 0;
             exportRecords.sort((a, b) => {
                 let numA = parseSpbNum(a.spb?.no_spb), numB = parseSpbNum(b.spb?.no_spb);
                 if (numA !== numB) return numB - numA;
                 return String(b.spb?.no_spb || '').localeCompare(String(a.spb?.no_spb || ''), undefined, { numeric: true });
             });
+
+            const displayRegisterMonth = monthName && year ? `${monthName.toUpperCase()} ${year}` : null;
 
             let data = exportRecords.map(d => {
                 const { tanggal_clearance, ppk, spb, no_urut, kapal, nahkoda, jumlah_crew, kedudukan_kapal, tanggal_datang, datang_dari, tanggal_berangkat, tempat_singgah, tujuan_akhir, agen, pukul_agen_clearance, pukul_kapal_berangkat } = d;
@@ -474,8 +701,10 @@ function Clearance() {
                 const tglBerangkat = new Date(tanggal_berangkat);
                 const rawStatus = (d.status_pelayaran_rel?.kode_status || d.status_pelayaran || 'TERBIT').toUpperCase();
 
+                const monthFormatted = displayRegisterMonth || (new Intl.DateTimeFormat('id-ID', { month: "long" }).format(tglClearance) || '-');
+
                 return {
-                    "REGISTER BULAN": new Intl.DateTimeFormat('id-ID', { month: "long" }).format(tglClearance) || '-',
+                    "REGISTER BULAN": monthFormatted,
                     "ANGKA BULAN": tglClearance.getMonth() + 1 || '-',
                     "PPK": ppk || '-',
                     "NO. SPB ASAL": safeSpb.no_spb_asal || '-',
@@ -515,14 +744,15 @@ function Clearance() {
             });
 
             if (data.length === 0) {
-                toast.error("Tidak ada data untuk diekspor.");
+                toast.error(`Tidak ada data clearance untuk bulan ${periodLabel}.`);
                 setIsExporting(false);
                 toast.dismiss(loadingToast);
                 return;
             }
 
             const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('Register Bulan');
+            const sheetName = monthName && year ? `${monthName} ${year}` : 'Register Bulan';
+            const worksheet = workbook.addWorksheet(sheetName);
             worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
             const dataKeys = Object.keys(data[0]);
 
@@ -551,11 +781,15 @@ function Clearance() {
                 });
             });
 
+            const fileNameStr = monthName && year
+                ? `laporan_register_${monthName.toLowerCase()}_${year}.xlsx`
+                : `laporan_register_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
             const buffer = await workbook.xlsx.writeBuffer();
-            saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `laporan_register_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileNameStr);
 
             toast.dismiss(loadingToast);
-            toast.success("Ekspor Laporan Register berhasil!");
+            toast.success(`Ekspor Laporan Register (${periodLabel}) berhasil!`);
         } catch (err) {
             console.error("Error writing excel buffer", err);
             toast.dismiss(loadingToast);
@@ -585,32 +819,15 @@ function Clearance() {
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                     <h1 className="text-2xl font-bold text-gray-800">Daftar Clearance</h1>
                     <div className="flex items-center gap-3">
-                        <div className="relative" ref={exportRef}>
-                            <button
-                                onClick={() => setIsExportOpen(!isExportOpen)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50"
-                            >
-                                Ekspor
-                            </button>
-                            {isExportOpen && (
-                                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border z-20">
-                                    <ul className="p-1">
-                                        <li
-                                            onClick={exportXLSX}
-                                            className={`rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 ${isExporting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                                        >
-                                            Ekspor Laporan Register (XLSX)
-                                        </li>
-                                        <li
-                                            onClick={exportXLSX_BongkarMuat}
-                                            className={`rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 ${isExporting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                                        >
-                                            Ekspor Laporan Bongkar Muat (XLSX)
-                                        </li>
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
+                        <button
+                            onClick={() => setIsExportModalOpen(true)}
+                            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                        >
+                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>Ekspor Laporan</span>
+                        </button>
                         <Link to="/clearance/add" className="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition-colors whitespace-nowrap">
                             + Tambah Data
                         </Link>
@@ -618,8 +835,8 @@ function Clearance() {
                 </div>
 
                 <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-                    <div className="grid grid-cols-1 items-end gap-4 border-b border-gray-200 p-4 md:grid-cols-2 lg:grid-cols-4">
-                        <div className="flex flex-col md:flex-row justify-between lg:col-span-4 gap-4">
+                    <div className="grid grid-cols-1 items-end gap-4 border-b border-gray-200 p-4 md:grid-cols-3 lg:grid-cols-3">
+                        <div className="flex flex-col md:flex-row justify-between md:col-span-3 lg:col-span-3 gap-4">
                             <div className="flex-1">
                                 <SearchBar
                                     searchTerm={filters.searchTerm}
@@ -650,13 +867,39 @@ function Clearance() {
                             setSelectedValue={(value) => handleFilterChange('selectedCategory', value)}
                             placeholder="Kategori Barang"
                         />
-                        <div className="flex flex-col sm:flex-row items-center gap-2 lg:col-span-2">
-                            <InputField type="date" name="startDate" value={filters.startDate} onChange={(e) => handleFilterChange(e.target.name, e.target.value)} />
-                            <span className="text-gray-500 hidden sm:block">-</span>
-                            <InputField type="date" name="endDate" value={filters.endDate} onChange={(e) => handleFilterChange(e.target.name, e.target.value)} />
+
+                        {/* Custom Date Range & Reset Button */}
+                        <div className="flex items-center gap-1.5 w-full min-w-0">
+                            <InputField
+                                type="date"
+                                name="startDate"
+                                value={filters.startDate}
+                                onChange={(e) => handleFilterChange(e.target.name, e.target.value)}
+                                className="!px-2.5 text-xs h-11 min-w-0 flex-1"
+                            />
+                            <span className="text-gray-400 text-xs shrink-0">-</span>
+                            <InputField
+                                type="date"
+                                name="endDate"
+                                value={filters.endDate}
+                                onChange={(e) => handleFilterChange(e.target.name, e.target.value)}
+                                className="!px-2.5 text-xs h-11 min-w-0 flex-1"
+                            />
+                            {isFilterActive && (
+                                <button
+                                    onClick={handleResetFilters}
+                                    title="Reset Semua Filter"
+                                    className="px-2.5 h-11 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <span>Reset</span>
+                                </button>
+                            )}
                         </div>
 
-                        <div className="lg:col-span-4">
+                        <div className="md:col-span-3 lg:col-span-3">
                             <Select
                                 isMulti
                                 name="selectedGoods"
@@ -708,6 +951,14 @@ function Clearance() {
                     </div>
                 </div>
             </div>
+
+            {/* Monthly Export Modal */}
+            <ExportMonthlyModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                onExport={handleExecuteExport}
+                initialReportType={exportReportType}
+            />
         </div>
     );
 }

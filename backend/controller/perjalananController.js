@@ -419,8 +419,12 @@ const getPerjalananById = async (req, res) => {
                 { model: kecamatan, as: "tujuan_akhir", attributes: ['nama_kecamatan'] },
             ]
         })
-        if (data == null) return res.status(500).json({ msg: "data tidak ditemukan" })
-        if (data.wilayah_kerja.toLowerCase() != wilker.toLowerCase() && wilker.toLowerCase() != "pusat") return res.status(500).json({ msg: "tidak ada akses" })
+        if (data == null) return res.status(404).json({ msg: "data tidak ditemukan" })
+        const recordWilker = (data.wilayah_kerja || '').toLowerCase();
+        const userWilker = (wilker || '').toLowerCase();
+        if (recordWilker && userWilker !== "pusat" && recordWilker !== userWilker) {
+            return res.status(403).json({ msg: "tidak ada akses" });
+        }
 
         return res.status(200).json({ msg: "Berhasil mengambil data", data })
     } catch (error) {

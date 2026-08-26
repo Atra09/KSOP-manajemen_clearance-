@@ -7,7 +7,10 @@ const pelabuhan = db.define("pelabuhan", {
         autoIncrement: true,
         type: DataTypes.INTEGER
     },
-    nama_pelabuhan: DataTypes.STRING,
+    nama_pelabuhan: {
+        type: DataTypes.STRING,
+        unique: true
+    },
 }, {freezeTableName: true})
 
 module.exports = pelabuhan

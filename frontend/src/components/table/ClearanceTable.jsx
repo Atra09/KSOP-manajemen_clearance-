@@ -6,36 +6,49 @@ import { DropdownItem } from '../ui/dropdown/DropdownItem';
 import { MoreDotIcon } from '../../icons';
 import axiosInstance from '../../api/axiosInstance';
 
+const STATUS_EMOJIS = {
+  TERBIT: '✅',
+  BATAL: '⚠️',
+  RUSAK: '🛠️',
+  BLUE: '🔵',
+  PURPLE: '🟣'
+};
+
 const colorMap = {
   emerald: {
-    badge: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300',
-    item: 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40',
-    row: 'bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100/60 border-l-4 border-l-emerald-500'
+    badge: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700',
+    item: 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40',
+    row: 'bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/40 border-l-4 border-l-emerald-500 text-gray-900 dark:text-gray-100'
   },
   amber: {
-    badge: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300',
-    item: 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40',
-    row: 'bg-amber-50/90 dark:bg-amber-950/40 hover:bg-amber-100/90 border-l-4 border-l-amber-500 text-amber-950 dark:text-amber-200 font-medium'
+    badge: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/80 dark:text-amber-200 dark:border-amber-700',
+    item: 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40',
+    row: 'bg-amber-50/90 dark:bg-amber-950/50 hover:bg-amber-100/90 dark:hover:bg-amber-900/60 border-l-4 border-l-amber-500 text-amber-950 dark:text-amber-200 font-medium'
   },
   red: {
-    badge: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950/60 dark:text-red-300',
-    item: 'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40',
-    row: 'bg-red-50/90 dark:bg-red-950/40 hover:bg-red-100/90 border-l-4 border-l-red-500 text-red-950 dark:text-red-200 font-medium'
+    badge: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/80 dark:text-red-200 dark:border-red-700',
+    item: 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40',
+    row: 'bg-red-50/90 dark:bg-red-950/50 hover:bg-red-100/90 dark:hover:bg-red-900/60 border-l-4 border-l-red-500 text-red-950 dark:text-red-200 font-medium'
+  },
+  rose: {
+    badge: 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-900/80 dark:text-rose-200 dark:border-rose-700',
+    item: 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40',
+    row: 'bg-rose-50/90 dark:bg-rose-950/50 hover:bg-rose-100/90 dark:hover:bg-rose-900/60 border-l-4 border-l-rose-500 text-rose-950 dark:text-rose-200 font-medium'
   },
   blue: {
-    badge: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300',
-    item: 'text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40',
-    row: 'bg-blue-50/50 dark:bg-blue-950/20 hover:bg-blue-100/60 border-l-4 border-l-blue-500'
+    badge: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/80 dark:text-blue-300 dark:border-blue-700',
+    item: 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40',
+    row: 'bg-blue-50/50 dark:bg-blue-950/30 hover:bg-blue-100/60 dark:hover:bg-blue-900/40 border-l-4 border-l-blue-500 text-gray-900 dark:text-gray-100'
   },
   purple: {
-    badge: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-300',
-    item: 'text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40',
-    row: 'bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100/80 border-l-4 border-l-purple-500'
+    badge: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/80 dark:text-purple-300 dark:border-purple-700',
+    item: 'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40',
+    row: 'bg-purple-50/70 dark:bg-purple-950/40 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 border-l-4 border-l-purple-500 text-gray-900 dark:text-gray-100'
   },
   gray: {
-    badge: 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-800 dark:text-gray-300',
-    item: 'text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/40',
-    row: 'bg-gray-50/50 dark:bg-gray-800/40 hover:bg-gray-100/60'
+    badge: 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700',
+    item: 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40',
+    row: 'bg-gray-50/50 dark:bg-gray-800/40 hover:bg-gray-100/60 dark:hover:bg-gray-700/60 text-gray-900 dark:text-gray-100'
   }
 };
 
@@ -131,9 +144,11 @@ const ActionDropdown = ({ item, onSuccess, statusCategories = [] }) => {
           .filter(cat => cat.kode_status.toUpperCase() !== currentStatus)
           .map(cat => {
             const style = colorMap[cat.badge_color] || colorMap.emerald;
-            const labelText = cat.kode_status.toUpperCase() === 'TERBIT' 
+            const kodeUpper = cat.kode_status.toUpperCase();
+            const emoji = STATUS_EMOJIS[kodeUpper] || '⚓';
+            const labelText = kodeUpper === 'TERBIT' 
               ? 'Set Terbit (Aktif)' 
-              : `Tandai ${cat.kode_status}`;
+              : `Tandai ${kodeUpper}`;
 
             return (
               <DropdownItem
@@ -141,9 +156,7 @@ const ActionDropdown = ({ item, onSuccess, statusCategories = [] }) => {
                 onItemClick={() => handleUpdateStatus(cat.kode_status)}
                 className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${style.item}`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <span className="text-base leading-none">{emoji}</span>
                 {labelText}
               </DropdownItem>
             );
@@ -216,7 +229,7 @@ const ClearanceTable = ({ clearanceItems = [], onSuccess, onSort, sortConfig }) 
             {renderHeader("Kapal", "nama_kapal")}
             {renderHeader("Nahkoda", "nama_nahkoda")}
             {renderHeader("Tujuan", "tujuan_akhir")}
-            {renderHeader("Waktu Keberangkatan", "pukul_kapal_berangkat")}
+            {renderHeader("Waktu Brgkt", "pukul_kapal_berangkat")}
             {renderHeader("Agen", "nama_agen")}
             <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Aksi</th>
           </tr>
@@ -232,7 +245,7 @@ const ClearanceTable = ({ clearanceItems = [], onSuccess, onSort, sortConfig }) 
 
               const isDefaultTerbit = rawStatus === 'TERBIT';
               const rowStyle = isDefaultTerbit 
-                ? "hover:bg-gray-50 transition-colors"
+                ? "hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors"
                 : styleConfig.row;
 
               return (
@@ -259,11 +272,9 @@ const ClearanceTable = ({ clearanceItems = [], onSuccess, onSort, sortConfig }) 
                   <td className="px-3 py-3 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
                       {!isDefaultTerbit && (
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${styleConfig.badge}`}>
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                          {rawStatus}
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${styleConfig.badge}`}>
+                          <span>{STATUS_EMOJIS[rawStatus] || '⚓'}</span>
+                          <span>{rawStatus}</span>
                         </span>
                       )}
 

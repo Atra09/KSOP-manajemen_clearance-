@@ -105,6 +105,50 @@ const storeKategoriMuatan = async (req, res) => {
     }
 }
 
+const syncMuatanForKategori = async (id_kategori_muatan) => {
+    try {
+        const cat = await kategoriMuatan.findByPk(id_kategori_muatan, {
+            include: [{ model: satuanMuatan, as: 'satuan_muatan' }]
+        });
+        if (!cat) return;
+
+        const nama_satuan = String(cat.satuan_muatan?.nama_satuan_muatan || 'unit').toLowerCase().trim();
+        const bobot_per_unit = parseFloat(cat.bobot_per_unit_kg || 0);
+
+        const muatanList = await muatan.findAll({
+            where: { id_kategori_muatan }
+        });
+
+        for (const item of muatanList) {
+            let currentUnit = item.unit;
+            let currentTon = item.ton;
+
+            let updatedUnit = currentUnit;
+            let updatedTon = currentTon;
+
+            if (nama_satuan !== 'ton' && bobot_per_unit > 0) {
+                if ((updatedUnit === null || updatedUnit === 0) && updatedTon > 0) {
+                    updatedUnit = Math.round((updatedTon * 1000) / bobot_per_unit);
+                } else if (updatedUnit > 0) {
+                    updatedTon = (updatedUnit * bobot_per_unit) / 1000;
+                }
+            } else if (nama_satuan === 'ton') {
+                if ((updatedTon === null || updatedTon === 0) && updatedUnit > 0 && bobot_per_unit > 0) {
+                    updatedTon = (updatedUnit * bobot_per_unit) / 1000;
+                } else if (updatedTon > 0 && bobot_per_unit > 0 && (updatedUnit === null || updatedUnit === 0)) {
+                    updatedUnit = Math.round((updatedTon * 1000) / bobot_per_unit);
+                }
+            }
+
+            if (updatedUnit !== currentUnit || updatedTon !== currentTon) {
+                await muatan.update({ unit: updatedUnit, ton: updatedTon }, { where: { id_muatan: item.id_muatan } });
+            }
+        }
+    } catch (err) {
+        console.error("Error auto-syncing muatan for kategori:", err);
+    }
+};
+
 const updateKategoriMuatan = async (req, res) => {
     try {
         let kategoriData = await kategoriMuatan.findOne({
@@ -132,6 +176,9 @@ const updateKategoriMuatan = async (req, res) => {
         let result = await kategoriMuatan.update(payload, { where: { id_kategori_muatan: req.params.id } })
 
         if (result == 0) return res.status(500).json({ msg: "data tidak ditemukan" })
+
+        // Trigger automatic recalculation & synchronization of existing transactions for this category
+        await syncMuatanForKategori(req.params.id);
 
         let log = await logUserController.storeLogUser(
             req.user.username,

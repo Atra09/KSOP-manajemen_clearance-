@@ -140,9 +140,8 @@ const StatusPelayaran = () => {
                         <thead className="bg-gray-50 dark:bg-gray-700/50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                             <tr>
                                 <th className="px-4 py-3">NO</th>
-                                <th className="px-4 py-3">KODE STATUS</th>
+                                <th className="px-4 py-3">KODE & BADGE</th>
                                 <th className="px-4 py-3">NAMA STATUS</th>
-                                <th className="px-4 py-3">INDIKATOR BADGE</th>
                                 <th className="px-4 py-3">DESKRIPSI & FUNGSI</th>
                                 <th className="px-4 py-3 text-right">AKSI</th>
                             </tr>
@@ -150,25 +149,33 @@ const StatusPelayaran = () => {
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="6" className="px-4 py-8 text-center text-gray-500 italic">
+                                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 italic">
                                         Memuat data status pelayaran...
                                     </td>
                                 </tr>
                             ) : filteredCategories.length > 0 ? (
                                 filteredCategories.map((item, idx) => {
                                     const badgeClass = colorStyles[item.badge_color] || colorStyles.emerald;
+                                    const STATUS_EMOJIS = {
+                                        TERBIT: '✅',
+                                        BATAL: '⚠️',
+                                        RUSAK: '🛠️',
+                                        BLUE: '🔵',
+                                        PURPLE: '🟣'
+                                    };
+                                    const emoji = STATUS_EMOJIS[item.kode_status?.toUpperCase()] || '⚓';
 
                                     return (
                                         <tr key={item.id_status} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                             <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">{idx + 1}</td>
-                                            <td className="px-4 py-4 font-semibold text-gray-900 dark:text-white">{item.kode_status}</td>
-                                            <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
-                                                {item.nama_status}
-                                            </td>
                                             <td className="px-4 py-4">
-                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${badgeClass}`}>
-                                                    {item.kode_status}
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-xs ${badgeClass}`}>
+                                                    <span>{emoji}</span>
+                                                    <span>{item.kode_status}</span>
                                                 </span>
+                                            </td>
+                                            <td className="px-4 py-4 font-semibold text-gray-900 dark:text-white">
+                                                {item.nama_status}
                                             </td>
                                             <td className="px-4 py-4 max-w-xs text-xs text-gray-600 dark:text-gray-400">
                                                 {item.deskripsi || '-'}
@@ -201,7 +208,7 @@ const StatusPelayaran = () => {
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan="7" className="px-4 py-8 text-center text-gray-500 italic">
+                                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 italic">
                                         Tidak ada status pelayaran yang cocok.
                                     </td>
                                 </tr>

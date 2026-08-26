@@ -10,7 +10,10 @@ const kapal = db.define('kapal', {
         primaryKey: true,
         autoIncrement: true
     },
-    nama_kapal: DataTypes.STRING,
+    nama_kapal: {
+        type: DataTypes.STRING,
+        unique: true
+    },
     id_jenis: {
         type: DataTypes.INTEGER,
         references: {

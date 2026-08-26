@@ -7,7 +7,10 @@ const agen = db.define('agen', {
         primaryKey: true,
         autoIncrement: true
     },
-    nama_agen: DataTypes.STRING,
+    nama_agen: {
+        type: DataTypes.STRING,
+        unique: true
+    },
 }, 
 {
     freezeTableName: true
