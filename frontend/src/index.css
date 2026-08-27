@@ -157,7 +157,23 @@ html.dark [role="menu"] li:hover {
   color: #ffffff !important;
 }
 
-/* React Select Dark Mode Overrides */
+/* React Select Dark Mode Overrides & Alignment Fixes */
+.select__control {
+  min-height: 44px !important;
+  border-radius: 0.5rem !important;
+}
+
+.select__value-container {
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+.select__placeholder,
+.select__single-value {
+  margin-left: 0 !important;
+  padding-left: 2px !important;
+}
+
 html.dark .basic-multi-select,
 html.dark .select__control,
 html.dark .select__control--is-focused {

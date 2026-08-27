@@ -14,7 +14,9 @@ import axiosInstance from '../../api/axiosInstance';
 import { useAuth } from '../../context/AuthContext';
 
 const customStyles = {
-    control: (styles) => ({ ...styles, backgroundColor: 'transparent' }),
+    control: (styles) => ({ ...styles, backgroundColor: 'transparent', minHeight: '44px' }),
+    valueContainer: (styles) => ({ ...styles, paddingLeft: '12px', paddingRight: '12px' }),
+    placeholder: (styles) => ({ ...styles, marginLeft: 0, marginRight: 0, paddingLeft: '2px' }),
     multiValue: (styles) => ({ ...styles, backgroundColor: 'var(--tw-select-multivalue-bg, #374151)' }),
     multiValueLabel: (styles) => ({ ...styles, color: '#F3F4F6' }),
     multiValueRemove: (styles) => ({ ...styles, color: '#9CA3AF', ':hover': { backgroundColor: '#EF4444', color: 'white' } }),
