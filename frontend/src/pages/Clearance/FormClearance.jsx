@@ -60,6 +60,10 @@ const FormClearance = () => {
         JSON.stringify(formData) !== initialSnapshotRef.current
     );
 
+    const shouldProtectNavigation = Boolean(
+        (isEditMode || isDirty) && !isSubmittedRef.current
+    );
+
     // Helper untuk mengubah data dari backend ke frontend (objek gabungan)
     const mapMuatanToFrontend = (muatanList = [], type = 'barang') => {
         const grouped = {};
@@ -160,18 +164,18 @@ const FormClearance = () => {
     // 1. Browser Tab Close / Refresh Interceptor
     useEffect(() => {
         const handleBeforeUnload = (e) => {
-            if (isDirty && !isSubmittedRef.current) {
+            if (shouldProtectNavigation) {
                 e.preventDefault();
                 e.returnValue = '';
             }
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isDirty]);
+    }, [shouldProtectNavigation]);
 
     // 2. Global Link Click Interceptor
     useEffect(() => {
-        if (!isDirty || isSubmittedRef.current) return;
+        if (!shouldProtectNavigation) return;
 
         const handleAnchorClick = (e) => {
             const anchor = e.target.closest('a[href], button[data-nav]');
@@ -190,11 +194,11 @@ const FormClearance = () => {
 
         document.addEventListener('click', handleAnchorClick, true);
         return () => document.removeEventListener('click', handleAnchorClick, true);
-    }, [isDirty]);
+    }, [shouldProtectNavigation]);
 
     // 3. Browser Back/Forward Navigation Interceptor
     useEffect(() => {
-        if (!isDirty || isSubmittedRef.current) return;
+        if (!shouldProtectNavigation) return;
 
         const handlePopState = () => {
             window.history.pushState(null, '', window.location.href);
@@ -205,7 +209,7 @@ const FormClearance = () => {
         window.history.pushState(null, '', window.location.href);
         window.addEventListener('popstate', handlePopState);
         return () => window.removeEventListener('popstate', handlePopState);
-    }, [isDirty]);
+    }, [shouldProtectNavigation]);
 
     const handleKapalChange = (kapalId) => {
         const selectedKapal = kapalData.find(k => k.id === parseInt(kapalId));
@@ -220,7 +224,7 @@ const FormClearance = () => {
     const prevStep = () => setStep(prev => prev - 1);
 
     const handleBackClick = () => {
-        if (isDirty) {
+        if (shouldProtectNavigation) {
             setPendingNavPath('/clearance');
             setShowUnsavedModal(true);
         } else {
