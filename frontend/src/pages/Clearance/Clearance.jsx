@@ -76,6 +76,17 @@ const getStatusStyle = (statusStr) => {
     return null;
 };
 
+const getColLetter = (colIdx) => {
+    let temp = '';
+    let letter = '';
+    while (colIdx > 0) {
+        temp = (colIdx - 1) % 26;
+        letter = String.fromCharCode(65 + temp) + letter;
+        colIdx = Math.floor((colIdx - temp) / 26);
+    }
+    return letter;
+};
+
 const CARGO_SUB_HEADERS = [
     "Gol. I", "Gol. II", "Gol. III", "Gol. IV", "Gol. V", "Bego",
     "Mitan", "Solar (ltr)", "Bensin (ltr)", "krosene", "Avtur", "LPG 3 kg (tb)", "LPG 12 kg (tb)",
@@ -546,6 +557,13 @@ function Clearance() {
 
         try {
             const exportRecords = await fetchAllExportData(overrideParams);
+            if (exportRecords.length === 0) {
+                toast.error(`Tidak ada data clearance untuk bulan ${periodLabel}.`);
+                setIsExporting(false);
+                toast.dismiss(loadingToast);
+                return;
+            }
+
             const parseSpbNum = (str) => str ? (parseInt(String(str).match(/\d+/)?.[0] || 0, 10)) : 0;
 
             exportRecords.sort((a, b) => {
@@ -622,7 +640,45 @@ function Clearance() {
                 ]);
             });
 
+            // Calculate SUM Row
+            const startDataRow = 4;
+            const endDataRow = 3 + exportRecords.length;
+            const sumRowNumber = endDataRow + 1;
+
+            const sumRowValues = new Array(118).fill(null);
+            sumRowValues[0] = "JUMLAH TOTAL";
+
+            // Col 10: CREW
+            sumRowValues[9] = { formula: `SUM(J${startDataRow}:J${endDataRow})` };
+
+            // Col 23-29: Penumpang Datang
+            for (let c = 23; c <= 29; c++) {
+                const colLet = getColLetter(c);
+                sumRowValues[c - 1] = { formula: `SUM(${colLet}${startDataRow}:${colLet}${endDataRow})` };
+            }
+
+            // Col 30-69: Bongkar Cargo & Vehicles (40 columns)
+            for (let c = 30; c <= 69; c++) {
+                const colLet = getColLetter(c);
+                sumRowValues[c - 1] = { formula: `SUM(${colLet}${startDataRow}:${colLet}${endDataRow})` };
+            }
+
+            // Col 70-76: Penumpang Berangkat
+            for (let c = 70; c <= 76; c++) {
+                const colLet = getColLetter(c);
+                sumRowValues[c - 1] = { formula: `SUM(${colLet}${startDataRow}:${colLet}${endDataRow})` };
+            }
+
+            // Col 77-116: Muat Cargo & Vehicles (40 columns)
+            for (let c = 77; c <= 116; c++) {
+                const colLet = getColLetter(c);
+                sumRowValues[c - 1] = { formula: `SUM(${colLet}${startDataRow}:${colLet}${endDataRow})` };
+            }
+
+            worksheet.addRow(sumRowValues);
+
             BONGKAR_MUAT_MERGES.forEach(([r1, c1, r2, c2]) => worksheet.mergeCells(r1, c1, r2, c2));
+            worksheet.mergeCells(sumRowNumber, 1, sumRowNumber, 9);
 
             worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
                 const statusStyle = getStatusStyle(row.getCell(6).value);
@@ -642,6 +698,9 @@ function Clearance() {
                         else if (colNumber <= 76) cell.fill = colNumber % 2 === 0 ? FILL_GREEN : FILL_ORANGE;
                         else if (colNumber <= 116) cell.fill = FILL_MUAT_LIGHT_BLUE;
                         else cell.fill = FILL_YELLOW;
+                    } else if (rowNumber === sumRowNumber) {
+                        cell.font = { bold: true, size: 10 };
+                        cell.fill = HEADER_FILL_GRAY;
                     } else if (statusStyle) {
                         cell.fill = statusStyle.fill;
                         cell.font = statusStyle.font;
@@ -759,6 +818,20 @@ function Clearance() {
             worksheet.columns = dataKeys.map(key => ({ header: key, key }));
             worksheet.addRows(data);
 
+            const startDataRow = 2;
+            const endDataRow = 1 + data.length;
+            const sumRowNumber = endDataRow + 1;
+
+            const sumRowObj = {};
+            dataKeys.forEach(key => { sumRowObj[key] = null; });
+            sumRowObj["REGISTER BULAN"] = "JUMLAH TOTAL";
+            sumRowObj["CREW"] = { formula: `SUM(L${startDataRow}:L${endDataRow})` };
+            sumRowObj["GT"] = { formula: `SUM(N${startDataRow}:N${endDataRow})` };
+            sumRowObj["NT"] = { formula: `SUM(O${startDataRow}:O${endDataRow})` };
+
+            worksheet.addRow(sumRowObj);
+            worksheet.mergeCells(sumRowNumber, 1, sumRowNumber, 11);
+
             dataKeys.forEach((key, i) => {
                 let maxLen = worksheet.columns[i].header.length;
                 data.forEach(row => { const cl = row[key] ? String(row[key]).length : 0; if (cl > maxLen) maxLen = cl; });
@@ -768,11 +841,14 @@ function Clearance() {
             worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
                 const statusStyle = getStatusStyle(row.getCell(8).value);
 
-                row.eachCell({ includeEmpty: true }, (cell) => {
+                row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
                     cell.border = BORDER_THIN;
                     cell.alignment = ALIGN_CENTER;
                     if (rowNumber === 1) {
                         cell.font = { bold: true };
+                        cell.fill = HEADER_FILL_GRAY;
+                    } else if (rowNumber === sumRowNumber) {
+                        cell.font = { bold: true, size: 10 };
                         cell.fill = HEADER_FILL_GRAY;
                     } else if (statusStyle) {
                         cell.fill = statusStyle.fill;
