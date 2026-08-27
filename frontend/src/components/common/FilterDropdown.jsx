@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-const FilterDropdown = ({ options, selectedValue, setSelectedValue, placeholder, className, direction = 'down' }) => {
+const FilterDropdown = ({ options = [], selectedValue, setSelectedValue, placeholder, className = '', direction = 'down' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -30,26 +30,33 @@ const FilterDropdown = ({ options, selectedValue, setSelectedValue, placeholder,
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-11 w-full flex items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20"
+        className="h-11 w-full flex items-center justify-between rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20 transition-colors cursor-pointer"
       >
-        <span className={selectedValue ? 'text-gray-800' : 'text-gray-500'}>
+        <span className={selectedValue ? 'text-gray-800 dark:text-gray-100 font-medium' : 'text-gray-500 dark:text-gray-400'}>
           {selectedValue || placeholder || 'Pilih Opsi'}
         </span>
-        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {isOpen && (
-        <div className={`absolute z-10 w-full rounded-lg border border-gray-200 bg-white shadow-lg ${directionClasses}`}>
+        <div className={`absolute z-20 w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg ${directionClasses}`}>
           <ul className="max-h-60 overflow-auto rounded-lg p-1">
             {placeholder && (
-              <li onClick={() => handleSelect('')} className="cursor-pointer rounded-md px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">
+              <li 
+                onClick={() => handleSelect('')} 
+                className={`cursor-pointer rounded-md px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-colors ${!selectedValue ? 'bg-indigo-50 dark:bg-indigo-950/80 font-medium text-indigo-700 dark:text-indigo-300' : ''}`}
+              >
                 {placeholder}
               </li>
             )}
             {options.map((option, index) => (
-              <li key={index} onClick={() => handleSelect(option)} className="cursor-pointer rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              <li 
+                key={index} 
+                onClick={() => handleSelect(option)} 
+                className={`cursor-pointer rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-colors ${selectedValue === option ? 'bg-indigo-50 dark:bg-indigo-950/80 font-medium text-indigo-700 dark:text-indigo-300' : ''}`}
+              >
                 {option}
               </li>
             ))}
