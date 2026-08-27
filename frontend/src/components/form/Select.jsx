@@ -127,11 +127,17 @@ const Select = ({ options, value, onChange, name, id, required, placeholder = "C
         }
       }}
     >
-      <div className="p-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-10">
+      <div className="p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-10">
         <input
           ref={searchInputRef}
           type="text"
-          className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          autoComplete="off"
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 bg-gray-50 dark:!bg-gray-900 text-gray-900 dark:!text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors select-search-input"
+          style={{
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : undefined,
+            color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : undefined,
+            borderColor: document.documentElement.classList.contains('dark') ? '#374151' : undefined,
+          }}
           placeholder={placeholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

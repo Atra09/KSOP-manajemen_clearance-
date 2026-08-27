@@ -92,6 +92,7 @@ const MonthlyClearanceBarChart = ({
     grid: { yaxis: { lines: { show: true } } },
     fill: { opacity: 1 },
     tooltip: {
+      theme: "dark",
       x: { show: true, formatter: (val) => `Bulan ${val}` },
       y: { formatter: (val) => `${val} clearance` },
     },

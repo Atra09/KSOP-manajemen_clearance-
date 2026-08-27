@@ -260,6 +260,43 @@ html.dark .apexcharts-legend-text {
 
 html.dark .apexcharts-gridline {
   stroke: #374151 !important;
+}
+
+/* Bulletproof ApexCharts Tooltip Dark Mode Styling */
+html.dark .apexcharts-tooltip {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f3f4f6 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .apexcharts-tooltip-title {
+  background-color: #111827 !important;
+  border-bottom-color: #374151 !important;
+  color: #f3f4f6 !important;
+  font-weight: 600 !important;
+}
+
+html.dark .apexcharts-tooltip-text,
+html.dark .apexcharts-tooltip-text-y-value,
+html.dark .apexcharts-tooltip-text-y-label,
+html.dark .apexcharts-tooltip-text-goals-value,
+html.dark .apexcharts-tooltip-text-z-value,
+html.dark .apexcharts-tooltip-series-group span {
+  color: #f3f4f6 !important;
+}
+
+html.dark .apexcharts-datalabel-label {
+  fill: #9ca3af !important;
+}
+
+html.dark .apexcharts-datalabel-value {
+  fill: #f3f4f6 !important;
+}
+
+html.dark .apexcharts-xcrosshairs,
+html.dark .apexcharts-ycrosshairs {
+  fill: #374151 !important;
 }.no-scrollbar::-webkit-scrollbar {
   display: none;
 }

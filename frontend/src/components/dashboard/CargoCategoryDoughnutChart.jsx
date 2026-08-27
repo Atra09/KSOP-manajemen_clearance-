@@ -28,6 +28,9 @@ const CargoCategoryDoughnutChart = ({
     dataLabels: {
       enabled: false,
     },
+    tooltip: {
+      theme: "dark",
+    },
     plotOptions: {
       pie: {
         donut: {
