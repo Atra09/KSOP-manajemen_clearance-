@@ -102,7 +102,10 @@ const CARGO_COL_INDEX_MAP = {
     'Mtan': 6, 'Mitan': 6, 'Solar (ltr)': 7, 'Bensin (ltr)': 8, 'krosene': 9, 'Krosene': 9, 'Avtur': 10, 'LPG 3 kg (tb)': 11, 'LPG 12 kg (tb)': 12,
     'Beras (ton)': 13, 'Jagung (ton)': 14, 'Garam (ton)': 15, 'Tepung (ton)': 16, 'Gula (ton)': 17, 'Kedelei': 18, 'Palen (ton)': 19, 'Kelapa (biji)': 20, 'Kacang (ton)': 21, 'Kacang': 21, 'Kcang ijo (ton)': 21, 'Kacang ijo (ton)': 21, 'Sayur & Buah (ton)': 22, 'Mangga (kg)': 23, 'Mangga (krg)': 23, 'Rmpt Laut (ton)': 24,
     'Keramik (ton)': 25, 'Semen (ton)': 26, 'Genteng (biji)': 27, 'Batu Bata (bj)/Paving': 28, 'Batu Bata (b)/Paving': 28, 'Pasir (ton)': 29, 'Bahan Bangunan Lain (ton)': 30,
-    'Barkas (ton)': 31, 'Berkas (ton)': 31, 'Tbg Kosong': 32, 'Air Galon Kosong': 33, 'Ikan (ton)': 34, 'Hewan/Ternak': 35, 'Kayu m3': 36, 'Pupuk (ton)': 37, 'Bagasi Lainnya (ton)': 38, 'Barang (ton)': 38
+    'Barkas (ton)': 31, 'Berkas (ton)': 31,
+    'Tbg Kosong': 32, 'Tabung Kosong': 32, 'Tabung LPG Kosong': 32, 'Tabung LPG 3kg Kosong': 32, 'Tabung LPG 3 kg Kosong': 32, 'Tabung LPG 12kg Kosong': 32, 'Tabung LPG 12 kg Kosong': 32, 'Tabung LPG': 32, 'Tabung Gas': 32, 'Tabung Gas Kosong': 32, 'Tabung Kosong LPG': 32, 'Tabung': 32, 'LPG Kosong': 32, 'Wadah Kosong': 32, 'Kemasan Kosong': 32, 'Kemasan & Wadah Kosong': 32, 'Kemasan & Wadah': 32,
+    'Air Galon Kosong': 33, 'Air Galon': 33, 'Galon Kosong': 33, 'Galon': 33,
+    'Ikan (ton)': 34, 'Hewan/Ternak': 35, 'Kayu m3': 36, 'Pupuk (ton)': 37, 'Bagasi Lainnya (ton)': 38, 'Barang (ton)': 38
 };
 
 const BONGKAR_MUAT_MERGES = [
@@ -167,8 +170,25 @@ const extractCargoRowData = (d, jenis) => {
             let slotIndex = -1;
             let qty = valDefault;
 
-            // --- BAHAN BAKAR ---
-            if (combinedName.includes('solar') || combinedName.includes('dexlite') || combinedName.includes('biosolar')) {
+            // --- TABUNG / WADAH / GALON KOSONG (Prioritas Utama untuk Tabung) ---
+            if (
+                combinedName.includes('tbg') ||
+                combinedName.includes('tabung') ||
+                combinedName.includes('wadah') ||
+                catName.includes('tabung') ||
+                catName.includes('kemasan') ||
+                catName.includes('wadah') ||
+                (combinedName.includes('lpg') && combinedName.includes('kosong')) ||
+                (combinedName.includes('elpiji') && combinedName.includes('kosong'))
+            ) {
+                if (combinedName.includes('galon')) {
+                    slotIndex = 33; qty = valUnit || valDefault; // Air Galon Kosong
+                } else {
+                    slotIndex = 32; qty = valUnit || valDefault; // Tbg Kosong
+                }
+            }
+            // --- BAHAN BAKAR (Hanya untuk gas isi / BBM) ---
+            else if (combinedName.includes('solar') || combinedName.includes('dexlite') || combinedName.includes('biosolar')) {
                 slotIndex = 7; qty = valUnit || valDefault;
             } else if (combinedName.includes('bensin') || combinedName.includes('pertalite') || combinedName.includes('pertamax')) {
                 slotIndex = 8; qty = valUnit || valDefault;
@@ -231,12 +251,6 @@ const extractCargoRowData = (d, jenis) => {
             ) {
                 // Default fallback untuk kategori Bahan Bangunan -> Bahan Bangunan Lain (ton)
                 slotIndex = 30; qty = valTon || valDefault;
-            }
-            // --- TABUNG / WADAH KOSONG ---
-            else if (combinedName.includes('tbg kosong') || combinedName.includes('tabung kosong') || combinedName.includes('tabung') || catName.includes('tabung')) {
-                slotIndex = 32; qty = valUnit || valDefault; // Tbg Kosong
-            } else if (combinedName.includes('galon') || combinedName.includes('air galon')) {
-                slotIndex = 33; qty = valUnit || valDefault; // Air Galon Kosong
             }
             // --- LAIN-LAIN ---
             else if (combinedName.includes('pupuk') || combinedName.includes('urea') || combinedName.includes('npk') || combinedName.includes('za')) {
