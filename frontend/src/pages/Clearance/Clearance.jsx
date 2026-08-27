@@ -200,12 +200,18 @@ const extractCargoRowData = (d, jenis) => {
                 slotIndex = 20; qty = valUnit || valDefault;
             } else if (combinedName.includes('kacang') || combinedName.includes('kcang')) {
                 slotIndex = 21; qty = valTon || valDefault;
-            } else if (combinedName.includes('sayur') || combinedName.includes('buah')) {
-                slotIndex = 22; qty = valTon || valDefault;
             } else if (combinedName.includes('mangga')) {
                 slotIndex = 23; qty = valUnit || valDefault;
             } else if (combinedName.includes('rumput laut') || combinedName.includes('rmpt laut')) {
                 slotIndex = 24; qty = valTon || valDefault;
+            } else if (
+                combinedName.includes('sayur') || combinedName.includes('buah') ||
+                catName.includes('makanan') || catName.includes('minuman') || catName.includes('olahan') ||
+                combinedName.includes('makanan') || combinedName.includes('minuman') || combinedName.includes('yogurt') ||
+                combinedName.includes('susu') || combinedName.includes('snack') || combinedName.includes('bumbu') || combinedName.includes('sirup')
+            ) {
+                // Default fallback untuk kategori Makanan, Minuman, & Produk Olahan -> Sayur & Buah (ton)
+                slotIndex = 22; qty = valTon || valDefault;
             }
             // --- BAHAN BANGUNAN ---
             else if (combinedName.includes('paving') || combinedName.includes('batu bata') || combinedName.includes('bata') || combinedName.includes('hebel')) {
@@ -219,11 +225,18 @@ const extractCargoRowData = (d, jenis) => {
             } else if (combinedName.includes('pasir') || combinedName.includes('sirtu') || combinedName.includes('batu split') || combinedName.includes('koral')) {
                 slotIndex = 29; qty = valTon || valDefault; // Pasir (ton)
             } else if (
-                combinedName.includes('bangunan') || combinedName.includes('asbes') || combinedName.includes('seng') ||
+                catName.includes('bangunan') || combinedName.includes('bangunan') || combinedName.includes('asbes') || combinedName.includes('seng') ||
                 combinedName.includes('besi') || combinedName.includes('pipa') || combinedName.includes('cat') ||
                 combinedName.includes('kaca') || combinedName.includes('triplek') || combinedName.includes('gypsum') || combinedName.includes('papan')
             ) {
-                slotIndex = 30; qty = valTon || valDefault; // Bahan Bangunan Lain (ton)
+                // Default fallback untuk kategori Bahan Bangunan -> Bahan Bangunan Lain (ton)
+                slotIndex = 30; qty = valTon || valDefault;
+            }
+            // --- TABUNG / WADAH KOSONG ---
+            else if (combinedName.includes('tbg kosong') || combinedName.includes('tabung kosong') || combinedName.includes('tabung') || catName.includes('tabung')) {
+                slotIndex = 33; qty = valUnit || valDefault; // Tbg Kosong
+            } else if (combinedName.includes('galon') || combinedName.includes('air galon')) {
+                slotIndex = 34; qty = valUnit || valDefault; // Air Galon Kosong
             }
             // --- LAIN-LAIN ---
             else if (combinedName.includes('pupuk') || combinedName.includes('urea') || combinedName.includes('npk') || combinedName.includes('za')) {
@@ -234,13 +247,9 @@ const extractCargoRowData = (d, jenis) => {
                 slotIndex = 36; qty = valUnit || valDefault; // Hewan/Ternak
             } else if (combinedName.includes('ikan') || combinedName.includes('cumi') || combinedName.includes('udang') || combinedName.includes('kerapu')) {
                 slotIndex = 35; qty = valTon || valDefault; // Ikan (ton)
-            } else if (combinedName.includes('galon') || combinedName.includes('air galon')) {
-                slotIndex = 34; qty = valUnit || valDefault; // Air Galon Kosong
-            } else if (combinedName.includes('tbg kosong') || combinedName.includes('tabung kosong')) {
-                slotIndex = 33; qty = valUnit || valDefault; // Tbg Kosong
             } else if (combinedName.includes('barkas') || combinedName.includes('rongsokan')) {
                 slotIndex = 32; qty = valTon || valDefault; // Barkas (ton)
-            } else if (combinedName.includes('barang') || combinedName.includes('kelontong')) {
+            } else if (combinedName.includes('barang') || combinedName.includes('kelontong') || catName.includes('barang')) {
                 slotIndex = 31; qty = valTon || valDefault; // Barang (ton)
             } else {
                 slotIndex = 39; qty = valTon || valDefault; // Bagasi Lainnya (ton)
