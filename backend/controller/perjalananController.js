@@ -16,10 +16,11 @@ const jenis = require("../model/jenisModel")
 const muatan = require("../model/muatanModel")
 const kategoriMuatan = require("../model/kategoriMuatanModel")
 const muatanKendaraan = require("../model/muatanKendaraanModel");
+const jenisMuatan = require("../model/jenisMuatanModel");
+const satuanMuatan = require("../model/satuanMuatanModel");
 const logUserController = require("./logUserController")
 const users = require("../model/userModel")
 const pelabuhan = require("../model/pelabuhanModel")
-const jenisMuatan = require("../model/jenisMuatanModel")
 const pembayaran = require("../model/pembayaranModel")
 const statusPelayaran = require("../model/statusPelayaranModel")
 
@@ -215,17 +216,16 @@ const getPerjalananByFilter = async (req, res) => {
                 {
                     model: muatan,
                     as: "muatans",
-                    attributes: ["jenis_perjalanan", "ton", "unit", "m3"],
+                    attributes: ["id_kategori_muatan", "jenis_perjalanan", "ton", "unit", "m3", "liter"],
                     include: [
                         {
                             model: kategoriMuatan,
                             as: "kategori_muatan",
-                            attributes: ["nama_kategori_muatan", "status_kategori_muatan"],
-                            include: [{
-                                model: jenisMuatan,
-                                as: "jenis_muatan",
-                                attributes: ['nama_jenis_muatan']
-                            }]
+                            attributes: ["id_kategori_muatan", "nama_kategori_muatan", "status_kategori_muatan"],
+                            include: [
+                                { model: jenisMuatan, as: "jenis_muatan", attributes: ['nama_jenis_muatan'] },
+                                { model: satuanMuatan, as: "satuan_muatan", attributes: ['nama_satuan_muatan'] }
+                            ]
                         }
                     ]
                 },
@@ -344,21 +344,17 @@ const getPerjalanan = async (req, res) => {
                 { model: nahkoda, attributes: ['nama_nahkoda'] },
                 { model: agen, attributes: ['nama_agen'] },
                 {
-                    model: muatan, as: "muatans", separate: true, attributes: ['jenis_perjalanan', "ton", "unit", "m3"], include: [
+                    model: muatan, as: "muatans", separate: true, attributes: ['id_kategori_muatan', 'jenis_perjalanan', "ton", "unit", "m3", "liter"], include: [
                         {
-                            model: kategoriMuatan, as: "kategori_muatan", attributes: ['nama_kategori_muatan', 'status_kategori_muatan'], where: {
-                                status_kategori_muatan: { [Op.like]: `%${search}%` }
-                            }, include: [{
-                                model: jenisMuatan, as: "jenis_muatan", attributes: ['nama_jenis_muatan']
-                            }]
+                            model: kategoriMuatan, as: "kategori_muatan", attributes: ['id_kategori_muatan', 'nama_kategori_muatan', 'status_kategori_muatan'], include: [
+                                { model: jenisMuatan, as: "jenis_muatan", attributes: ['nama_jenis_muatan'] },
+                                { model: satuanMuatan, as: "satuan_muatan", attributes: ['nama_satuan_muatan'] }
+                            ]
                         }
                     ]
                 },
                 {
-                    model: muatanKendaraan, as: "muatan_kendaraan", separate: true, attributes: ['jenis_perjalanan', 'golongan_kendaraan', "ton", "unit", "m3"],
-                    where: {
-                        golongan_kendaraan: { [Op.like]: `%${search}%` }
-                    }
+                    model: muatanKendaraan, as: "muatan_kendaraan", separate: true, attributes: ['jenis_perjalanan', 'golongan_kendaraan', "ton", "unit", "m3"]
                 },
                 { model: pembayaran, as: "pembayaran", attributes: ['ntpn', 'nilai', 'tipe_pembayaran'] },
                 { model: pelabuhan, as: "tolak", attributes: ['nama_pelabuhan'] },
@@ -399,11 +395,12 @@ const getPerjalananById = async (req, res) => {
                 { model: nahkoda, attributes: ['nama_nahkoda'] },
                 { model: agen, attributes: ['nama_agen'] },
                 {
-                    model: muatan, as: "muatans", attributes: ['id_kategori_muatan', 'jenis_perjalanan', "ton", "unit", "m3"], include: [
+                    model: muatan, as: "muatans", attributes: ['id_kategori_muatan', 'jenis_perjalanan', "ton", "unit", "m3", "liter"], include: [
                         {
-                            model: kategoriMuatan, as: "kategori_muatan", attributes: ['nama_kategori_muatan', 'status_kategori_muatan'], include: [{
-                                model: jenisMuatan, as: "jenis_muatan", attributes: ['nama_jenis_muatan']
-                            }]
+                            model: kategoriMuatan, as: "kategori_muatan", attributes: ['id_kategori_muatan', 'nama_kategori_muatan', 'status_kategori_muatan'], include: [
+                                { model: jenisMuatan, as: "jenis_muatan", attributes: ['nama_jenis_muatan'] },
+                                { model: satuanMuatan, as: "satuan_muatan", attributes: ['nama_satuan_muatan'] }
+                            ]
                         }
                     ],
                 },

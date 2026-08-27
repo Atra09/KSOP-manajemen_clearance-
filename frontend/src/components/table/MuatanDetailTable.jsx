@@ -13,30 +13,48 @@ const MuatanDetailTable = ({ data = [] }) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.length > 0 ? data.map((item, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {item.kategori_muatan?.nama_kategori_muatan || '-'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {item.kategori_muatan?.jenis_muatan?.nama_jenis_muatan || '-'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                {item.ton?.toLocaleString('id-ID') || '-'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                {item.m3?.toLocaleString('id-ID') || '-'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                {item.unit?.toLocaleString('id-ID') || '-'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                {item.liter?.toLocaleString('id-ID') || '-'}
-              </td>
-            </tr>
-          )) : (
+          {data.length > 0 ? data.map((item, index) => {
+            const catName = String(item.kategori_muatan?.nama_kategori_muatan || item.kategori_muatan?.nama || '').toLowerCase();
+            const unitName = String(item.kategori_muatan?.satuan_muatan?.nama_satuan_muatan || item.kategori_muatan?.nama_satuan_muatan || '').toLowerCase();
+            const isLiterCat = unitName === 'liter' || ['mitan', 'minyak tanah', 'krosene', 'kerosene', 'kerosine', 'solar', 'bensin'].some(k => catName.includes(k));
+
+            let displayLiter = item.liter;
+            let displayTon = item.ton;
+            let displayUnit = item.unit;
+            let displayM3 = item.m3;
+
+            if (isLiterCat) {
+              displayLiter = displayLiter ?? displayUnit ?? displayTon ?? displayM3 ?? null;
+              displayTon = null;
+              displayUnit = null;
+              displayM3 = null;
+            }
+
+            return (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {item.kategori_muatan?.nama_kategori_muatan || '-'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {item.kategori_muatan?.jenis_muatan?.nama_jenis_muatan || '-'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                  {displayTon !== null && displayTon !== undefined ? displayTon.toLocaleString('id-ID') : '-'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                  {displayM3 !== null && displayM3 !== undefined ? displayM3.toLocaleString('id-ID') : '-'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                  {displayUnit !== null && displayUnit !== undefined ? displayUnit.toLocaleString('id-ID') : '-'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                  {displayLiter !== null && displayLiter !== undefined ? displayLiter.toLocaleString('id-ID') : '-'}
+                </td>
+              </tr>
+            );
+          }) : (
             <tr>
-              <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data.</td>
+              <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data.</td>
             </tr>
           )}
         </tbody>

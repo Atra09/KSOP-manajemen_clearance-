@@ -48,13 +48,40 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
       currentRow.m3 = null;
     } else if (name === 'quantity') {
       currentRow.quantity = value;
-      currentRow.unit = value !== '' ? value : null;
+      const unitName = String(selectedCat?.nama_satuan_muatan || 'unit').toLowerCase().trim();
+      const catName = String(selectedCat?.nama || selectedCat?.nama_kategori_muatan || '').toLowerCase().trim();
+      const isLiter = unitName === 'liter' || ['mitan', 'minyak tanah', 'krosene', 'kerosene', 'kerosine', 'solar', 'bensin'].some(k => catName.includes(k));
+      const numVal = value !== '' ? value : null;
+
+      if (isLiter) {
+        currentRow.liter = numVal;
+        currentRow.unit = null;
+        currentRow.m3 = null;
+        currentRow.ton = null;
+      } else if (unitName === 'm3' || unitName === 'm³') {
+        currentRow.m3 = numVal;
+        currentRow.unit = null;
+        currentRow.liter = null;
+        currentRow.ton = null;
+      } else if (unitName === 'ton') {
+        currentRow.ton = numVal;
+        currentRow.estimated_ton = value;
+        currentRow.unit = null;
+        currentRow.liter = null;
+        currentRow.m3 = null;
+      } else {
+        currentRow.unit = numVal;
+        currentRow.liter = null;
+        currentRow.m3 = null;
+        currentRow.ton = null;
+      }
+
       if (bobotKg > 0 && value !== '' && !isNaN(parseFloat(value))) {
         const calc = (parseFloat(value) * bobotKg) / 1000;
         const est = Number.isInteger(calc) ? calc.toString() : parseFloat(calc.toFixed(3)).toString();
         currentRow.estimated_ton = est;
         currentRow.ton = est;
-      } else if (value === '') {
+      } else if (value === '' && unitName !== 'ton') {
         currentRow.estimated_ton = '';
         currentRow.ton = null;
       }

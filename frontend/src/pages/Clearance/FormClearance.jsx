@@ -72,18 +72,35 @@ const FormClearance = () => {
         muatanList.forEach(m => {
             const key = m[keyField];
             if (!grouped[key]) {
-                const qty = m.unit ?? m.liter ?? m.m3 ?? m.ton ?? '';
-                const estTon = (m.ton !== null && m.ton !== undefined) ? m.ton : '';
+                const catName = String(m.kategori_muatan?.nama_kategori_muatan || m.kategori_muatan?.nama || '').toLowerCase();
+                const unitName = String(m.kategori_muatan?.satuan_muatan?.nama_satuan_muatan || m.kategori_muatan?.nama_satuan_muatan || '').toLowerCase();
+                const isLiterCat = unitName === 'liter' || ['mitan', 'minyak tanah', 'krosene', 'kerosene', 'kerosine', 'solar', 'bensin'].some(k => catName.includes(k));
+
+                let valLiter = m.liter !== undefined && m.liter !== null ? m.liter : null;
+                let valUnit = m.unit !== undefined && m.unit !== null ? m.unit : null;
+                let valTon = m.ton !== undefined && m.ton !== null ? m.ton : null;
+                let valM3 = m.m3 !== undefined && m.m3 !== null ? m.m3 : null;
+
+                if (isLiterCat) {
+                    valLiter = valLiter ?? valUnit ?? valTon ?? valM3 ?? null;
+                    valUnit = null;
+                    valTon = null;
+                    valM3 = null;
+                }
+
+                const qty = valLiter ?? valUnit ?? valM3 ?? valTon ?? '';
+                const estTon = (valTon !== null && valTon !== undefined) ? valTon : '';
+
                 grouped[key] = {
                     type: type,
                     jenis_perjalanan: m.jenis_perjalanan,
                     ...(type === 'barang' ? { id_kategori_muatan: m.id_kategori_muatan, kategori_muatan: m.kategori_muatan } : { golongan_kendaraan: m.golongan_kendaraan }),
                     quantity: qty,
                     estimated_ton: estTon,
-                    ton: m.ton || null,
-                    m3: m.m3 || null,
-                    unit: m.unit || null,
-                    liter: m.liter || null,
+                    ton: valTon,
+                    m3: valM3,
+                    unit: valUnit,
+                    liter: valLiter,
                 };
             }
         });
@@ -114,6 +131,7 @@ const FormClearance = () => {
                 setNahkodaData(nahkodaRes.data.datas.map(d => ({ nama: d.nama_nahkoda, id: d.id_nahkoda })));
                 setKategoriMuatanData(kategoriMuatanRes.data.datas.map(d => ({
                     nama: d.nama_kategori_muatan,
+                    nama_kategori_muatan: d.nama_kategori_muatan,
                     id: d.id_kategori_muatan,
                     bobot_per_unit_kg: d.bobot_per_unit_kg || 0,
                     nama_satuan_muatan: d.satuan_muatan?.nama_satuan_muatan || 'unit'
@@ -261,15 +279,29 @@ const FormClearance = () => {
             if (item.type === 'barang') {
                 if (item.id_kategori_muatan) {
                     const selectedCat = kategoriMuatanData.find(k => String(k.id) === String(item.id_kategori_muatan));
+                    const catName = String(selectedCat?.nama || selectedCat?.nama_kategori_muatan || '').toLowerCase();
                     const unitType = String(selectedCat?.nama_satuan_muatan || 'unit').toLowerCase().trim();
-                    const rawVal = (item.quantity !== undefined && item.quantity !== '') ? item.quantity : (item.unit || item.ton || item.liter || item.m3);
-                    const val = parseNumeric(rawVal);
+                    const isLiterCat = unitType === 'liter' || ['mitan', 'minyak tanah', 'krosene', 'kerosene', 'kerosine', 'solar', 'bensin'].some(k => catName.includes(k));
 
-                    let ton = null, liter = null, m3 = null, unit = null;
-                    if (unitType === 'ton') ton = val;
-                    else if (unitType === 'liter') liter = val;
-                    else if (unitType === 'm3' || unitType === 'm³') m3 = val;
-                    else unit = val;
+                    let ton = parseNumeric(item.ton);
+                    let liter = parseNumeric(item.liter);
+                    let m3 = parseNumeric(item.m3);
+                    let unit = parseNumeric(item.unit);
+                    const qtyVal = parseNumeric(item.quantity);
+
+                    if (isLiterCat) {
+                        liter = liter ?? qtyVal ?? unit ?? ton ?? m3 ?? null;
+                        unit = null;
+                        ton = null;
+                        m3 = null;
+                    } else if (ton === null && liter === null && m3 === null && unit === null) {
+                        if (qtyVal !== null) {
+                            if (unitType === 'ton') ton = qtyVal;
+                            else if (unitType === 'liter') liter = qtyVal;
+                            else if (unitType === 'm3' || unitType === 'm³') m3 = qtyVal;
+                            else unit = qtyVal;
+                        }
+                    }
 
                     muatanBarangBackend.push({
                         jenis_perjalanan: item.jenis_perjalanan,

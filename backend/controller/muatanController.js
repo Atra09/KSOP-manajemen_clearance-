@@ -64,13 +64,19 @@ const processSingleMuatan = async (item) => {
     let insertM3 = rawM3;
     let insertLiter = rawLiter;
 
+    const catName = String(cat?.nama_kategori_muatan || '').toLowerCase();
+    const isLiterCat = nama_satuan_muatan === 'liter' || ['mitan', 'minyak tanah', 'krosene', 'kerosene', 'kerosine', 'solar', 'bensin'].some(k => catName.includes(k));
+
     // Primary Mapping based on Master Unit if specific field wasn't set
-    if (nama_satuan_muatan === 'ton') {
+    if (isLiterCat) {
+        insertLiter = insertLiter ?? generalJumlah ?? rawLiter ?? rawUnit ?? rawTon ?? rawM3 ?? null;
+        insertUnit = null;
+        insertTon = null;
+        insertM3 = null;
+    } else if (nama_satuan_muatan === 'ton') {
         if (insertTon === null && generalJumlah !== null) insertTon = generalJumlah;
     } else if (nama_satuan_muatan === 'm3' || nama_satuan_muatan === 'm³') {
         if (insertM3 === null && generalJumlah !== null) insertM3 = generalJumlah;
-    } else if (nama_satuan_muatan === 'liter') {
-        if (insertLiter === null && generalJumlah !== null) insertLiter = generalJumlah;
     } else {
         if (insertUnit === null && generalJumlah !== null) insertUnit = generalJumlah;
     }

@@ -99,13 +99,39 @@ const CARGO_SUB_HEADERS = [
 
 const CARGO_COL_INDEX_MAP = {
     'Gol. I': 0, 'Gol. II': 1, 'Gol. III': 2, 'Gol. IV': 3, 'Gol. V': 4, 'Bego': 5,
-    'Mtan': 6, 'Mitan': 6, 'Solar (ltr)': 7, 'Bensin (ltr)': 8, 'krosene': 9, 'Krosene': 9, 'Avtur': 10, 'LPG 3 kg (tb)': 11, 'LPG 12 kg (tb)': 12,
-    'Beras (ton)': 13, 'Jagung (ton)': 14, 'Garam (ton)': 15, 'Tepung (ton)': 16, 'Gula (ton)': 17, 'Kedelei': 18, 'Palen (ton)': 19, 'Kelapa (biji)': 20, 'Kacang (ton)': 21, 'Kacang': 21, 'Kcang ijo (ton)': 21, 'Kacang ijo (ton)': 21, 'Sayur & Buah (ton)': 22, 'Mangga (kg)': 23, 'Mangga (krg)': 23, 'Rmpt Laut (ton)': 24,
-    'Keramik (ton)': 25, 'Semen (ton)': 26, 'Genteng (biji)': 27, 'Batu Bata (bj)/Paving': 28, 'Batu Bata (b)/Paving': 28, 'Pasir (ton)': 29, 'Bahan Bangunan Lain (ton)': 30,
-    'Barkas (ton)': 31, 'Berkas (ton)': 31,
+    'Mtan': 6, 'Mitan': 6, 'Minyak Tanah': 6, 'Minyak Tanah (ltr)': 6,
+    'Solar (ltr)': 7, 'Solar': 7,
+    'Bensin (ltr)': 8, 'Bensin': 8,
+    'krosene': 9, 'Krosene': 9, 'Kerosene': 9, 'Kerosine': 9,
+    'Avtur': 10, 'Avtur (ltr)': 10,
+    'LPG 3 kg (tb)': 11, 'LPG 3kg': 11, 'LPG 3 kg': 11,
+    'LPG 12 kg (tb)': 12, 'LPG 12kg': 12, 'LPG 12 kg': 12,
+    'Beras': 13, 'Beras (ton)': 13,
+    'Jagung': 14, 'Jagung (ton)': 14,
+    'Garam': 15, 'Garam (ton)': 15,
+    'Tepung': 16, 'Tepung (ton)': 16, 'Terigu': 16,
+    'Gula': 17, 'Gula (ton)': 17,
+    'Kedelei': 18, 'Kedelai': 18, 'Kedelai (ton)': 18,
+    'Palen': 19, 'Palen (ton)': 19,
+    'Kelapa': 20, 'Kelapa (biji)': 20,
+    'Kacang': 21, 'Kacang (ton)': 21, 'Kcang ijo (ton)': 21, 'Kacang ijo (ton)': 21, 'Kacang Ijo': 21,
+    'Sayur & Buah': 22, 'Sayur & Buah (ton)': 22, 'Sayuran & Buah': 22, 'Sayur dan Buah': 22,
+    'Mangga': 23, 'Mangga (kg)': 23, 'Mangga (krg)': 23, 'Mangga (ton)': 23,
+    'Rumput Laut': 24, 'Rmpt Laut (ton)': 24, 'Rumput Laut (ton)': 24,
+    'Keramik': 25, 'Keramik (ton)': 25,
+    'Semen': 26, 'Semen (ton)': 26,
+    'Genteng': 27, 'Genteng (biji)': 27,
+    'Batu Bata (bj)/Paving': 28, 'Batu Bata (b)/Paving': 28, 'Batu Bata': 28, 'Paving': 28, 'Hebel': 28,
+    'Pasir': 29, 'Pasir (ton)': 29,
+    'Bahan Bangunan Lain (ton)': 30, 'Bahan Bangunan Lain': 30, 'Bahan Bangunan': 30, 'Palen Bangunan': 30,
+    'Barkas': 31, 'Barkas (ton)': 31, 'Berkas (ton)': 31, 'Rongsokan': 31,
     'Tbg Kosong': 32, 'Tabung Kosong': 32, 'Tabung LPG Kosong': 32, 'Tabung LPG 3kg Kosong': 32, 'Tabung LPG 3 kg Kosong': 32, 'Tabung LPG 12kg Kosong': 32, 'Tabung LPG 12 kg Kosong': 32, 'Tabung LPG': 32, 'Tabung Gas': 32, 'Tabung Gas Kosong': 32, 'Tabung Kosong LPG': 32, 'Tabung': 32, 'LPG Kosong': 32, 'Wadah Kosong': 32, 'Kemasan Kosong': 32, 'Kemasan & Wadah Kosong': 32, 'Kemasan & Wadah': 32,
     'Air Galon Kosong': 33, 'Air Galon': 33, 'Galon Kosong': 33, 'Galon': 33,
-    'Ikan (ton)': 34, 'Hewan/Ternak': 35, 'Kayu m3': 36, 'Pupuk (ton)': 37, 'Bagasi Lainnya (ton)': 38, 'Barang (ton)': 38
+    'Ikan': 34, 'Ikan (ton)': 34,
+    'Hewan/Ternak': 35, 'Hewan': 35, 'Ternak': 35, 'Ternak/Hewan': 35,
+    'Kayu': 36, 'Kayu m3': 36, 'Kayu (m3)': 36,
+    'Pupuk': 37, 'Pupuk (ton)': 37,
+    'Bagasi Lainnya (ton)': 38, 'Bagasi Lainnya': 38, 'Lainnya': 38, 'Barang (ton)': 38
 };
 
 const BONGKAR_MUAT_MERGES = [
@@ -159,7 +185,8 @@ const extractCargoRowData = (d, jenis) => {
             const valUnit = Number(m.unit) || 0;
             const valTon = Number(m.ton) || 0;
             const valM3 = Number(m.m3) || 0;
-            const valDefault = valTon || valUnit || valM3 || 0;
+            const valLiter = Number(m.liter) || 0;
+            const valDefault = valLiter || valTon || valUnit || valM3 || 0;
 
             // 1. Direct index map matching from excel_column_name or exact category name
             if (CARGO_COL_INDEX_MAP[targetCol] !== undefined || CARGO_COL_INDEX_MAP[m.kategori_muatan?.nama_kategori_muatan] !== undefined) {
@@ -167,7 +194,11 @@ const extractCargoRowData = (d, jenis) => {
                     ? CARGO_COL_INDEX_MAP[targetCol] 
                     : CARGO_COL_INDEX_MAP[m.kategori_muatan?.nama_kategori_muatan];
                 let qty = valDefault;
-                if ([7, 8, 11, 12, 20, 23, 27, 28, 33].includes(idx)) {
+                if ([6, 7, 8, 9].includes(idx)) {
+                    qty = valLiter || valUnit || valDefault;
+                } else if (idx === 10) {
+                    qty = valTon || valUnit || valDefault;
+                } else if ([11, 12, 20, 23, 27, 28, 33].includes(idx)) {
                     qty = valUnit || valDefault;
                 } else if (idx === 36) {
                     qty = valM3 || valTon || valDefault;
@@ -201,13 +232,15 @@ const extractCargoRowData = (d, jenis) => {
             }
             // --- BAHAN BAKAR (Hanya untuk gas isi / BBM) ---
             else if (combinedName.includes('solar') || combinedName.includes('dexlite') || combinedName.includes('biosolar')) {
-                slotIndex = 7; qty = valUnit || valDefault;
+                slotIndex = 7; qty = valLiter || valUnit || valDefault;
             } else if (combinedName.includes('bensin') || combinedName.includes('pertalite') || combinedName.includes('pertamax')) {
-                slotIndex = 8; qty = valUnit || valDefault;
-            } else if (combinedName.includes('mitan') || combinedName.includes('kerosene') || combinedName.includes('minyak tanah')) {
-                slotIndex = 6; qty = valUnit || valDefault;
+                slotIndex = 8; qty = valLiter || valUnit || valDefault;
+            } else if (combinedName.includes('krosene') || combinedName.includes('kerosene') || combinedName.includes('kerosine')) {
+                slotIndex = 9; qty = valLiter || valUnit || valDefault;
+            } else if (combinedName.includes('mitan') || combinedName.includes('minyak tanah')) {
+                slotIndex = 6; qty = valLiter || valUnit || valDefault;
             } else if (combinedName.includes('avtur')) {
-                slotIndex = 10; qty = valUnit || valDefault;
+                slotIndex = 10; qty = valTon || valUnit || valDefault;
             } else if (combinedName.includes('lpg 3') || combinedName.includes('elpiji 3')) {
                 slotIndex = 11; qty = valUnit || valDefault;
             } else if (combinedName.includes('lpg 12') || combinedName.includes('lpg 50') || combinedName.includes('elpiji 12')) {
@@ -536,7 +569,9 @@ function Clearance() {
                     let qtyText = '';
                     const namaLower = nama.toLowerCase();
 
-                    if (m.unit && m.unit > 0) {
+                    if (m.liter && m.liter > 0) {
+                        qtyText = `${m.liter.toLocaleString('id-ID')} liter`;
+                    } else if (m.unit && m.unit > 0) {
                         let unitName = 'unit';
                         if (namaLower.includes('lpg')) unitName = 'tabung';
                         else if (namaLower.includes('bensin') || namaLower.includes('solar') || namaLower.includes('bbm') || namaLower.includes('mitan') || namaLower.includes('avtur') || namaLower.includes('minyak')) unitName = 'liter';

@@ -194,14 +194,7 @@ export default function ExportMonthlyModal({ isOpen, onClose, onExport, initialR
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
-          >
-            Batal
-          </button>
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-end">
           <button
             type="button"
             onClick={handleExportClick}
