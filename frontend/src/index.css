@@ -337,3 +337,42 @@ html.dark .apexcharts-ycrosshairs {
   }
 }
 
+/* ApexCharts Tooltip Custom Styling */
+.apexcharts-tooltip {
+  background: #111827 !important;
+  border: 1px solid #374151 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  color: #f3f4f6 !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden;
+}
+
+.apexcharts-tooltip-title {
+  background: #1f2937 !important;
+  border-bottom: 1px solid #374151 !important;
+  color: #f3f4f6 !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  padding: 6px 12px !important;
+}
+
+.apexcharts-tooltip-text-y-value,
+.apexcharts-tooltip-text-y-label,
+.apexcharts-tooltip-text-goals-value,
+.apexcharts-tooltip-text-z-value {
+  color: #f3f4f6 !important;
+}
+
+.apexcharts-tooltip-series-group {
+  padding: 6px 12px !important;
+  background: #111827 !important;
+}
+
+.apexcharts-tooltip-marker {
+  background-color: #6366f1 !important;
+  border-radius: 50% !important;
+  width: 10px !important;
+  height: 10px !important;
+}
+
+
