@@ -285,18 +285,18 @@ const FormClearance = () => {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-800">{isEditMode ? 'Edit' : 'Formulir'} Surat Persetujuan Berlayar</h1>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">{isEditMode ? 'Edit' : 'Formulir'} Surat Persetujuan Berlayar</h1>
             <div className="w-full">
                 <ol className="flex items-center w-full">
-                    <li className={`flex w-full items-center ${step >= 1 ? 'text-blue-600' : 'text-gray-500'} after:content-[''] after:w-full after:h-1 after:border-b ${step > 1 ? 'after:border-blue-600' : 'after:border-gray-200'} after:border-4 after:inline-block`}>
-                        <span className={`flex items-center justify-center w-10 h-10 ${step >= 1 ? 'bg-blue-100' : 'bg-gray-100'} rounded-full lg:h-12 lg:w-12 shrink-0`}>1</span>
+                    <li className={`flex w-full items-center ${step >= 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} after:content-[''] after:w-full after:h-1 after:border-b ${step > 1 ? 'after:border-blue-600 dark:after:border-blue-500' : 'after:border-gray-200 dark:after:border-gray-700'} after:border-4 after:inline-block`}>
+                        <span className={`flex items-center justify-center w-10 h-10 ${step >= 1 ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-300' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'} rounded-full lg:h-12 lg:w-12 shrink-0`}>1</span>
                     </li>
                     <li className={`flex items-center w-auto`}>
-                        <span className={`flex items-center justify-center w-10 h-10 ${step >= 2 ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'} rounded-full lg:h-12 lg:w-12 shrink-0`}>2</span>
+                        <span className={`flex items-center justify-center w-10 h-10 ${step >= 2 ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-300' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'} rounded-full lg:h-12 lg:w-12 shrink-0`}>2</span>
                     </li>
                 </ol>
             </div>
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 sm:p-6 shadow-sm overflow-x-auto">
                 <form ref={formRef} onSubmit={handleSubmit}>
                     {step === 1 && (
                         <Step1DataKapal

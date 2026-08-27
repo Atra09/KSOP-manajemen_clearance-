@@ -87,8 +87,8 @@ const Step1DataKapal = ({
 
     return (
         <div className="space-y-6">
-            <div className="border-b pb-4">
-                <h3 className="text-lg font-semibold text-gray-800">Data Clearance</h3>
+            <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Data Clearance</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                     <div><Label htmlFor="jenisPpk">Jenis PPK</Label><Select id="jenisPpk" name="ppk" value={formData.ppk || ''} onChange={handleChange} options={createOptions(jenisPpkOptions, 'Pilih Jenis PPK')} required /></div>
                     <div>
@@ -133,8 +133,8 @@ const Step1DataKapal = ({
                 </div>
             </div>
 
-            <div className="border-b pb-4">
-                <h3 className="text-lg font-semibold text-gray-800">Data Kapal & Awak</h3>
+            <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Data Kapal & Awak</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div><Label htmlFor="kapalId">Nama Kapal</Label><Select id="kapalId" name="id_kapal" value={formData.id_kapal || ''} onChange={handleChange} options={createOptions(kapalOptions, 'Pilih Kapal')} required /></div>
                     <div><Label htmlFor="nahkodaId">Nama Nahkoda</Label><Select id="nahkodaId" name="id_nahkoda" value={formData.id_nahkoda || ''} onChange={handleChange} options={createOptions(nahkodaOptions, 'Pilih Nahkoda')} required /></div>
@@ -155,8 +155,8 @@ const Step1DataKapal = ({
                 </div>
             </div>
 
-            <div className="border-b pb-4">
-                <h3 className="text-lg font-semibold text-gray-800">Data Perjalanan</h3>
+            <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Data Perjalanan</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div>
                         <Label htmlFor="kedudukanKapal">Kedudukan Kapal</Label>
@@ -226,8 +226,8 @@ const Step1DataKapal = ({
                 </div>
             </div>
 
-            <div className="border-b pb-4">
-                <h3 className="text-lg font-semibold text-gray-800">Data Pembayaran (Opsional)</h3>
+            <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Data Pembayaran (Opsional)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <Label htmlFor="rambu_ntpn">NTPN Rambu</Label>
@@ -281,7 +281,7 @@ const Step1DataKapal = ({
                 </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-800 mt-6">
                 <Button type="button" onClick={handleNext}>
                     Berikutnya
                 </Button>
