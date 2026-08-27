@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../api/axiosInstance';
 import Step1DataKapal from '../../components/clearance/Step1DataKapal';
 import Step2DataMuatan from '../../components/clearance/Step2DataMuatan';
+import UnsavedChangesModal from '../../components/modal/UnsavedChangesModal';
 
 const initialState = {
     ppk: '',
@@ -43,6 +44,22 @@ const FormClearance = () => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState(initialState);
 
+    // Unsaved Changes Tracking States & Refs
+    const initialSnapshotRef = useRef(null);
+    const isInitialLoadedRef = useRef(false);
+    const isSubmittedRef = useRef(false);
+    const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+    const [pendingNavPath, setPendingNavPath] = useState(null);
+    const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false);
+
+    // Calculate whether form has unsaved edits
+    const isDirty = Boolean(
+        isInitialLoadedRef.current &&
+        initialSnapshotRef.current &&
+        !isSubmittedRef.current &&
+        JSON.stringify(formData) !== initialSnapshotRef.current
+    );
+
     // Helper untuk mengubah data dari backend ke frontend (objek gabungan)
     const mapMuatanToFrontend = (muatanList = [], type = 'barang') => {
         const grouped = {};
@@ -68,7 +85,6 @@ const FormClearance = () => {
         });
         return Object.values(grouped);
     };
-
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -100,11 +116,12 @@ const FormClearance = () => {
                 })));
                 setPelabuhanData(pelabuhanRes.data.datas.map(d => ({ nama: d.nama_pelabuhan, id: d.id_pelabuhan })));
 
+                let finalFormData = initialState;
+
                 if (isEditMode) {
                     const clearanceRes = await axiosInstance.get(`/perjalanan/${id}`);
                     const clearanceData = clearanceRes.data.data;
 
-                    // [DIUBAH] Gunakan helper baru untuk memetakan data
                     const barangDatang = mapMuatanToFrontend(clearanceData.muatans?.filter(m => m.jenis_perjalanan === 'datang'), 'barang');
                     const barangBerangkat = mapMuatanToFrontend(clearanceData.muatans?.filter(m => m.jenis_perjalanan === 'berangkat'), 'barang');
                     const kendaraanDatang = mapMuatanToFrontend(clearanceData.muatan_kendaraan?.filter(k => k.jenis_perjalanan === 'datang'), 'kendaraan');
@@ -116,7 +133,7 @@ const FormClearance = () => {
                     const pembayaran_rambu = clearanceData.pembayaran?.find(p => p.tipe_pembayaran === 'rambu') || { ntpn: '', nilai: '' };
                     const pembayaran_labuh = clearanceData.pembayaran?.find(p => p.tipe_pembayaran === 'labuh') || { ntpn: '', nilai: '' };
 
-                    const dataToEdit = {
+                    finalFormData = {
                         ...initialState,
                         ...clearanceData,
                         spb: clearanceData.spb || initialState.spb,
@@ -125,8 +142,11 @@ const FormClearance = () => {
                         pembayaran_rambu: { ntpn: pembayaran_rambu.ntpn, nilai: pembayaran_rambu.nilai },
                         pembayaran_labuh: { ntpn: pembayaran_labuh.ntpn, nilai: pembayaran_labuh.nilai }
                     };
-                    setFormData(dataToEdit);
                 }
+
+                setFormData(finalFormData);
+                initialSnapshotRef.current = JSON.stringify(finalFormData);
+                isInitialLoadedRef.current = true;
 
             } catch (error) {
                 toast.error("Gagal memuat data master.");
@@ -136,6 +156,56 @@ const FormClearance = () => {
 
         fetchAllData();
     }, [id, isEditMode, API_URL]);
+
+    // 1. Browser Tab Close / Refresh Interceptor
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (isDirty && !isSubmittedRef.current) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    // 2. Global Link Click Interceptor
+    useEffect(() => {
+        if (!isDirty || isSubmittedRef.current) return;
+
+        const handleAnchorClick = (e) => {
+            const anchor = e.target.closest('a[href], button[data-nav]');
+            if (!anchor) return;
+
+            const href = anchor.getAttribute('href') || anchor.getAttribute('data-nav');
+            if (!href || href.startsWith('#') || href.startsWith('javascript:') || href === window.location.pathname) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+            setPendingNavPath(href);
+            setShowUnsavedModal(true);
+        };
+
+        document.addEventListener('click', handleAnchorClick, true);
+        return () => document.removeEventListener('click', handleAnchorClick, true);
+    }, [isDirty]);
+
+    // 3. Browser Back/Forward Navigation Interceptor
+    useEffect(() => {
+        if (!isDirty || isSubmittedRef.current) return;
+
+        const handlePopState = () => {
+            window.history.pushState(null, '', window.location.href);
+            setPendingNavPath('GO_BACK');
+            setShowUnsavedModal(true);
+        };
+
+        window.history.pushState(null, '', window.location.href);
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [isDirty]);
 
     const handleKapalChange = (kapalId) => {
         const selectedKapal = kapalData.find(k => k.id === parseInt(kapalId));
@@ -149,14 +219,17 @@ const FormClearance = () => {
     const nextStep = () => setStep(prev => prev + 1);
     const prevStep = () => setStep(prev => prev - 1);
 
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!formRef.current?.checkValidity()) {
-            formRef.current?.reportValidity();
-            return;
+    const handleBackClick = () => {
+        if (isDirty) {
+            setPendingNavPath('/clearance');
+            setShowUnsavedModal(true);
+        } else {
+            navigate('/clearance');
         }
+    };
 
+    // Save Data Function (Returns boolean for success)
+    const processSaveData = async () => {
         let {
             barangBerangkat, barangDatang,
             pembayaran_rambu, pembayaran_labuh,
@@ -176,15 +249,11 @@ const FormClearance = () => {
             allMuatanForm = [...formData.barangBerangkat, ...formData.barangDatang];
         }
 
-        // [LOGIKA DIUBAH TOTAL]
         const muatanBarangBackend = [];
         const muatanKendaraanBackend = [];
-
-        // Helper untuk mengubah nilai kosong/0 menjadi null
         const parseNumeric = (val) => (val ? parseFloat(val) : null);
 
         allMuatanForm.forEach(item => {
-            // Jika item adalah BARANG
             if (item.type === 'barang') {
                 if (item.id_kategori_muatan) {
                     const selectedCat = kategoriMuatanData.find(k => String(k.id) === String(item.id_kategori_muatan));
@@ -193,28 +262,18 @@ const FormClearance = () => {
                     const val = parseNumeric(rawVal);
 
                     let ton = null, liter = null, m3 = null, unit = null;
-                    if (unitType === 'ton') {
-                        ton = val;
-                    } else if (unitType === 'liter') {
-                        liter = val;
-                    } else if (unitType === 'm3' || unitType === 'm³') {
-                        m3 = val;
-                    } else {
-                        unit = val;
-                    }
+                    if (unitType === 'ton') ton = val;
+                    else if (unitType === 'liter') liter = val;
+                    else if (unitType === 'm3' || unitType === 'm³') m3 = val;
+                    else unit = val;
 
                     muatanBarangBackend.push({
                         jenis_perjalanan: item.jenis_perjalanan,
                         id_kategori_muatan: item.id_kategori_muatan,
-                        ton: ton,
-                        m3: m3,
-                        unit: unit,
-                        liter: liter
+                        ton, m3, unit, liter
                     });
                 }
-            }
-            // Jika item adalah KENDARAAN
-            else if (item.type === 'kendaraan') {
+            } else if (item.type === 'kendaraan') {
                 if (item.golongan_kendaraan) {
                     const ton = parseNumeric(item.ton);
                     const m3 = parseNumeric(item.m3);
@@ -224,16 +283,12 @@ const FormClearance = () => {
                     muatanKendaraanBackend.push({
                         jenis_perjalanan: item.jenis_perjalanan,
                         golongan_kendaraan: item.golongan_kendaraan,
-                        ton: ton,
-                        m3: m3,
-                        unit: unit,
-                        liter: liter
+                        ton, m3, unit, liter
                     });
                 }
             }
         });
 
-        // Proses Pembayaran
         const pembayaran = [];
         if (pembayaran_rambu.ntpn && pembayaran_rambu.nilai) {
             pembayaran.push({ tipe_pembayaran: 'rambu', ntpn: pembayaran_rambu.ntpn, nilai: parseFloat(pembayaran_rambu.nilai) });
@@ -244,32 +299,39 @@ const FormClearance = () => {
 
         const newData = {
             ...cleanData,
-            muatan: muatanBarangBackend, // Data baru (format sudah benar)
-            muatan_kendaraan: muatanKendaraanBackend, // Data baru (format sudah benar)
-            pembayaran: pembayaran
+            muatan: muatanBarangBackend,
+            muatan_kendaraan: muatanKendaraanBackend,
+            pembayaran
         };
 
-        console.log("Data yang dikirim ke backend:", newData);
+        if (!localStorage.getItem('token')) {
+            toast.error("Sesi Anda telah berakhir, silakan login kembali.");
+            navigate('/signin');
+            return false;
+        }
 
-        const config = {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        };
+        const response = isEditMode
+            ? await axiosInstance.patch(`/perjalanan/update/${id}`, newData)
+            : await axiosInstance.post('/perjalanan/store', newData);
+
+        if (response.status === 200) {
+            toast.success(`Data Clearance berhasil ${isEditMode ? 'diperbarui' : 'disimpan'}!`);
+            isSubmittedRef.current = true;
+            return true;
+        }
+        return false;
+    };
+
+    const handleSubmit = async (e) => {
+        if (e) e.preventDefault();
+        if (!formRef.current?.checkValidity()) {
+            formRef.current?.reportValidity();
+            return;
+        }
 
         try {
-            if (!localStorage.getItem('token')) {
-                toast.error("Sesi Anda telah berakhir, silakan login kembali.");
-                navigate('/signin');
-                return;
-            }
-
-            const response = isEditMode
-                ? await axiosInstance.patch(`/perjalanan/update/${id}`, newData)
-                : await axiosInstance.post('/perjalanan/store', newData);
-
-            if (response.status === 200) {
-                toast.success(`Data Clearance berhasil ${isEditMode ? 'diperbarui' : 'disimpan'}!`);
+            const success = await processSaveData();
+            if (success) {
                 if (isEditMode) {
                     navigate(`/clearance/${id}`);
                 } else {
@@ -283,9 +345,67 @@ const FormClearance = () => {
         }
     };
 
+    // Modal action handlers
+    const handleLeaveWithoutSaving = () => {
+        isSubmittedRef.current = true;
+        setShowUnsavedModal(false);
+        if (pendingNavPath === 'GO_BACK') {
+            navigate('/clearance');
+        } else {
+            navigate(pendingNavPath || '/clearance');
+        }
+    };
+
+    const handleSaveAndLeave = async () => {
+        if (!formRef.current?.checkValidity()) {
+            setShowUnsavedModal(false);
+            formRef.current?.reportValidity();
+            toast.error("Harap lengkapi semua field yang wajib diisi terlebih dahulu.");
+            return;
+        }
+
+        setIsSavingAndLeaving(true);
+        try {
+            const success = await processSaveData();
+            if (success) {
+                setShowUnsavedModal(false);
+                if (pendingNavPath && pendingNavPath !== 'GO_BACK') {
+                    navigate(pendingNavPath);
+                } else if (isEditMode) {
+                    navigate(`/clearance/${id}`);
+                } else {
+                    navigate('/clearance');
+                }
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.msg || "Terjadi kesalahan saat menyimpan data.";
+            toast.error(errorMessage);
+            console.error("Save and leave error:", error);
+        } finally {
+            setIsSavingAndLeaving(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">{isEditMode ? 'Edit' : 'Formulir'} Surat Persetujuan Berlayar</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <button
+                        type="button"
+                        onClick={handleBackClick}
+                        className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors mb-1 cursor-pointer"
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Kembali ke Daftar Clearance</span>
+                    </button>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+                        {isEditMode ? 'Edit' : 'Formulir'} Surat Persetujuan Berlayar
+                    </h1>
+                </div>
+            </div>
+
             <div className="w-full">
                 <ol className="flex items-center w-full">
                     <li className={`flex w-full items-center ${step >= 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} after:content-[''] after:w-full after:h-1 after:border-b ${step > 1 ? 'after:border-blue-600 dark:after:border-blue-500' : 'after:border-gray-200 dark:after:border-gray-700'} after:border-4 after:inline-block`}>
@@ -296,6 +416,7 @@ const FormClearance = () => {
                     </li>
                 </ol>
             </div>
+
             <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 sm:p-6 shadow-sm overflow-x-auto">
                 <form ref={formRef} onSubmit={handleSubmit}>
                     {step === 1 && (
@@ -317,6 +438,18 @@ const FormClearance = () => {
                     )}
                 </form>
             </div>
+
+            {/* Modal Notifikasi Perubahan Belum Disimpan */}
+            <UnsavedChangesModal
+                isOpen={showUnsavedModal}
+                onClose={() => {
+                    setShowUnsavedModal(false);
+                    setPendingNavPath(null);
+                }}
+                onLeaveWithoutSaving={handleLeaveWithoutSaving}
+                onSaveAndLeave={handleSaveAndLeave}
+                isSaving={isSavingAndLeaving}
+            />
         </div>
     );
 };
