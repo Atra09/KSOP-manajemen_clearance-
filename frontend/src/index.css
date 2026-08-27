@@ -79,6 +79,19 @@ html.dark textarea {
   border-color: #374151 !important;
 }
 
+/* Autofill Dark Mode Fix */
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark input:-webkit-autofill:active,
+html.dark textarea:-webkit-autofill,
+html.dark select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+  caret-color: #f3f4f6 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 /* Bulletproof Global Table Styles in Dark Mode */
 html.dark table,
 html.dark table * {

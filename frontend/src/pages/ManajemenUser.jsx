@@ -103,7 +103,7 @@ function ManajemenUser() {
         <>
             <div className="p-4 md:p-6 space-y-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    <h1 className="text-2xl font-bold text-gray-800">Manajemen Pengguna</h1>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Manajemen Pengguna</h1>
                     <div className="flex items-center gap-3">
                         <button onClick={handleOpenModal} className="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition-colors">
                             + Tambah Pengguna
@@ -111,8 +111,8 @@ function ManajemenUser() {
                     </div>
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-                    <div className="p-4 border-b border-gray-200">
+                <div className="rounded-2xl border border-gray-200 bg-white shadow-sm dark:bg-gray-900 dark:border-gray-800">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-800">
                         <div className="w-full md:w-1/3">
                             <SearchBar 
                                 searchTerm={searchTerm} 
@@ -124,7 +124,7 @@ function ManajemenUser() {
 
                     <div className="p-0">
                         {loading ? (
-                            <p className="text-center text-gray-500 py-10">Memuat data...</p>
+                            <p className="text-center text-gray-500 dark:text-gray-400 py-10">Memuat data...</p>
                         ) : (
                             <UserTable userItems={userData} onEdit={handleEdit} onDelete={handleDelete} />
                         )}

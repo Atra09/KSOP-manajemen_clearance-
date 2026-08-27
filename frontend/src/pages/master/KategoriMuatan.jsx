@@ -252,7 +252,7 @@ function KategoriMuatan() {
         <>
             <div className="p-4 md:p-6 space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <h1 className="text-2xl font-bold text-gray-800">
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                         {getHeaderTitle()}
                     </h1>
                     <button
@@ -263,17 +263,17 @@ function KategoriMuatan() {
                     </button>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="border-b border-gray-200">
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+                    <div className="border-b border-gray-200 dark:border-gray-800">
                         <nav className="-mb-px flex gap-x-6 px-4" aria-label="Tabs">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => handleTabChange(tab.id)}
-                                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                         activeTab === tab.id
-                                            ? 'border-indigo-500 text-indigo-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-700'
                                     }`}
                                 >
                                     {tab.label}
@@ -282,7 +282,7 @@ function KategoriMuatan() {
                         </nav>
                     </div>
 
-                    <div className="p-4 border-b border-gray-200">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-800">
                         <div className="w-full md:w-1/3">
                             <SearchBar 
                                 searchTerm={searchTerm} 
