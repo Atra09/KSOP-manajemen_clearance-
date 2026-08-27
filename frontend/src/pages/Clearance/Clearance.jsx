@@ -102,7 +102,7 @@ const CARGO_COL_INDEX_MAP = {
     'Mtan': 6, 'Mitan': 6, 'Solar (ltr)': 7, 'Bensin (ltr)': 8, 'krosene': 9, 'Krosene': 9, 'Avtur': 10, 'LPG 3 kg (tb)': 11, 'LPG 12 kg (tb)': 12,
     'Beras (ton)': 13, 'Jagung (ton)': 14, 'Garam (ton)': 15, 'Tepung (ton)': 16, 'Gula (ton)': 17, 'Kedelei': 18, 'Palen (ton)': 19, 'Kelapa (biji)': 20, 'Kacang (ton)': 21, 'Kacang': 21, 'Kcang ijo (ton)': 21, 'Kacang ijo (ton)': 21, 'Sayur & Buah (ton)': 22, 'Mangga (kg)': 23, 'Mangga (krg)': 23, 'Rmpt Laut (ton)': 24,
     'Keramik (ton)': 25, 'Semen (ton)': 26, 'Genteng (biji)': 27, 'Batu Bata (bj)/Paving': 28, 'Batu Bata (b)/Paving': 28, 'Pasir (ton)': 29, 'Bahan Bangunan Lain (ton)': 30,
-    'Barang (ton)': 31, 'Barkas (ton)': 32, 'Berkas (ton)': 32, 'Tbg Kosong': 33, 'Air Galon Kosong': 34, 'Ikan (ton)': 35, 'Hewan/Ternak': 36, 'Kayu m3': 37, 'Pupuk (ton)': 38, 'Bagasi Lainnya (ton)': 39
+    'Barang (ton)': 39, 'Barkas (ton)': 32, 'Berkas (ton)': 32, 'Tbg Kosong': 33, 'Air Galon Kosong': 34, 'Ikan (ton)': 35, 'Hewan/Ternak': 36, 'Kayu m3': 37, 'Pupuk (ton)': 38, 'Bagasi Lainnya (ton)': 39
 };
 
 const BONGKAR_MUAT_MERGES = [
@@ -249,10 +249,9 @@ const extractCargoRowData = (d, jenis) => {
                 slotIndex = 35; qty = valTon || valDefault; // Ikan (ton)
             } else if (combinedName.includes('barkas') || combinedName.includes('rongsokan')) {
                 slotIndex = 32; qty = valTon || valDefault; // Barkas (ton)
-            } else if (combinedName.includes('barang') || combinedName.includes('kelontong') || catName.includes('barang')) {
-                slotIndex = 31; qty = valTon || valDefault; // Barang (ton)
             } else {
-                slotIndex = 39; qty = valTon || valDefault; // Bagasi Lainnya (ton)
+                // Semua barang yang tidak spesifik dipetakan langsung ke Bagasi Lainnya (ton) [slot 39]
+                slotIndex = 39; qty = valTon || valDefault;
             }
 
             slots[slotIndex] += qty;
