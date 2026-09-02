@@ -242,6 +242,9 @@ const FormClearance = () => {
     const prevStep = () => setStep(prev => prev - 1);
 
     const handleBackClick = () => {
+        if (isEditMode) {
+            sessionStorage.setItem('clearance_from_edit', 'true');
+        }
         if (shouldProtectNavigation) {
             setPendingNavPath('/clearance');
             setShowUnsavedModal(true);
@@ -369,10 +372,9 @@ const FormClearance = () => {
             const success = await processSaveData();
             if (success) {
                 if (isEditMode) {
-                    navigate(`/clearance/${id}`);
-                } else {
-                    navigate('/clearance');
+                    sessionStorage.setItem('clearance_from_edit', 'true');
                 }
+                navigate('/clearance');
             }
         } catch (error) {
             const errorMessage = error.response?.data?.msg || "Terjadi kesalahan saat menyimpan data.";
@@ -385,6 +387,9 @@ const FormClearance = () => {
     const handleLeaveWithoutSaving = () => {
         isSubmittedRef.current = true;
         setShowUnsavedModal(false);
+        if (isEditMode) {
+            sessionStorage.setItem('clearance_from_edit', 'true');
+        }
         if (pendingNavPath === 'GO_BACK') {
             navigate('/clearance');
         } else {
@@ -405,10 +410,11 @@ const FormClearance = () => {
             const success = await processSaveData();
             if (success) {
                 setShowUnsavedModal(false);
+                if (isEditMode) {
+                    sessionStorage.setItem('clearance_from_edit', 'true');
+                }
                 if (pendingNavPath && pendingNavPath !== 'GO_BACK') {
                     navigate(pendingNavPath);
-                } else if (isEditMode) {
-                    navigate(`/clearance/${id}`);
                 } else {
                     navigate('/clearance');
                 }

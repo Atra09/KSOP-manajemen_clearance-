@@ -337,19 +337,7 @@ const extractCargoRowData = (d, jenis) => {
 const INITIAL_FILTERS = {
     searchTerm: '', selectedShip: '', startDate: '', endDate: '',
     selectedCategory: '', selectedGoods: [], selectedWilayah: '',
-};
-
-const getInitialFilterState = (key, fallback) => {
-    try {
-        const saved = sessionStorage.getItem('clearance_filter_state');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            return parsed[key] !== undefined ? parsed[key] : fallback;
-        }
-    } catch (e) {
-        console.error("Error reading saved filter state:", e);
-    }
-    return fallback;
+    selectedMonth: '', selectedYear: ''
 };
 
 function Clearance() {
@@ -361,25 +349,46 @@ function Clearance() {
         ships: [], categories: [], goods: [], wilayahKerja: []
     });
 
-    const [filters, setFilters] = useState(() => getInitialFilterState('filters', INITIAL_FILTERS));
-    const [sortConfig, setSortConfig] = useState(() => getInitialFilterState('sortConfig', { key: 'no_spb', direction: 'DESC' }));
-    const [currentPage, setCurrentPage] = useState(() => getInitialFilterState('currentPage', 1));
-    const [rowsPerPage, setRowsPerPage] = useState(() => getInitialFilterState('rowsPerPage', '5'));
+    const [filters, setFilters] = useState(() => {
+        try {
+            const fromEdit = sessionStorage.getItem('clearance_from_edit');
+            const savedDraft = sessionStorage.getItem('clearance_filter_draft');
+            if (fromEdit === 'true' && savedDraft) {
+                sessionStorage.removeItem('clearance_from_edit');
+                return JSON.parse(savedDraft);
+            }
+        } catch (e) {
+            console.error("Error loading filter draft:", e);
+        }
+        sessionStorage.removeItem('clearance_filter_draft');
+        sessionStorage.removeItem('clearance_from_edit');
+        return INITIAL_FILTERS;
+    });
+
+    const [sortConfig, setSortConfig] = useState({ key: 'tanggal_berangkat', direction: 'DESC' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState('5');
     const [totalData, setTotalData] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
+    // Save active filters to draft in sessionStorage
     useEffect(() => {
         try {
-            sessionStorage.setItem('clearance_filter_state', JSON.stringify({
-                filters,
-                currentPage,
-                rowsPerPage,
-                sortConfig
-            }));
+            const hasFilter = Boolean(
+                filters.searchTerm || filters.selectedShip || filters.startDate ||
+                filters.endDate || filters.selectedCategory ||
+                (filters.selectedGoods && filters.selectedGoods.length > 0) ||
+                filters.selectedWilayah || filters.selectedMonth || filters.selectedYear
+            );
+            if (hasFilter) {
+                sessionStorage.setItem('clearance_filter_draft', JSON.stringify(filters));
+            } else {
+                sessionStorage.removeItem('clearance_filter_draft');
+            }
         } catch (e) {
-            console.error("Error saving filter state:", e);
+            console.error("Error saving filter draft:", e);
         }
-    }, [filters, currentPage, rowsPerPage, sortConfig]);
+    }, [filters]);
 
     const [isExportOpen, setIsExportOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -421,9 +430,31 @@ function Clearance() {
         }));
     };
 
+    const isFilterActive = useMemo(() => {
+        return Boolean(
+            filters.searchTerm ||
+            filters.selectedShip ||
+            filters.startDate ||
+            filters.endDate ||
+            filters.selectedCategory ||
+            (filters.selectedGoods && filters.selectedGoods.length > 0) ||
+            filters.selectedWilayah ||
+            filters.selectedMonth ||
+            filters.selectedYear
+        );
+    }, [filters]);
+
     const getQueryParams = useCallback((limitOverride = null, customParams = null) => {
-        const queryLimit = limitOverride !== null ? limitOverride : (rowsPerPage === 'Semua' ? 0 : parseInt(rowsPerPage, 10));
-        const queryPage = limitOverride !== null ? 1 : currentPage;
+        let queryLimit;
+        if (limitOverride !== null) {
+            queryLimit = limitOverride;
+        } else if (isFilterActive) {
+            queryLimit = 0; // Display all filtered records in one scrollable list
+        } else {
+            queryLimit = (rowsPerPage === 'Semua' ? 0 : parseInt(rowsPerPage, 10));
+        }
+
+        const queryPage = (limitOverride !== null || isFilterActive) ? 1 : currentPage;
 
         let effectiveStartDate = filters.startDate;
         let effectiveEndDate = filters.endDate;
@@ -456,7 +487,7 @@ function Clearance() {
         if (vehicles.length > 0) params.golongan_kendaraan = vehicles;
 
         return params;
-    }, [currentPage, rowsPerPage, filters, sortConfig]);
+    }, [currentPage, rowsPerPage, filters, sortConfig, isFilterActive]);
 
     const fetchAllExportData = async (overrideParams = null) => {
         try {
@@ -483,35 +514,23 @@ function Clearance() {
 
     const fetchData = useCallback(async () => {
         if (!authLoading) setLoading(true);
-        const queryLimit = (rowsPerPage === 'Semua' ? 0 : parseInt(rowsPerPage, 10));
+        const queryLimit = isFilterActive ? 0 : (rowsPerPage === 'Semua' ? 0 : parseInt(rowsPerPage, 10));
         try {
             const resData = await fetchPerjalananData(getQueryParams());
-            setPageData(resData.datas);
-            setTotalData(resData.totalData);
-            setTotalPages(queryLimit > 0 ? Math.ceil(resData.totalData / queryLimit) : 1);
+            setPageData(resData.datas || []);
+            setTotalData(resData.totalData || 0);
+            setTotalPages(queryLimit > 0 ? Math.ceil((resData.totalData || 0) / queryLimit) : 1);
         } catch (error) {
             console.error("Gagal mengambil data:", error);
             toast.error("Gagal mengambil data.");
         } finally {
             if (!authLoading) setLoading(false);
         }
-    }, [authLoading, rowsPerPage, getQueryParams]);
+    }, [authLoading, rowsPerPage, getQueryParams, isFilterActive]);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
-
-    const isFilterActive = useMemo(() => {
-        return Boolean(
-            filters.searchTerm ||
-            filters.selectedShip ||
-            filters.startDate ||
-            filters.endDate ||
-            filters.selectedCategory ||
-            (filters.selectedGoods && filters.selectedGoods.length > 0) ||
-            filters.selectedWilayah
-        );
-    }, [filters]);
 
     const handleResetFilters = () => {
         setFilters(INITIAL_FILTERS);
@@ -1091,27 +1110,36 @@ function Clearance() {
                     )}
 
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4">
-                        <div className="flex items-center gap-2 text-sm">
-                            <span>Tampilkan</span>
-                            <FilterDropdown
-                                direction="up"
-                                selectedValue={String(rowsPerPage)}
-                                setSelectedValue={handleRowsPerPageChange}
-                                options={rowsPerPageOptions}
-                            />
-                            <span>baris</span>
-                        </div>
+                        {!isFilterActive ? (
+                            <>
+                                <div className="flex items-center gap-2 text-sm">
+                                    <span>Tampilkan</span>
+                                    <FilterDropdown
+                                        direction="up"
+                                        selectedValue={String(rowsPerPage)}
+                                        setSelectedValue={handleRowsPerPageChange}
+                                        options={rowsPerPageOptions}
+                                    />
+                                    <span>baris</span>
+                                </div>
 
-                        <span className="text-sm text-gray-700">
-                            Total {totalData} data
-                        </span>
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                    Total {totalData} data
+                                </span>
 
-                        {totalPages > 1 && !loading && (
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                paginate={paginate}
-                            />
+                                {totalPages > 1 && !loading && (
+                                    <Pagination
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        paginate={paginate}
+                                    />
+                                )}
+                            </>
+                        ) : (
+                            <div className="w-full flex items-center justify-between text-sm text-indigo-700 dark:text-indigo-300 font-medium">
+                                <span>Menampilkan {pageData.length} data hasil filter (Semua data ditampilkan, scroll ke bawah)</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">Reset filter untuk kembali ke mode halaman</span>
+                            </div>
                         )}
                     </div>
                 </div>

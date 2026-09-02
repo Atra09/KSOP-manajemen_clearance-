@@ -156,42 +156,45 @@ const getPerjalananByFilter = async (req, res) => {
         }
 
         const sortDir = (sort && sort.toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
-        const sortCol = data_name || 'no_spb';
+        const sortCol = data_name || 'id_perjalanan';
 
         switch (sortCol) {
             case 'nama_kapal':
-                orderBySort = [[{ model: kapal }, 'nama_kapal', sortDir]];
+                orderBySort = [[{ model: kapal }, 'nama_kapal', sortDir], ['id_perjalanan', 'DESC']];
                 break;
             case 'no_spb':
                 orderBySort = [
                     Sequelize.literal(`CAST(\`spb\`.\`no_spb\` AS UNSIGNED) ${sortDir}`),
                     [{ model: spb }, 'no_spb', sortDir],
-                    [Sequelize.literal('CAST(`no_urut` AS UNSIGNED)'), sortDir],
-                    ['no_urut', sortDir]
+                    ['id_perjalanan', 'DESC']
                 ];
                 break;
             case 'nama_nahkoda':
-                orderBySort = [[{ model: nahkoda }, 'nama_nahkoda', sortDir]];
+                orderBySort = [[{ model: nahkoda }, 'nama_nahkoda', sortDir], ['id_perjalanan', 'DESC']];
                 break;
             case 'nama_agen':
-                orderBySort = [[{ model: agen }, 'nama_agen', sortDir]];
+                orderBySort = [[{ model: agen }, 'nama_agen', sortDir], ['id_perjalanan', 'DESC']];
                 break;
             case 'tujuan_akhir':
-                orderBySort = [[{ model: kecamatan, as: 'tujuan_akhir' }, 'nama_kecamatan', sortDir]];
+                orderBySort = [[{ model: kecamatan, as: 'tujuan_akhir' }, 'nama_kecamatan', sortDir], ['id_perjalanan', 'DESC']];
                 break;
             case 'no_urut':
-                orderBySort = [[Sequelize.literal('CAST(`no_urut` AS UNSIGNED)'), sortDir], ['no_urut', sortDir]];
+                orderBySort = [[Sequelize.literal('CAST(`no_urut` AS UNSIGNED)'), sortDir], ['no_urut', sortDir], ['id_perjalanan', 'DESC']];
                 break;
+            case 'pukul_kapal_berangkat':
+            case 'tanggal_berangkat':
+                orderBySort = [
+                    ['tanggal_berangkat', sortDir],
+                    ['pukul_kapal_berangkat', sortDir],
+                    ['id_perjalanan', 'DESC']
+                ];
+                break;
+            case 'id_perjalanan':
             default:
                 orderBySort = [
-                    Sequelize.literal(`CAST(\`spb\`.\`no_spb\` AS UNSIGNED) ${sortDir}`),
-                    [{ model: spb }, 'no_spb', sortDir],
-                    [Sequelize.literal('CAST(`no_urut` AS UNSIGNED)'), sortDir],
-                    ['no_urut', sortDir]
+                    ['id_perjalanan', sortDir]
                 ];
         }
-
-        console.log(whereKategoriMuatan)
 
         let result = await perjalanan.findAll({
             order: orderBySort,
@@ -256,8 +259,34 @@ const getPerjalananByFilter = async (req, res) => {
             return match ? parseInt(match[0], 10) : 0;
         };
 
-        if (sortCol === 'no_spb') {
+        const getTime = (item) => {
+            if (!item.tanggal_berangkat) return 0;
+            const d = new Date(item.tanggal_berangkat).getTime();
+            return isNaN(d) ? 0 : d;
+        };
+
+        if (sortCol === 'id_perjalanan' || sortCol === 'pukul_kapal_berangkat' || sortCol === 'tanggal_berangkat' || !data_name) {
             unique.sort((a, b) => {
+                let timeA = getTime(a);
+                let timeB = getTime(b);
+                if (timeA !== timeB) {
+                    return sortDir === 'DESC' ? timeB - timeA : timeA - timeB;
+                }
+                let jamA = String(a.pukul_kapal_berangkat || '');
+                let jamB = String(b.pukul_kapal_berangkat || '');
+                if (jamA !== jamB) {
+                    return sortDir === 'DESC'
+                        ? jamB.localeCompare(jamA)
+                        : jamA.localeCompare(jamB);
+                }
+                let idA = a.id_perjalanan || 0;
+                let idB = b.id_perjalanan || 0;
+                return sortDir === 'DESC' ? idB - idA : idA - idB;
+            });
+        } else if (sortCol === 'no_spb') {
+            unique.sort((a, b) => {
+                let idA = a.id_perjalanan || 0;
+                let idB = b.id_perjalanan || 0;
                 let spbA = a.spb?.no_spb || '';
                 let spbB = b.spb?.no_spb || '';
                 let numA = parseSpbNumber(spbA);
@@ -265,9 +294,12 @@ const getPerjalananByFilter = async (req, res) => {
                 if (numA !== numB) {
                     return sortDir === 'DESC' ? numB - numA : numA - numB;
                 }
-                return sortDir === 'DESC'
-                    ? spbB.localeCompare(spbA, undefined, { numeric: true })
-                    : spbA.localeCompare(spbB, undefined, { numeric: true });
+                if (spbA !== spbB) {
+                    return sortDir === 'DESC'
+                        ? spbB.localeCompare(spbA, undefined, { numeric: true })
+                        : spbA.localeCompare(spbB, undefined, { numeric: true });
+                }
+                return sortDir === 'DESC' ? idB - idA : idA - idB;
             });
         }
 
@@ -283,7 +315,7 @@ const getPerjalananByFilter = async (req, res) => {
             totalData: unique.length
         });
     } catch (error) {
-        console.log(error);
+        console.error("GET PERJALANAN BY FILTER ERROR:", error);
         return res.status(500).json({ msg: "Terjadi kesalahan pada server" });
     }
 };
@@ -296,7 +328,6 @@ const getPerjalanan = async (req, res) => {
         const dataUser = await users.findByPk(req.user.id)
         let wilker = dataUser.wilayah_kerja
 
-        console.log(wilker)
         let whereClause
         if (wilker.toLowerCase() != "pusat") {
             whereClause = {
@@ -318,8 +349,6 @@ const getPerjalanan = async (req, res) => {
                 ]
             }
         }
-
-        console.log(whereClause)
 
         let pagination = {}
 
