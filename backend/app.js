@@ -44,6 +44,8 @@ var statusPelayaranRouter = require('./routes/statusPelayaran')
 var asalKapalRouter = require('./routes/asalKapal')
 var satuanMuatanRouter = require('./routes/satuanMuatan')
 var klasifikasiMuatanRouter = require('./routes/klasifikasiMuatan')
+var spbAsalRouter = require('./routes/spbAsal')
+var spbAsalModel = require('./model/spbAsalModel')
 
 var app = express();
 
@@ -63,7 +65,10 @@ app.use(express.static(path.join(__dirname, 'public')));
     // await db.sync({ force: true });
     // await db.query('SET FOREIGN_KEY_CHECKS = 1');
     configDb()
-    console.log("berhasil sync")
+    await spbAsalModel.sync({ alter: true });
+    const muatanModel = require('./model/muatanModel');
+    await muatanModel.sync({ alter: true });
+    console.log("berhasil sync spb_asal & muatan")
   } catch (error) {
     console.log(error)
   }
@@ -90,6 +95,7 @@ app.use('/perjalanan', perjalananRouter);
 app.use('/pelabuhan', pelabuhanRouter);
 app.use('/status-pelayaran', statusPelayaranRouter);
 app.use('/asal-kapal', asalKapalRouter);
+app.use('/spb-asal', spbAsalRouter);
 app.use('/log-user', logUserRouter);
 
 // catch 404 and forward to error handler

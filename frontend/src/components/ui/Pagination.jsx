@@ -27,7 +27,7 @@ const Pagination = ({ currentPage, totalPages, paginate }) => {
           <button
             onClick={onPrevious}
             disabled={currentPage === 1}
-            className="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200 disabled:opacity-50 transition-colors"
           >
             <span className="hidden sm:inline">Sebelumnya</span>
             <FaChevronLeft className="sm:hidden h-4 w-4" />
@@ -36,16 +36,20 @@ const Pagination = ({ currentPage, totalPages, paginate }) => {
         
         {paginationRange.map((pageNumber, index) => {
           if (pageNumber === DOTS) {
-            return <li key={DOTS + index} className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300">...</li>;
+            return (
+              <li key={DOTS + index} className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-400">
+                ...
+              </li>
+            );
           }
           return (
             <li key={pageNumber}>
               <button
                 onClick={() => paginate(pageNumber)}
-                className={`px-3 py-2 leading-tight border border-gray-300 ${
+                className={`px-3 py-2 leading-tight border transition-colors ${
                   currentPage === pageNumber
-                    ? 'z-10 text-blue-600 bg-blue-50 hover:bg-blue-100'
-                    : 'text-gray-500 bg-white hover:bg-gray-100'
+                    ? 'z-10 text-indigo-600 bg-indigo-50 border-indigo-200 hover:bg-indigo-100 dark:bg-gray-700 dark:text-white dark:border-gray-600 font-semibold'
+                    : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
                 }`}
               >
                 {pageNumber}
@@ -58,7 +62,7 @@ const Pagination = ({ currentPage, totalPages, paginate }) => {
           <button
             onClick={onNext}
             disabled={currentPage === totalPages}
-            className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200 disabled:opacity-50 transition-colors"
           >
             <span className="hidden sm:inline">Berikutnya</span>
             <FaChevronRight className="sm:hidden h-4 w-4" />

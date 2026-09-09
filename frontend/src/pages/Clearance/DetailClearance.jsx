@@ -83,8 +83,8 @@ const DetailClearance = () => {
                             <h1 className="text-2xl font-bold text-gray-800">Detail SPB: {data.spb?.no_spb || '-'}</h1>
                             <div className="flex flex-wrap items-center gap-3">
                                 <Link to={`/clearance/edit/${data.id_perjalanan}`} className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 transition-colors">Edit Data</Link>
-                                <button onClick={() => setIsConfirmOpen(true)} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors">Hapus</button>
-                                <button onClick={handlePrint} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Cetak SPB</button>
+                                <button onClick={() => setIsConfirmOpen(true)} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-950/60 dark:text-red-300 dark:hover:bg-red-900/60 rounded-lg transition-colors">Hapus</button>
+                                <button onClick={handlePrint} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:border dark:border-gray-700 rounded-lg transition-colors">Cetak SPB</button>
                             </div>
                         </div>
                     </div>

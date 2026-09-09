@@ -37,6 +37,9 @@ const AppLayout = () => {
       <Toaster 
         position="top-right"
         reverseOrder={false}
+        toastOptions={{
+          className: 'dark:!bg-gray-800 dark:!text-white dark:!border-gray-700 border border-gray-200 shadow-xl rounded-2xl',
+        }}
       />
       <LayoutContent />
     </SidebarProvider>

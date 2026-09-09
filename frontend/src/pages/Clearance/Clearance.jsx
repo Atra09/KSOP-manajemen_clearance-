@@ -578,15 +578,23 @@ function Clearance() {
         return n.toString();
     }
 
+    const formatTitleCase = (str) => {
+        if (!str) return '';
+        return str
+            .toLowerCase()
+            .replace(/(?:^|\s|-|\/)\S/g, (match) => match.toUpperCase());
+    };
+
     const getMuatanText = (d, jenis = 'berangkat') => {
         const items = [];
         if (Array.isArray(d.muatans)) {
             d.muatans.forEach(m => {
                 if (m.jenis_perjalanan === jenis) {
-                    const nama = m.kategori_muatan?.nama_kategori_muatan || '';
-                    if (!nama) return;
+                    const rawNama = m.kategori_muatan?.nama_kategori_muatan || '';
+                    if (!rawNama) return;
+                    const nama = formatTitleCase(rawNama);
                     let qtyText = '';
-                    const namaLower = nama.toLowerCase();
+                    const namaLower = rawNama.toLowerCase();
 
                     if (m.liter && m.liter > 0) {
                         qtyText = `${m.liter.toLocaleString('id-ID')} liter`;

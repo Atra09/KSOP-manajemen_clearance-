@@ -33,15 +33,11 @@ const UserMenuContent = ({ onClose, user }) => (
           Profil Saya
         </Link>
       </li>
-      <li>
-        <Link to="/settings" onClick={onClose} className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 transition-colors">
-          Pengaturan
-        </Link>
-      </li>
     </ul>
     <div className="p-2 border-t border-gray-200 dark:border-gray-800">
       <button 
         onClick={() => { 
+          sessionStorage.clear();
           localStorage.removeItem('token');
           window.location.href = '/signin';
           onClose(); 

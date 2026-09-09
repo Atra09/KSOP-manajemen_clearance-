@@ -72,12 +72,13 @@ const ActionDropdown = ({ item, onSuccess, statusCategories = [] }) => {
   };
 
   const handleDelete = (itemToDelete) => {
+    const isDark = document.documentElement.classList.contains('dark');
     toast((t) => (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm text-gray-800">
-          Apakah Anda yakin ingin menghapus <strong>{itemToDelete.spb?.no_spb || 'data ini'}</strong>?
+      <div className="flex flex-col gap-3 p-1">
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          Apakah Anda yakin ingin menghapus <strong className="font-bold text-red-600 dark:text-red-400">{itemToDelete.spb?.no_spb || 'data ini'}</strong>?
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-1">
           <button
             onClick={async () => {
               toast.dismiss(t.id);
@@ -90,19 +91,28 @@ const ActionDropdown = ({ item, onSuccess, statusCategories = [] }) => {
                 console.error("Delete error:", error);
               }
             }}
-            className="w-full px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+            className="w-full px-3.5 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm cursor-pointer"
           >
             Ya, Hapus
           </button>
           <button
             onClick={() => toast.dismiss(t.id)}
-            className="w-full px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+            className="w-full px-3.5 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors border border-gray-300 dark:border-gray-600 cursor-pointer"
           >
             Batal
           </button>
         </div>
       </div>
-    ));
+    ), {
+      style: {
+        background: isDark ? '#1f2937' : '#ffffff',
+        color: isDark ? '#ffffff' : '#111827',
+        border: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
+        borderRadius: '0.875rem',
+        padding: '14px 18px',
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
+      }
+    });
   };
 
   const currentStatus = (item.status_pelayaran || 'Terbit').toUpperCase();
@@ -122,7 +132,7 @@ const ActionDropdown = ({ item, onSuccess, statusCategories = [] }) => {
         triggerRef={triggerRef}
         className="absolute right-0 top-full z-20 mt-1 flex w-52 flex-col rounded-xl border border-gray-200 bg-white p-2 shadow-xl dark:bg-gray-800 dark:border-gray-700"
       >
-        <Link to={`/clearance/${item.id_perjalanan}`} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+        <Link to={`/clearance/${item.id_perjalanan}`} onClick={() => sessionStorage.setItem('clearance_from_edit', 'true')} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
           <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -130,7 +140,7 @@ const ActionDropdown = ({ item, onSuccess, statusCategories = [] }) => {
           Lihat Detail
         </Link>
         
-        <Link to={`/clearance/edit/${item.id_perjalanan}`} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+        <Link to={`/clearance/edit/${item.id_perjalanan}`} onClick={() => sessionStorage.setItem('clearance_from_edit', 'true')} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
           <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>

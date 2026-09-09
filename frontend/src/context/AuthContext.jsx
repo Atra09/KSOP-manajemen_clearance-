@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+        sessionStorage.clear();
         localStorage.removeItem('token');
         setUser(null);
         window.location.href = '/signin';

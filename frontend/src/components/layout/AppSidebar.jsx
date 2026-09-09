@@ -38,6 +38,7 @@ const AppSidebar = () => {
         { name: 'Kategori Muatan', path: '/master/muatan' },
         { name: 'Pelabuhan', path: '/master/pelabuhan' },
         { name: 'Status Pelayaran', path: '/master/status-pelayaran' },
+        { name: 'SPB Asal', path: '/master/spb-asal' },
       ],
     },
     { 

@@ -50,7 +50,9 @@ html.dark .bg-white {
   color: #f3f4f6 !important;
 }
 
-html.dark .bg-gray-50 {
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-gray-200 {
   background-color: #1f2937 !important;
 }
 
@@ -310,30 +312,66 @@ html.dark .apexcharts-ycrosshairs {
   }
 }
 
-@media print {
-  .screen-only {
-    display: none !important;
-  }
-  .print-only {
-    display: block !important;
-  }
-}@page {
+@page {
   size: A4;
   margin: 0;
 }
 
-@media screen {
-  .print-only {
-    display: none !important;
-  }
-}
-
 @media print {
+  /* Reset document flow & parent containers to prevent Chromium blank page clipping */
+  html, body, #root, #root > div, main, .xl\:flex, .flex-1 {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .screen-only {
     display: none !important;
   }
+
   .print-only {
     display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 210mm !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    z-index: 999999 !important;
+  }
+
+  /* Reset all text & backgrounds inside print-only to light mode black on white */
+  .print-only,
+  .print-only *,
+  html.dark .print-only,
+  html.dark .print-only * {
+    background-color: transparent !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+
+  .print-only {
+    background-color: #ffffff !important;
+  }
+
+  /* Preserve red warning box styling in SPB */
+  .print-only [style*="c00000"],
+  .print-only [style*="#c00000"],
+  .print-only [style*="rgb(192, 0, 0)"],
+  html.dark .print-only [style*="c00000"],
+  html.dark .print-only [style*="#c00000"],
+  html.dark .print-only [style*="rgb(192, 0, 0)"] {
+    color: #c00000 !important;
+    border-color: #c00000 !important;
   }
 }
 

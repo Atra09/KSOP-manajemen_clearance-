@@ -32,6 +32,7 @@ const muatan = db.define("muatan", {
     ton: DataTypes.DOUBLE,
     m3: DataTypes.DOUBLE,
     liter: DataTypes.DOUBLE,
+    bobot_per_unit_kg: DataTypes.DOUBLE,
 }, 
 {
     freezeTableName: true

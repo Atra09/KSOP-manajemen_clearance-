@@ -109,6 +109,7 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
         margin: "0 auto",
         position: "relative",
         backgroundColor: "#fff",
+        color: "#000",
         fontFamily: "Calibri, sans-serif",
         fontSize: "11pt",
         overflow: "hidden",

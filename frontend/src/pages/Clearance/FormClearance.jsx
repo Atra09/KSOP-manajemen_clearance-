@@ -41,6 +41,7 @@ const FormClearance = () => {
     const [agenData, setAgenData] = useState([]);
     const [kategoriMuatanData, setKategoriMuatanData] = useState([]);
     const [pelabuhanData, setPelabuhanData] = useState([]);
+    const [spbAsalData, setSpbAsalData] = useState([]);
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState(initialState);
 
@@ -101,6 +102,7 @@ const FormClearance = () => {
                     m3: valM3,
                     unit: valUnit,
                     liter: valLiter,
+                    bobot_per_unit_kg: m.bobot_per_unit_kg || m.kategori_muatan?.bobot_per_unit_kg || '',
                 };
             }
         });
@@ -113,7 +115,7 @@ const FormClearance = () => {
                 const [
                     agenRes, kabupatenRes, kapalRes,
                     kecamatanRes, nahkodaRes, kategoriMuatanRes,
-                    pelabuhanRes
+                    pelabuhanRes, spbAsalRes
                 ] = await Promise.all([
                     axiosInstance.get('/agen'),
                     axiosInstance.get('/kabupaten'),
@@ -121,7 +123,8 @@ const FormClearance = () => {
                     axiosInstance.get('/kecamatan'),
                     axiosInstance.get('/nahkoda'),
                     axiosInstance.get('/kategori-muatan'),
-                    axiosInstance.get('/pelabuhan')
+                    axiosInstance.get('/pelabuhan'),
+                    axiosInstance.get('/spb-asal')
                 ]);
 
                 setAgenData(agenRes.data.datas.map(d => ({ nama: d.nama_agen, id: d.id_agen })));
@@ -137,6 +140,7 @@ const FormClearance = () => {
                     nama_satuan_muatan: d.satuan_muatan?.nama_satuan_muatan || 'unit'
                 })));
                 setPelabuhanData(pelabuhanRes.data.datas.map(d => ({ nama: d.nama_pelabuhan, id: d.id_pelabuhan })));
+                setSpbAsalData((spbAsalRes.data?.datas || []).map(d => ({ id: d.id_spb_asal, kode_spb: d.kode_spb, asal: d.asal, nama: `${d.kode_spb} (${d.asal})` })));
 
                 let finalFormData = initialState;
 
@@ -309,7 +313,8 @@ const FormClearance = () => {
                     muatanBarangBackend.push({
                         jenis_perjalanan: item.jenis_perjalanan,
                         id_kategori_muatan: item.id_kategori_muatan,
-                        ton, m3, unit, liter
+                        ton, m3, unit, liter,
+                        bobot_per_unit_kg: parseNumeric(item.bobot_per_unit_kg)
                     });
                 }
             } else if (item.type === 'kendaraan') {
@@ -468,7 +473,7 @@ const FormClearance = () => {
                             handleKapalChange={handleKapalChange} kapalOptions={kapalData}
                             nahkodaOptions={nahkodaData} kabupatenOptions={kabupatenData}
                             kecamatanOptions={kecamatanData} agenOptions={agenData}
-                            pelabuhanOptions={pelabuhanData}
+                            pelabuhanOptions={pelabuhanData} spbAsalOptions={spbAsalData}
                             jenisPpkOptions={[{ id: '27', nama: '27' }, { id: '29', nama: '29' }]}
                         />
                     )}

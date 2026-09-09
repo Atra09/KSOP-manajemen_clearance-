@@ -1,12 +1,85 @@
+import React, { useState, useRef, useEffect } from 'react';
 import Label from '../form/Label';
 import InputField from '../form/InputField';
 import Select from '../form/Select';
 import Button from '../ui/Button';
 
+const SpbAsalComboboxInput = ({ value, onChange, options, name, id, required }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleSelectOption = (prefix) => {
+        onChange({ target: { name, value: prefix } });
+        setIsOpen(false);
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    };
+
+    return (
+        <div className="relative w-full" ref={containerRef}>
+            <div className="relative flex items-center">
+                <input
+                    ref={inputRef}
+                    id={id}
+                    name={name}
+                    value={value || ''}
+                    onChange={onChange}
+                    onFocus={() => setIsOpen(true)}
+                    required={required}
+                    type="text"
+                    className="w-full h-11 pl-4 pr-10 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+                    placeholder="Pilih atau ketik No SPB Asal..."
+                    autoComplete="off"
+                />
+                {options.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
+                    >
+                        <svg className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                )}
+            </div>
+
+            {isOpen && options.length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-1 z-30 max-h-52 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl py-1">
+                    {options.map((opt) => (
+                        <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => handleSelectOption(opt.kode_spb)}
+                            className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-between transition-colors cursor-pointer"
+                        >
+                            <span className="font-semibold">{opt.kode_spb}</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">({opt.asal})</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const Step1DataKapal = ({
     formData, setFormData, nextStep, handleKapalChange,
     kapalOptions, nahkodaOptions, kabupatenOptions,
-    kecamatanOptions, agenOptions, jenisPpkOptions, pelabuhanOptions
+    kecamatanOptions, agenOptions, jenisPpkOptions, pelabuhanOptions,
+    spbAsalOptions = []
 }) => {
 
     const handleChange = (e) => {
@@ -119,13 +192,13 @@ const Step1DataKapal = ({
                     </div>
                     <div>
                         <Label htmlFor="noSpbAsal">No SPB Asal</Label>
-                        <InputField
+                        <SpbAsalComboboxInput
                             id="noSpbAsal"
                             name="no_spb_asal"
                             value={formData.spb?.no_spb_asal || ''}
                             onChange={handleChange}
+                            options={spbAsalOptions}
                             required
-                            type="text"
                         />
                     </div>
                     <div><Label htmlFor="tanggalClearance">Tanggal Clearance</Label><InputField id="tanggalClearance" name="tanggal_clearance" type="date" value={formData.tanggal_clearance || ''} onChange={handleChange} required /></div>
