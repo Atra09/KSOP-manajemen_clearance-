@@ -699,10 +699,11 @@ const getTotalPerjalananPerMonth = async (req, res) => {
             {
                 attributes: [
                     [fn("MONTH", col("tanggal_clearance")), 'bulan'],
+                    'ppk',
                     [fn("COUNT", col("id_perjalanan")), 'jumlah_perjalanan'],
                 ],
                 where: literal(`YEAR(tanggal_clearance) = ${targetYear}`),
-                group: [fn('MONTH', col("tanggal_clearance"))],
+                group: [fn('MONTH', col("tanggal_clearance")), 'ppk'],
                 order: [[fn('MONTH', col("tanggal_clearance")), 'ASC']]
             }
         )
@@ -711,12 +712,25 @@ const getTotalPerjalananPerMonth = async (req, res) => {
         for (let i = 0; i < 12; i++) {
             defaultData[i] = {
                 bulan: i + 1,
-                jumlah_perjalanan: 0
+                jumlah_perjalanan: 0,
+                ppk_27: 0,
+                ppk_29: 0
             }
         }
 
         datas.forEach(d => {
-            defaultData[d.dataValues.bulan - 1].jumlah_perjalanan = d.dataValues.jumlah_perjalanan
+            const bulanIdx = d.dataValues.bulan - 1;
+            const count = parseInt(d.dataValues.jumlah_perjalanan, 10) || 0;
+            const ppkVal = String(d.dataValues.ppk || '');
+
+            if (bulanIdx >= 0 && bulanIdx < 12) {
+                defaultData[bulanIdx].jumlah_perjalanan += count;
+                if (ppkVal === '27') {
+                    defaultData[bulanIdx].ppk_27 += count;
+                } else {
+                    defaultData[bulanIdx].ppk_29 += count;
+                }
+            }
         })
 
         return res.status(200).json({ msg: "Berhasil mengambil data", defaultData })

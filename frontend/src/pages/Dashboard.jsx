@@ -41,6 +41,38 @@ const Dashboard = () => {
     fetchPerjalananPerBulan(selectedYear);
   }, [selectedYear]);
 
+  // Recalculate monthly clearance stacked chart data (PPK 27 & PPK 29) whenever allPerjalanan or selectedYear changes
+  useEffect(() => {
+    if (!allPerjalanan || allPerjalanan.length === 0) return;
+
+    const monthlyMap = Array.from({ length: 12 }, (_, i) => ({
+      bulan: i + 1,
+      jumlah_perjalanan: 0,
+      ppk_27: 0,
+      ppk_29: 0
+    }));
+
+    allPerjalanan.forEach(item => {
+      if (!item.tanggal_clearance) return;
+      const d = new Date(item.tanggal_clearance);
+      if (isNaN(d.getTime())) return;
+      if (d.getFullYear() === selectedYear) {
+        const mIdx = d.getMonth();
+        if (mIdx >= 0 && mIdx < 12) {
+          monthlyMap[mIdx].jumlah_perjalanan += 1;
+          const ppkStr = String(item.ppk || '').trim();
+          if (ppkStr === '27' || ppkStr.includes('27')) {
+            monthlyMap[mIdx].ppk_27 += 1;
+          } else {
+            monthlyMap[mIdx].ppk_29 += 1;
+          }
+        }
+      }
+    });
+
+    setTotalPerjalananPerBulan(monthlyMap);
+  }, [allPerjalanan, selectedYear]);
+
   useEffect(() => {
     fetchTotalKategori(selectedYear, selectedMonth);
   }, [selectedYear, selectedMonth]);
@@ -124,7 +156,19 @@ const Dashboard = () => {
   const fetchPerjalananPerBulan = async (year) => {
     try {
       let response = await axiosInstance.get(`/perjalanan/total-month?year=${year}`);
-      setTotalPerjalananPerBulan(response.data.defaultData || []);
+      let rawData = response.data.defaultData || [];
+      let formatted = rawData.map(d => ({
+        bulan: d.bulan,
+        jumlah_perjalanan: d.jumlah_perjalanan || 0,
+        ppk_27: d.ppk_27 ?? 0,
+        ppk_29: d.ppk_29 ?? (d.jumlah_perjalanan || 0)
+      }));
+      setTotalPerjalananPerBulan(prev => {
+        if (allPerjalanan && allPerjalanan.length > 0) {
+          return prev;
+        }
+        return formatted;
+      });
     } catch (err) {
       console.error(err);
     }

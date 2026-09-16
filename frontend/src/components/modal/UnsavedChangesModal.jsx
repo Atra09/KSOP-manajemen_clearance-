@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 export default function UnsavedChangesModal({
   isOpen,
@@ -9,8 +10,8 @@ export default function UnsavedChangesModal({
 }) {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 top-0 left-0 w-screen h-screen z-[999999] flex items-center justify-center bg-black/70 dark:bg-black/85 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-100 dark:border-gray-700 transform transition-all scale-100">
         
         {/* Header with Warning Icon */}
@@ -79,6 +80,7 @@ export default function UnsavedChangesModal({
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

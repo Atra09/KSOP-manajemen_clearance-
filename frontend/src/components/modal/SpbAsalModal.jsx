@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../api/axiosInstance';
 
@@ -56,9 +57,9 @@ const SpbAsalModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in duration-200">
+    return createPortal(
+        <div className="fixed inset-0 top-0 left-0 w-screen h-screen z-[999999] flex items-center justify-center p-4 bg-black/70 dark:bg-black/85 backdrop-blur-sm animate-in fade-in zoom-in duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                         {initialData ? 'Edit SPB Asal' : 'Tambah SPB Asal'}
@@ -122,7 +123,8 @@ const SpbAsalModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

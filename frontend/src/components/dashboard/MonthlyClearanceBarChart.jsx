@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import Chart from "react-apexcharts";
+import { useTheme } from "../../context/ThemeContext";
 
 const MONTH_NAMES = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -14,20 +15,21 @@ const MonthlyClearanceBarChart = ({
   onSelectYear = () => {},
   availableYears = [2026, 2025, 2024]
 }) => {
+  let isDark = false;
+  try {
+    const { theme } = useTheme();
+    isDark = theme === "dark";
+  } catch (e) {
+    isDark = document.documentElement.classList.contains("dark");
+  }
+
   const selectedMonthRef = useRef(selectedMonth);
   useEffect(() => {
     selectedMonthRef.current = selectedMonth;
   }, [selectedMonth]);
 
-  const filteredData = datas.map(d => d.jumlah_perjalanan);
-
-  // Custom colors for bars: highlight selected month if active
-  const colors = datas.map((_, index) => {
-    if (selectedMonth && index === selectedMonth - 1) {
-      return "#10B981"; // Emerald/Green for selected month
-    }
-    return "#4F46E5"; // Default Indigo
-  });
+  const ppk29Data = datas.map(d => (d.ppk_29 !== undefined ? d.ppk_29 : (d.jumlah_perjalanan || 0)));
+  const ppk27Data = datas.map(d => (d.ppk_27 !== undefined ? d.ppk_27 : 0));
 
   const handleMonthClick = (index) => {
     if (typeof index !== 'number' || index < 0 || index >= 12) return;
@@ -41,10 +43,11 @@ const MonthlyClearanceBarChart = ({
   };
   
   const options = {
-    colors: colors,
+    colors: ["#6366F1", "#EF4444"], // Ungu untuk PPK 29 (bawah), Merah untuk PPK 27 (atas)
     chart: {
       fontFamily: "Outfit, sans-serif",
       type: "bar",
+      stacked: true,
       height: 350,
       toolbar: { show: false },
       events: {
@@ -64,15 +67,14 @@ const MonthlyClearanceBarChart = ({
       bar: {
         horizontal: false,
         columnWidth: "55%",
-        borderRadius: 8,
+        borderRadius: 6,
         borderRadiusApplication: "end",
-        distributed: true, // Allows per-bar colors
       },
     },
     dataLabels: { enabled: false },
     stroke: {
       show: true,
-      width: 4,
+      width: 2,
       colors: ["transparent"],
     },
     xaxis: {
@@ -87,14 +89,67 @@ const MonthlyClearanceBarChart = ({
         }
       }
     },
-    legend: { show: false },
+    legend: { 
+      show: true,
+      position: 'top',
+      horizontalAlign: 'right',
+      fontSize: '12px',
+      labels: {
+        colors: '#6B7280'
+      }
+    },
     yaxis: { title: { text: undefined } },
     grid: { yaxis: { lines: { show: true } } },
     fill: { opacity: 1 },
     tooltip: {
-      theme: "dark",
-      x: { show: true, formatter: (val) => `Bulan ${val}` },
-      y: { formatter: (val) => `${val} clearance` },
+      theme: isDark ? "dark" : "light",
+      custom: function({ series, seriesIndex, dataPointIndex, w }) {
+        const monthName = MONTH_NAMES[dataPointIndex] || "";
+        const valPPK29 = series[0]?.[dataPointIndex] || 0;
+        const valPPK27 = series[1]?.[dataPointIndex] || 0;
+        const totalVal = valPPK29 + valPPK27;
+
+        const bg = isDark ? "#0f172a" : "#ffffff";
+        const textColor = isDark ? "#ffffff" : "#1f2937";
+        const borderColor = isDark ? "#1e293b" : "#e5e7eb";
+        const dividerColor = isDark ? "#374151" : "#f3f4f6";
+        const headerTextColor = isDark ? "#f3f4f6" : "#111827";
+        const val29Color = isDark ? "#a5b4fc" : "#4f46e5";
+        const val27Color = isDark ? "#fca5a5" : "#dc2626";
+        const totalLabelColor = isDark ? "#d1d5db" : "#4b5563";
+        const totalValColor = isDark ? "#f59e0b" : "#d97706";
+        const shadow = isDark
+          ? "0 10px 25px -5px rgba(0,0,0,0.5)"
+          : "0 10px 25px -5px rgba(0,0,0,0.12), 0 4px 6px -4px rgba(0,0,0,0.08)";
+
+        return `
+          <div style="padding: 10px 14px; background: ${bg}; color: ${textColor}; border-radius: 12px; border: 1px solid ${borderColor}; font-family: Outfit, sans-serif; font-size: 12px; box-shadow: ${shadow}; transition: all 0.2s ease;">
+            <div style="font-weight: 700; border-bottom: 1px solid ${dividerColor}; padding-bottom: 6px; margin-bottom: 8px; color: ${headerTextColor};">
+              Bulan ${monthName} ${selectedYear}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; justify-content: space-between; gap: 16px;">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #6366F1; display: inline-block;"></span>
+                  <span>PPK 29:</span>
+                </span>
+                <strong style="color: ${val29Color};">${valPPK29} clearance</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; gap: 16px;">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #EF4444; display: inline-block;"></span>
+                  <span>PPK 27:</span>
+                </span>
+                <strong style="color: ${val27Color};">${valPPK27} clearance</strong>
+              </div>
+              <div style="border-top: 1px solid ${dividerColor}; margin-top: 6px; padding-top: 6px; display: flex; justify-content: space-between; gap: 16px;">
+                <span style="font-weight: 600; color: ${totalLabelColor};">Jumlah Clearance:</span>
+                <strong style="color: ${totalValColor}; font-size: 13px;">${totalVal} clearance</strong>
+              </div>
+            </div>
+          </div>
+        `;
+      }
     },
     responsive: [
       {
@@ -119,7 +174,8 @@ const MonthlyClearanceBarChart = ({
   };
 
   const series = [
-    { name: "Jumlah Clearance", data: filteredData },
+    { name: "PPK 29", data: ppk29Data },
+    { name: "PPK 27", data: ppk27Data },
   ];
 
   return (

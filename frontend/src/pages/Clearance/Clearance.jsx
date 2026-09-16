@@ -91,7 +91,7 @@ const getColLetter = (colIdx) => {
 
 const CARGO_SUB_HEADERS = [
     "Gol. I", "Gol. II", "Gol. III", "Gol. IV", "Gol. V", "Bego",
-    "Mitan", "Solar (ltr)", "Bensin (ltr)", "krosene", "Avtur", "LPG 3 kg (tb)", "LPG 12 kg (tb)",
+    "Mitan", "Solar (ltr)", "Bensin (ltr)", "krosene", "Avtur", "LPG 3 kg (tb)", "LPG 12 kg (tb)", "BBM Lain",
     "Beras (ton)", "Jagung (ton)", "Garam (ton)", "Tepung (ton)", "Gula (ton)", "Kedelei", "Palen (ton)", "Kelapa (biji)", "Kacang (ton)", "Sayur & Buah (ton)", "Mangga (krg)", "Rmpt Laut (ton)",
     "Keramik (ton)", "Semen (ton)", "Genteng (biji)", "Batu Bata (b)/Paving", "Pasir (ton)", "Bahan Bangunan Lain (ton)",
     "Barkas (ton)", "Tbg Kosong", "Air Galon Kosong", "Ikan (ton)", "Hewan/Ternak", "Kayu m3", "Pupuk (ton)", "Bagasi Lainnya (ton)"
@@ -106,32 +106,33 @@ const CARGO_COL_INDEX_MAP = {
     'Avtur': 10, 'Avtur (ltr)': 10,
     'LPG 3 kg (tb)': 11, 'LPG 3kg': 11, 'LPG 3 kg': 11,
     'LPG 12 kg (tb)': 12, 'LPG 12kg': 12, 'LPG 12 kg': 12,
-    'Beras': 13, 'Beras (ton)': 13,
-    'Jagung': 14, 'Jagung (ton)': 14,
-    'Garam': 15, 'Garam (ton)': 15,
-    'Tepung': 16, 'Tepung (ton)': 16, 'Terigu': 16,
-    'Gula': 17, 'Gula (ton)': 17,
-    'Kedelei': 18, 'Kedelai': 18, 'Kedelai (ton)': 18,
-    'Palen': 19, 'Palen (ton)': 19,
-    'Kelapa': 20, 'Kelapa (biji)': 20,
-    'Kacang': 21, 'Kacang (ton)': 21, 'Kcang ijo (ton)': 21, 'Kacang ijo (ton)': 21, 'Kacang Ijo': 21,
-    'Sayur & Buah': 22, 'Sayur & Buah (ton)': 22, 'Sayuran & Buah': 22, 'Sayur dan Buah': 22,
-    'Mangga': 23, 'Mangga (kg)': 23, 'Mangga (krg)': 23, 'Mangga (ton)': 23,
-    'Rumput Laut': 24, 'Rmpt Laut (ton)': 24, 'Rumput Laut (ton)': 24,
-    'Keramik': 25, 'Keramik (ton)': 25,
-    'Semen': 26, 'Semen (ton)': 26,
-    'Genteng': 27, 'Genteng (biji)': 27,
-    'Batu Bata (bj)/Paving': 28, 'Batu Bata (b)/Paving': 28, 'Batu Bata': 28, 'Paving': 28, 'Hebel': 28,
-    'Pasir': 29, 'Pasir (ton)': 29,
-    'Bahan Bangunan Lain (ton)': 30, 'Bahan Bangunan Lain': 30, 'Bahan Bangunan': 30, 'Palen Bangunan': 30,
-    'Barkas': 31, 'Barkas (ton)': 31, 'Berkas (ton)': 31, 'Rongsokan': 31,
-    'Tbg Kosong': 32, 'Tabung Kosong': 32, 'Tabung LPG Kosong': 32, 'Tabung LPG 3kg Kosong': 32, 'Tabung LPG 3 kg Kosong': 32, 'Tabung LPG 12kg Kosong': 32, 'Tabung LPG 12 kg Kosong': 32, 'Tabung LPG': 32, 'Tabung Gas': 32, 'Tabung Gas Kosong': 32, 'Tabung Kosong LPG': 32, 'Tabung': 32, 'LPG Kosong': 32, 'Wadah Kosong': 32, 'Kemasan Kosong': 32, 'Kemasan & Wadah Kosong': 32, 'Kemasan & Wadah': 32,
-    'Air Galon Kosong': 33, 'Air Galon': 33, 'Galon Kosong': 33, 'Galon': 33,
-    'Ikan': 34, 'Ikan (ton)': 34,
-    'Hewan/Ternak': 35, 'Hewan': 35, 'Ternak': 35, 'Ternak/Hewan': 35,
-    'Kayu': 36, 'Kayu m3': 36, 'Kayu (m3)': 36,
-    'Pupuk': 37, 'Pupuk (ton)': 37,
-    'Bagasi Lainnya (ton)': 38, 'Bagasi Lainnya': 38, 'Lainnya': 38, 'Barang (ton)': 38
+    'BBM Lain': 13, 'BBM Lain (ltr)': 13, 'BBM Lain (ton)': 13, 'BBM Lainnya': 13, 'BBM': 13,
+    'Beras': 14, 'Beras (ton)': 14,
+    'Jagung': 15, 'Jagung (ton)': 15,
+    'Garam': 16, 'Garam (ton)': 16,
+    'Tepung': 17, 'Tepung (ton)': 17, 'Terigu': 17,
+    'Gula': 18, 'Gula (ton)': 18,
+    'Kedelei': 19, 'Kedelai': 19, 'Kedelai (ton)': 19,
+    'Palen': 20, 'Palen (ton)': 20,
+    'Kelapa': 21, 'Kelapa (biji)': 21,
+    'Kacang': 22, 'Kacang (ton)': 22, 'Kcang ijo (ton)': 22, 'Kacang ijo (ton)': 22, 'Kacang Ijo': 22,
+    'Sayur & Buah': 23, 'Sayur & Buah (ton)': 23, 'Sayuran & Buah': 23, 'Sayur dan Buah': 23,
+    'Mangga': 24, 'Mangga (kg)': 24, 'Mangga (krg)': 24, 'Mangga (ton)': 24,
+    'Rumput Laut': 25, 'Rmpt Laut (ton)': 25, 'Rumput Laut (ton)': 25,
+    'Keramik': 26, 'Keramik (ton)': 26,
+    'Semen': 27, 'Semen (ton)': 27,
+    'Genteng': 28, 'Genteng (biji)': 28,
+    'Batu Bata (bj)/Paving': 29, 'Batu Bata (b)/Paving': 29, 'Batu Bata': 29, 'Paving': 29, 'Hebel': 29,
+    'Pasir': 30, 'Pasir (ton)': 30,
+    'Bahan Bangunan Lain (ton)': 31, 'Bahan Bangunan Lain': 31, 'Bahan Bangunan': 31, 'Palen Bangunan': 31,
+    'Barkas': 32, 'Barkas (ton)': 32, 'Berkas (ton)': 32, 'Rongsokan': 32,
+    'Tbg Kosong': 33, 'Tabung Kosong': 33, 'Tabung LPG Kosong': 33, 'Tabung LPG 3kg Kosong': 33, 'Tabung LPG 3 kg Kosong': 33, 'Tabung LPG 12kg Kosong': 33, 'Tabung LPG 12 kg Kosong': 33, 'Tabung LPG': 33, 'Tabung Gas': 33, 'Tabung Gas Kosong': 33, 'Tabung Kosong LPG': 33, 'Tabung': 33, 'LPG Kosong': 33, 'Wadah Kosong': 33, 'Kemasan Kosong': 33, 'Kemasan & Wadah Kosong': 33, 'Kemasan & Wadah': 33,
+    'Air Galon Kosong': 34, 'Air Galon': 34, 'Galon Kosong': 34, 'Galon': 34,
+    'Ikan': 35, 'Ikan (ton)': 35,
+    'Hewan/Ternak': 36, 'Hewan': 36, 'Ternak': 36, 'Ternak/Hewan': 36,
+    'Kayu': 37, 'Kayu m3': 37, 'Kayu (m3)': 37,
+    'Pupuk': 38, 'Pupuk (ton)': 38,
+    'Bagasi Lainnya (ton)': 39, 'Bagasi Lainnya': 39, 'Lainnya': 39, 'Barang (ton)': 39
 };
 
 const BONGKAR_MUAT_MERGES = [
@@ -140,10 +141,10 @@ const BONGKAR_MUAT_MERGES = [
     [1, 16, 1, 21], [2, 16, 2, 18], [2, 19, 3, 19], [2, 20, 3, 20], [2, 21, 3, 21],
     [1, 22, 3, 22],
     [1, 23, 1, 25], [2, 23, 2, 24], [1, 26, 1, 28], [2, 26, 2, 27], [1, 29, 3, 29],
-    [1, 30, 1, 68], [2, 30, 2, 35], [2, 36, 2, 42], [2, 43, 2, 54], [2, 55, 2, 60], [2, 61, 2, 68],
-    [1, 69, 1, 71], [2, 69, 2, 70], [1, 72, 1, 74], [2, 72, 2, 73], [1, 75, 3, 75],
-    [1, 76, 1, 114], [2, 76, 2, 81], [2, 82, 2, 88], [2, 89, 2, 100], [2, 101, 2, 106], [2, 107, 2, 114],
-    [1, 115, 3, 115], [1, 116, 3, 116]
+    [1, 30, 1, 69], [2, 30, 2, 35], [2, 36, 2, 43], [2, 44, 2, 55], [2, 56, 2, 61], [2, 62, 2, 69],
+    [1, 70, 1, 72], [2, 70, 2, 71], [1, 73, 1, 75], [2, 73, 2, 74], [1, 76, 3, 76],
+    [1, 77, 1, 116], [2, 77, 2, 82], [2, 83, 2, 90], [2, 91, 2, 102], [2, 103, 2, 108], [2, 109, 2, 116],
+    [1, 117, 3, 117], [1, 118, 3, 118]
 ];
 
 const fetchPerjalananData = async (params) => {
@@ -163,7 +164,7 @@ const fetchPerjalananData = async (params) => {
 };
 
 const extractCargoRowData = (d, jenis) => {
-    const slots = new Array(39).fill(0);
+    const slots = new Array(40).fill(0);
 
     d.muatans?.forEach(m => {
         if (m.jenis_perjalanan === jenis) {
@@ -194,13 +195,13 @@ const extractCargoRowData = (d, jenis) => {
                     ? CARGO_COL_INDEX_MAP[targetCol] 
                     : CARGO_COL_INDEX_MAP[m.kategori_muatan?.nama_kategori_muatan];
                 let qty = valDefault;
-                if ([6, 7, 8, 9].includes(idx)) {
+                if ([6, 7, 8, 9, 13].includes(idx)) {
                     qty = valLiter || valUnit || valDefault;
                 } else if (idx === 10) {
                     qty = valTon || valUnit || valDefault;
-                } else if ([11, 12, 20, 23, 27, 28, 33].includes(idx)) {
+                } else if ([11, 12, 21, 24, 28, 29, 34].includes(idx)) {
                     qty = valUnit || valDefault;
-                } else if (idx === 36) {
+                } else if (idx === 37) {
                     qty = valM3 || valTon || valDefault;
                 } else {
                     qty = valTon || valDefault;
@@ -225,9 +226,9 @@ const extractCargoRowData = (d, jenis) => {
                 (combinedName.includes('elpiji') && combinedName.includes('kosong'))
             ) {
                 if (combinedName.includes('galon')) {
-                    slotIndex = 33; qty = valUnit || valDefault; // Air Galon Kosong
+                    slotIndex = 34; qty = valUnit || valDefault; // Air Galon Kosong
                 } else {
-                    slotIndex = 32; qty = valTon || valDefault; // Tbg Kosong (menggunakan Ton)
+                    slotIndex = 33; qty = valTon || valDefault; // Tbg Kosong (menggunakan Ton)
                 }
             }
             // --- BAHAN BAKAR (Hanya untuk gas isi / BBM) ---
@@ -245,18 +246,25 @@ const extractCargoRowData = (d, jenis) => {
                 slotIndex = 11; qty = valUnit || valDefault;
             } else if (combinedName.includes('lpg 12') || combinedName.includes('lpg 50') || combinedName.includes('elpiji 12')) {
                 slotIndex = 12; qty = valUnit || valDefault;
+            } else if (
+                jenisName.includes('bahan bakar') || jenisName.includes('bbm') ||
+                catName.includes('bahan bakar') || catName.includes('bbm') ||
+                combinedName.includes('bahan bakar') || combinedName.includes('bbm')
+            ) {
+                // Fallback khusus Bahan Bakar -> BBM Lain [slot 13]
+                slotIndex = 13; qty = valLiter || valTon || valUnit || valDefault;
             }
             // --- BAHAN BANGUNAN (Didahulukan sebelum Palen agar "Palen Bangunan" masuk ke Bahan Bangunan) ---
             else if (combinedName.includes('paving') || combinedName.includes('batu bata') || combinedName.includes('bata') || combinedName.includes('hebel')) {
-                slotIndex = 28; qty = valUnit || valDefault; // Batu Bata (b)/Paving
+                slotIndex = 29; qty = valUnit || valDefault; // Batu Bata (b)/Paving
             } else if (combinedName.includes('semen')) {
-                slotIndex = 26; qty = valTon || valUnit || valDefault; // Semen (ton)
+                slotIndex = 27; qty = valTon || valUnit || valDefault; // Semen (ton)
             } else if (combinedName.includes('genteng')) {
-                slotIndex = 27; qty = valUnit || valDefault; // Genteng (biji)
+                slotIndex = 28; qty = valUnit || valDefault; // Genteng (biji)
             } else if (combinedName.includes('keramik') || combinedName.includes('granit')) {
-                slotIndex = 25; qty = valTon || valDefault; // Keramik (ton)
+                slotIndex = 26; qty = valTon || valDefault; // Keramik (ton)
             } else if (combinedName.includes('pasir') || combinedName.includes('sirtu') || combinedName.includes('batu split') || combinedName.includes('koral')) {
-                slotIndex = 29; qty = valTon || valDefault; // Pasir (ton)
+                slotIndex = 30; qty = valTon || valDefault; // Pasir (ton)
             } else if (
                 combinedName.includes('palen bangunan') ||
                 jenisName.includes('bahan bangunan') || jenisName.includes('bangunan') ||
@@ -266,31 +274,31 @@ const extractCargoRowData = (d, jenis) => {
                 combinedName.includes('spandek') || combinedName.includes('baja') || combinedName.includes('hollow')
             ) {
                 // Default fallback untuk kategori Bahan Bangunan -> Bahan Bangunan Lain (ton)
-                slotIndex = 30; qty = valTon || valDefault;
+                slotIndex = 31; qty = valTon || valDefault;
             }
             // --- MAKANAN & PRODUK OLAHAN / PERTANIAN ---
             else if (combinedName.includes('beras')) {
-                slotIndex = 13; qty = valTon || valDefault;
-            } else if (combinedName.includes('jagung')) {
                 slotIndex = 14; qty = valTon || valDefault;
-            } else if (combinedName.includes('garam')) {
+            } else if (combinedName.includes('jagung')) {
                 slotIndex = 15; qty = valTon || valDefault;
-            } else if (combinedName.includes('tepung') || combinedName.includes('terigu')) {
+            } else if (combinedName.includes('garam')) {
                 slotIndex = 16; qty = valTon || valDefault;
-            } else if (combinedName.includes('gula')) {
+            } else if (combinedName.includes('tepung') || combinedName.includes('terigu')) {
                 slotIndex = 17; qty = valTon || valDefault;
-            } else if (combinedName.includes('kedelai') || combinedName.includes('kedele')) {
+            } else if (combinedName.includes('gula')) {
                 slotIndex = 18; qty = valTon || valDefault;
-            } else if (combinedName.includes('kelapa')) {
-                slotIndex = 20; qty = valUnit || valDefault;
-            } else if (combinedName.includes('kacang') || combinedName.includes('kcang')) {
-                slotIndex = 21; qty = valTon || valDefault;
-            } else if (combinedName.includes('mangga')) {
-                slotIndex = 23; qty = valUnit || valDefault;
-            } else if (combinedName.includes('rumput laut') || combinedName.includes('rmpt laut')) {
-                slotIndex = 24; qty = valTon || valDefault;
-            } else if (combinedName.includes('palen') && !combinedName.includes('bangunan')) {
+            } else if (combinedName.includes('kedelai') || combinedName.includes('kedele')) {
                 slotIndex = 19; qty = valTon || valDefault;
+            } else if (combinedName.includes('kelapa')) {
+                slotIndex = 21; qty = valUnit || valDefault;
+            } else if (combinedName.includes('kacang') || combinedName.includes('kcang')) {
+                slotIndex = 22; qty = valTon || valDefault;
+            } else if (combinedName.includes('mangga')) {
+                slotIndex = 24; qty = valUnit || valDefault;
+            } else if (combinedName.includes('rumput laut') || combinedName.includes('rmpt laut')) {
+                slotIndex = 25; qty = valTon || valDefault;
+            } else if (combinedName.includes('palen') && !combinedName.includes('bangunan')) {
+                slotIndex = 20; qty = valTon || valDefault;
             } else if (
                 combinedName.includes('pisang') || combinedName.includes('sayur') || combinedName.includes('buah') ||
                 jenisName.includes('makanan') || jenisName.includes('minuman') || jenisName.includes('olahan') || jenisName.includes('pertanian') ||
@@ -301,22 +309,22 @@ const extractCargoRowData = (d, jenis) => {
                 combinedName.includes('cabai') || combinedName.includes('tomat') || combinedName.includes('bawang') || combinedName.includes('kentang')
             ) {
                 // Default fallback untuk kategori Makanan, Minuman, & Produk Olahan -> Sayur & Buah (ton)
-                slotIndex = 22; qty = valTon || valDefault;
+                slotIndex = 23; qty = valTon || valDefault;
             }
             // --- LAIN-LAIN ---
             else if (combinedName.includes('pupuk') || combinedName.includes('urea') || combinedName.includes('npk') || combinedName.includes('za')) {
-                slotIndex = 37; qty = valTon || valDefault; // Pupuk (ton)
+                slotIndex = 38; qty = valTon || valDefault; // Pupuk (ton)
             } else if (combinedName.includes('kayu')) {
-                slotIndex = 36; qty = valM3 || valTon || valDefault; // Kayu m3
+                slotIndex = 37; qty = valM3 || valTon || valDefault; // Kayu m3
             } else if (combinedName.includes('hewan') || combinedName.includes('ternak') || combinedName.includes('sapi') || combinedName.includes('kambing') || combinedName.includes('domba') || combinedName.includes('ayam')) {
-                slotIndex = 35; qty = valUnit || valDefault; // Hewan/Ternak
+                slotIndex = 36; qty = valUnit || valDefault; // Hewan/Ternak
             } else if (combinedName.includes('ikan') || combinedName.includes('cumi') || combinedName.includes('udang') || combinedName.includes('kerapu')) {
-                slotIndex = 34; qty = valTon || valDefault; // Ikan (ton)
+                slotIndex = 35; qty = valTon || valDefault; // Ikan (ton)
             } else if (combinedName.includes('barkas') || combinedName.includes('rongsokan')) {
-                slotIndex = 31; qty = valTon || valDefault; // Barkas (ton)
+                slotIndex = 32; qty = valTon || valDefault; // Barkas (ton)
             } else {
-                // Semua barang yang tidak spesifik dipetakan langsung ke Bagasi Lainnya (ton) [slot 38]
-                slotIndex = 38; qty = valTon || valDefault;
+                // Semua barang yang tidak spesifik dipetakan langsung ke Bagasi Lainnya (ton) [slot 39]
+                slotIndex = 39; qty = valTon || valDefault;
             }
 
             slots[slotIndex] += qty;
@@ -694,7 +702,7 @@ function Clearance() {
             const sheetName = monthName && year ? `${monthName} ${year}` : 'Data Ekrek';
             const worksheet = workbook.addWorksheet(sheetName);
             worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 3 }];
-            const emptyCargoSlots = new Array(39).fill(null);
+            const emptyCargoSlots = new Array(40).fill(null);
 
             const row1 = [
                 "PPK", "No. SPB Asal", "No. SPB", "No. Urut", "Nama Kapal", "Status Kapal", "Jenis Kapal", "Bendera", "Nama Nakhoda", "Banyak Anak Buah Kapal",
@@ -710,9 +718,9 @@ function Clearance() {
                 "Pada Tanggal", null, null, "Tempat Terakhir Disinggahi", "Bermuatan Atau Kosong",
                 "Pada Tanggal", null, null, "Tempat Yang Pertama Disinggahi", "Tempat Tujuan Terakhir", "Bermuatan Atau Kosong", null,
                 "Dewasa", null, "TOTAL Dewasa (Datang)", "Anak", null, "TOTAL Anak (Datang)", null,
-                "Kendaraan", null, null, null, null, null, "Bahan Bakar", null, null, null, null, null, null, "Makanan , Minuman , Dan Produk Olahan", null, null, null, null, null, null, null, null, null, null, null, "Bahan Bangunan", null, null, null, null, null, "Lain-lain", null, null, null, null, null, null, null,
+                "Kendaraan", null, null, null, null, null, "Bahan Bakar", null, null, null, null, null, null, null, "Makanan , Minuman , Dan Produk Olahan", null, null, null, null, null, null, null, null, null, null, null, "Bahan Bangunan", null, null, null, null, null, "Lain-lain", null, null, null, null, null, null, null,
                 "Dewasa", null, "TOTAL Dewasa (brkt)", "Anak", null, "TOTAL Anak (brkt)", null,
-                "Kendaraan", null, null, null, null, null, "Bahan Bakar", null, null, null, null, null, null, "Makanan , Minuman , Dan Produk Olahan", null, null, null, null, null, null, null, null, null, null, null, "Bahan Bangunan", null, null, null, null, null, "Lain-lain", null, null, null, null, null, null, null,
+                "Kendaraan", null, null, null, null, null, "Bahan Bakar", null, null, null, null, null, null, null, "Makanan , Minuman , Dan Produk Olahan", null, null, null, null, null, null, null, null, null, null, null, "Bahan Bangunan", null, null, null, null, null, "Lain-lain", null, null, null, null, null, null, null,
                 null, null
             ];
 
@@ -761,7 +769,7 @@ function Clearance() {
             const endDataRow = 3 + exportRecords.length;
             const sumRowNumber = endDataRow + 1;
 
-            const sumRowValues = new Array(116).fill(null);
+            const sumRowValues = new Array(118).fill(null);
             sumRowValues[0] = "JUMLAH TOTAL";
 
             // Col 10: CREW
@@ -773,20 +781,20 @@ function Clearance() {
                 sumRowValues[c - 1] = { formula: `SUM(${colLet}${startDataRow}:${colLet}${endDataRow})` };
             }
 
-            // Col 30-68: Bongkar Cargo & Vehicles (39 columns)
-            for (let c = 30; c <= 68; c++) {
+            // Col 30-69: Bongkar Cargo & Vehicles (40 columns)
+            for (let c = 30; c <= 69; c++) {
                 const colLet = getColLetter(c);
                 sumRowValues[c - 1] = { formula: `SUM(${colLet}${startDataRow}:${colLet}${endDataRow})` };
             }
 
-            // Col 69-75: Penumpang Berangkat
-            for (let c = 69; c <= 75; c++) {
+            // Col 70-76: Penumpang Berangkat
+            for (let c = 70; c <= 76; c++) {
                 const colLet = getColLetter(c);
                 sumRowValues[c - 1] = { formula: `SUM(${colLet}${startDataRow}:${colLet}${endDataRow})` };
             }
 
-            // Col 76-114: Muat Cargo & Vehicles (39 columns)
-            for (let c = 76; c <= 114; c++) {
+            // Col 77-116: Muat Cargo & Vehicles (40 columns)
+            for (let c = 77; c <= 116; c++) {
                 const colLet = getColLetter(c);
                 sumRowValues[c - 1] = { formula: `SUM(${colLet}${startDataRow}:${colLet}${endDataRow})` };
             }

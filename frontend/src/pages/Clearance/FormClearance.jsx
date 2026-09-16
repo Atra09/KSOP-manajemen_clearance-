@@ -168,6 +168,44 @@ const FormClearance = () => {
                         pembayaran_rambu: { ntpn: pembayaran_rambu.ntpn, nilai: pembayaran_rambu.nilai },
                         pembayaran_labuh: { ntpn: pembayaran_labuh.ntpn, nilai: pembayaran_labuh.nilai }
                     };
+                } else {
+                    try {
+                        const spbRes = await axiosInstance.get('/spb');
+                        const listSpb = spbRes.data?.datas || [];
+                        if (listSpb.length > 0) {
+                            let maxIdSpb = -1;
+                            let latestItem = null;
+
+                            listSpb.forEach(item => {
+                                if (item && item.no_spb) {
+                                    const currentId = Number(item.id_spb) || 0;
+                                    if (currentId > maxIdSpb) {
+                                        maxIdSpb = currentId;
+                                        latestItem = item;
+                                    }
+                                }
+                            });
+
+                            if (latestItem && latestItem.no_spb) {
+                                const str = String(latestItem.no_spb).trim();
+                                const digitsMatch = str.match(/\d+/);
+                                if (digitsMatch) {
+                                    const numStr = digitsMatch[0];
+                                    const numVal = parseInt(numStr, 10);
+                                    if (!isNaN(numVal)) {
+                                        const nextVal = (numVal + 1).toString().padStart(numStr.length, '0');
+                                        const suggestedNoSpb = str.replace(numStr, nextVal);
+                                        finalFormData = {
+                                            ...initialState,
+                                            spb: { ...initialState.spb, no_spb: suggestedNoSpb }
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Gagal memuat SPB untuk auto-suggest:", e);
+                    }
                 }
 
                 setFormData(finalFormData);

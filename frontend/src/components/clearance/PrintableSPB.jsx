@@ -118,12 +118,12 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
         paddingBottom: "0mm",
       }}
     >
-      {/* === PPK Number (Top Right) === */}
+      {/* === atur ppk number === */}
       <div
         style={{
           position: "absolute",
           top: "21mm",
-          left: "136mm",
+          left: "130mm",
           display: "flex",
           gap: "10px",
           fontWeight: "bold",
@@ -136,11 +136,11 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
         <div style={{ width: "11mm" }}>{tahun}</div>
       </div>
 
-      {/* === Warning Box === */}
+      {/* === atur warning box === */}
       <div
         style={{
           position: "absolute",
-          top: "47mm",
+          top: "43mm",
           left: "122mm",
           width: "70mm",
           border: "5px double #c00000",
@@ -150,22 +150,22 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
           fontWeight: "bold",
         }}
       >
-        <div style={{ fontSize: "14pt", textDecoration: "underline" }}>
+        <div style={{ fontSize: "14pt", textDecoration: "underline", color: "#c00000" }}>
           *PERINGATAN AWAL*
         </div>
-        <div style={{ lineHeight: 1.2, fontSize: "11pt" }}>
+        <div style={{ lineHeight: 1.2, fontSize: "11pt", color: "#c00000" }}>
           UTAMAKAN KESELAMATAN BERLAYAR
           <br />
           BERLINDUNG JIKA CUACA BURUK
         </div>
       </div>
 
-      {/* === SPB Number === */}
+      {/* === atur NK === */}
       <div
         style={{
           position: "absolute",
           top: "101mm",
-          left: "280.1px",
+          left: "268px",
           display: "flex",
           gap: "10px",
           fontWeight: "bold",
@@ -227,11 +227,11 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
       >
         {data.nahkoda?.nama_nahkoda}
       </div>
-
+      {/* atur imo */}
       <div
         style={{
           position: "absolute",
-          top: "141mm",
+          top: "138mm",
           left: "42mm",
           fontWeight: "bold",
           fontSize: "12pt",
@@ -239,11 +239,11 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
       >
         {data.kapal?.nomor_imo || "-"}
       </div>
-
+      {/* atur call sign */}
       <div
         style={{
           position: "absolute",
-          top: "141mm",
+          top: "138mm",
           left: "142mm",
           fontWeight: "bold",
           fontSize: "12pt",
@@ -252,12 +252,12 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
         {data.kapal?.call_sign || "-"}
       </div>
 
-      {/* === tanggal clearance + waktu === */}
+      {/* === atur tanggal clearance + waktu === */}
       <div
         style={{
           position: "absolute",
           top: "151mm",
-          left: "140.2mm",
+          left: "135mm",
           fontWeight: "bold",
           fontSize: "9pt",
         }}
@@ -269,7 +269,7 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
         style={{
           position: "absolute",
           top: "151mm",
-          left: "166.2mm",
+          left: "161.2mm",
           fontWeight: "bold",
           fontSize: "9pt",
         }}
@@ -281,7 +281,7 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
       <div
         style={{
           position: "absolute",
-          top: "178mm",
+          top: "178.5mm",
           left: "42mm",
           fontWeight: "bold",
           fontSize: "11pt",
@@ -290,11 +290,12 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
         {renderLocation(getOriginLocation(data))}
       </div>
 
+      {/* atur tanggal berangkat + waktu */}
       <div
         style={{
           position: "absolute",
-          top: "180mm",
-          left: "105mm",
+          top: "178.5mm",
+          left: "101mm",
           fontWeight: "bold",
           fontSize: "10pt",
         }}
@@ -305,8 +306,8 @@ const PrintableSPB = React.forwardRef(({ data }, ref) => {
       <div
         style={{
           position: "absolute",
-          top: "185mm",
-          left: "105mm",
+          top: "182.5mm",
+          left: "101mm",
           fontWeight: "bold",
           fontSize: "10pt",
         }}

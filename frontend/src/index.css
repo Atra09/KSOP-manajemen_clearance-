@@ -373,6 +373,37 @@ html.dark .apexcharts-ycrosshairs {
     color: #c00000 !important;
     border-color: #c00000 !important;
   }
+
+  /* Reset all text & backgrounds inside print-only to light mode black on white */
+  .print-only,
+  .print-only *,
+  html.dark .print-only,
+  html.dark .print-only * {
+    background-color: transparent !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+
+  .print-only {
+    background-color: #ffffff !important;
+  }
+
+  /* Preserve red warning box styling in SPB */
+  .print-only [style*="c00000"],
+  .print-only [style*="c00000"] *,
+  .print-only [style*="#c00000"],
+  .print-only [style*="#c00000"] *,
+  .print-only [style*="rgb(192, 0, 0)"],
+  .print-only [style*="rgb(192, 0, 0)"] *,
+  html.dark .print-only [style*="c00000"],
+  html.dark .print-only [style*="c00000"] *,
+  html.dark .print-only [style*="#c00000"],
+  html.dark .print-only [style*="#c00000"] *,
+  html.dark .print-only [style*="rgb(192, 0, 0)"],
+  html.dark .print-only [style*="rgb(192, 0, 0)"] * {
+    color: #c00000 !important;
+    border-color: #c00000 !important;
+  }
 }
 
 /* ApexCharts Tooltip Custom Styling */

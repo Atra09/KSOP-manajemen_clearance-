@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import Label from '../form/Label';
 import InputField from '../form/InputField';
@@ -83,9 +84,9 @@ const StatusPelayaranModal = ({ isOpen, onClose, onSuccess, initialData = null }
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+    return createPortal(
+        <div className="fixed inset-0 top-0 left-0 w-screen h-screen z-[999999] flex items-center justify-center bg-black/70 dark:bg-black/85 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700">
                 <form onSubmit={handleSubmit}>
                     <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-700/50">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-white">
@@ -164,7 +165,8 @@ const StatusPelayaranModal = ({ isOpen, onClose, onSuccess, initialData = null }
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
