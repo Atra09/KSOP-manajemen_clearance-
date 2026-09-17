@@ -41,7 +41,6 @@ const FormClearance = () => {
     const [agenData, setAgenData] = useState([]);
     const [kategoriMuatanData, setKategoriMuatanData] = useState([]);
     const [pelabuhanData, setPelabuhanData] = useState([]);
-    const [spbAsalData, setSpbAsalData] = useState([]);
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState(initialState);
 
@@ -102,7 +101,6 @@ const FormClearance = () => {
                     m3: valM3,
                     unit: valUnit,
                     liter: valLiter,
-                    bobot_per_unit_kg: m.bobot_per_unit_kg || m.kategori_muatan?.bobot_per_unit_kg || '',
                 };
             }
         });
@@ -115,7 +113,7 @@ const FormClearance = () => {
                 const [
                     agenRes, kabupatenRes, kapalRes,
                     kecamatanRes, nahkodaRes, kategoriMuatanRes,
-                    pelabuhanRes, spbAsalRes
+                    pelabuhanRes
                 ] = await Promise.all([
                     axiosInstance.get('/agen'),
                     axiosInstance.get('/kabupaten'),
@@ -123,8 +121,7 @@ const FormClearance = () => {
                     axiosInstance.get('/kecamatan'),
                     axiosInstance.get('/nahkoda'),
                     axiosInstance.get('/kategori-muatan'),
-                    axiosInstance.get('/pelabuhan'),
-                    axiosInstance.get('/spb-asal')
+                    axiosInstance.get('/pelabuhan')
                 ]);
 
                 setAgenData(agenRes.data.datas.map(d => ({ nama: d.nama_agen, id: d.id_agen })));
@@ -140,7 +137,6 @@ const FormClearance = () => {
                     nama_satuan_muatan: d.satuan_muatan?.nama_satuan_muatan || 'unit'
                 })));
                 setPelabuhanData(pelabuhanRes.data.datas.map(d => ({ nama: d.nama_pelabuhan, id: d.id_pelabuhan })));
-                setSpbAsalData((spbAsalRes.data?.datas || []).map(d => ({ id: d.id_spb_asal, kode_spb: d.kode_spb, asal: d.asal, nama: `${d.kode_spb} (${d.asal})` })));
 
                 let finalFormData = initialState;
 
@@ -168,44 +164,6 @@ const FormClearance = () => {
                         pembayaran_rambu: { ntpn: pembayaran_rambu.ntpn, nilai: pembayaran_rambu.nilai },
                         pembayaran_labuh: { ntpn: pembayaran_labuh.ntpn, nilai: pembayaran_labuh.nilai }
                     };
-                } else {
-                    try {
-                        const spbRes = await axiosInstance.get('/spb');
-                        const listSpb = spbRes.data?.datas || [];
-                        if (listSpb.length > 0) {
-                            let maxIdSpb = -1;
-                            let latestItem = null;
-
-                            listSpb.forEach(item => {
-                                if (item && item.no_spb) {
-                                    const currentId = Number(item.id_spb) || 0;
-                                    if (currentId > maxIdSpb) {
-                                        maxIdSpb = currentId;
-                                        latestItem = item;
-                                    }
-                                }
-                            });
-
-                            if (latestItem && latestItem.no_spb) {
-                                const str = String(latestItem.no_spb).trim();
-                                const digitsMatch = str.match(/\d+/);
-                                if (digitsMatch) {
-                                    const numStr = digitsMatch[0];
-                                    const numVal = parseInt(numStr, 10);
-                                    if (!isNaN(numVal)) {
-                                        const nextVal = (numVal + 1).toString().padStart(numStr.length, '0');
-                                        const suggestedNoSpb = str.replace(numStr, nextVal);
-                                        finalFormData = {
-                                            ...initialState,
-                                            spb: { ...initialState.spb, no_spb: suggestedNoSpb }
-                                        };
-                                    }
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Gagal memuat SPB untuk auto-suggest:", e);
-                    }
                 }
 
                 setFormData(finalFormData);
@@ -351,8 +309,7 @@ const FormClearance = () => {
                     muatanBarangBackend.push({
                         jenis_perjalanan: item.jenis_perjalanan,
                         id_kategori_muatan: item.id_kategori_muatan,
-                        ton, m3, unit, liter,
-                        bobot_per_unit_kg: parseNumeric(item.bobot_per_unit_kg)
+                        ton, m3, unit, liter
                     });
                 }
             } else if (item.type === 'kendaraan') {
@@ -511,7 +468,7 @@ const FormClearance = () => {
                             handleKapalChange={handleKapalChange} kapalOptions={kapalData}
                             nahkodaOptions={nahkodaData} kabupatenOptions={kabupatenData}
                             kecamatanOptions={kecamatanData} agenOptions={agenData}
-                            pelabuhanOptions={pelabuhanData} spbAsalOptions={spbAsalData}
+                            pelabuhanOptions={pelabuhanData}
                             jenisPpkOptions={[{ id: '27', nama: '27' }, { id: '29', nama: '29' }]}
                         />
                     )}

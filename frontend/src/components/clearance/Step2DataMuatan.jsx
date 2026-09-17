@@ -27,7 +27,7 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
   const handleRowChange = (type, index, e) => {
     let { name, value } = e.target;
 
-    if ((name === 'ton' || name === 'm3' || name === 'unit' || name === 'liter' || name === 'quantity' || name === 'estimated_ton' || name === 'bobot_per_unit_kg') && value !== '' && !/^[0-9]*\.?[0-9]*$/.test(value)) {
+    if ((name === 'ton' || name === 'm3' || name === 'unit' || name === 'liter' || name === 'quantity' || name === 'estimated_ton') && value !== '' && !/^[0-9]*\.?[0-9]*$/.test(value)) {
       return;
     }
 
@@ -35,39 +35,23 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
     const currentRow = { ...list[index] };
     const isKendaraan = currentRow.type === 'kendaraan';
     const selectedCat = !isKendaraan ? muatanOptions?.find(k => String(k.id) === String(currentRow.id_kategori_muatan)) : null;
-    const catBobotKg = parseFloat(selectedCat?.bobot_per_unit_kg || 0);
+    const bobotKg = parseFloat(selectedCat?.bobot_per_unit_kg || 0);
 
     // Reset values when category changes
     if (name === 'id_kategori_muatan') {
-      const newSelectedCat = muatanOptions?.find(k => String(k.id) === String(value));
       currentRow.id_kategori_muatan = value;
-      currentRow.bobot_per_unit_kg = newSelectedCat?.bobot_per_unit_kg ? String(newSelectedCat.bobot_per_unit_kg) : '';
       currentRow.quantity = '';
       currentRow.estimated_ton = '';
       currentRow.unit = null;
       currentRow.ton = null;
       currentRow.liter = null;
       currentRow.m3 = null;
-    } else if (name === 'bobot_per_unit_kg') {
-      currentRow.bobot_per_unit_kg = value;
-      const effectiveBobot = value !== '' ? parseFloat(value) : catBobotKg;
-      const qtyVal = parseFloat(currentRow.quantity || currentRow.unit || 0);
-      if (effectiveBobot > 0 && qtyVal > 0) {
-        const calc = (qtyVal * effectiveBobot) / 1000;
-        const est = Number.isInteger(calc) ? calc.toString() : parseFloat(calc.toFixed(3)).toString();
-        currentRow.estimated_ton = est;
-        currentRow.ton = est;
-      }
     } else if (name === 'quantity') {
       currentRow.quantity = value;
       const unitName = String(selectedCat?.nama_satuan_muatan || 'unit').toLowerCase().trim();
       const catName = String(selectedCat?.nama || selectedCat?.nama_kategori_muatan || '').toLowerCase().trim();
       const isLiter = unitName === 'liter' || ['mitan', 'minyak tanah', 'krosene', 'kerosene', 'kerosine', 'solar', 'bensin'].some(k => catName.includes(k));
       const numVal = value !== '' ? value : null;
-
-      const effectiveBobot = (currentRow.bobot_per_unit_kg !== undefined && currentRow.bobot_per_unit_kg !== '' && !isNaN(parseFloat(currentRow.bobot_per_unit_kg)))
-        ? parseFloat(currentRow.bobot_per_unit_kg)
-        : catBobotKg;
 
       if (isLiter) {
         currentRow.liter = numVal;
@@ -92,8 +76,8 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
         currentRow.ton = null;
       }
 
-      if (effectiveBobot > 0 && value !== '' && !isNaN(parseFloat(value))) {
-        const calc = (parseFloat(value) * effectiveBobot) / 1000;
+      if (bobotKg > 0 && value !== '' && !isNaN(parseFloat(value))) {
+        const calc = (parseFloat(value) * bobotKg) / 1000;
         const est = Number.isInteger(calc) ? calc.toString() : parseFloat(calc.toFixed(3)).toString();
         currentRow.estimated_ton = est;
         currentRow.ton = est;
@@ -104,12 +88,8 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
     } else if (name === 'estimated_ton') {
       currentRow.estimated_ton = value;
       currentRow.ton = value !== '' ? value : null;
-      const effectiveBobot = (currentRow.bobot_per_unit_kg !== undefined && currentRow.bobot_per_unit_kg !== '' && !isNaN(parseFloat(currentRow.bobot_per_unit_kg)))
-        ? parseFloat(currentRow.bobot_per_unit_kg)
-        : catBobotKg;
-
-      if (effectiveBobot > 0 && value !== '' && !isNaN(parseFloat(value))) {
-        const calculatedQty = Math.round((parseFloat(value) * 1000) / effectiveBobot).toString();
+      if (bobotKg > 0 && value !== '' && !isNaN(parseFloat(value))) {
+        const calculatedQty = Math.round((parseFloat(value) * 1000) / bobotKg).toString();
         currentRow.quantity = calculatedQty;
         currentRow.unit = calculatedQty;
       } else if (value === '') {
@@ -137,7 +117,7 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
     if (itemType === 'kendaraan') {
       newItem = { type: 'kendaraan', golongan_kendaraan: '', unit: '', jenis_perjalanan: jenisPerjalanan };
     } else {
-      newItem = { type: 'barang', id_kategori_muatan: '', quantity: '', estimated_ton: '', bobot_per_unit_kg: '', jenis_perjalanan: jenisPerjalanan };
+      newItem = { type: 'barang', id_kategori_muatan: '', quantity: '', estimated_ton: '', jenis_perjalanan: jenisPerjalanan };
     }
 
     setFormData(prev => ({
@@ -150,17 +130,14 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
     const isKendaraan = item.type === 'kendaraan';
     const selectedCat = !isKendaraan ? muatanOptions?.find(k => String(k.id) === String(item.id_kategori_muatan)) : null;
     const unitLabel = selectedCat?.nama_satuan_muatan || 'unit';
-    const catBobotKg = parseFloat(selectedCat?.bobot_per_unit_kg || 0);
+    const bobotKg = parseFloat(selectedCat?.bobot_per_unit_kg || 0);
 
     const currentQtyValue = item.quantity ?? item.unit ?? item.liter ?? item.m3 ?? item.ton ?? '';
     const currentTonValue = item.estimated_ton ?? item.ton ?? '';
-    const currentBobotValue = item.bobot_per_unit_kg !== undefined && item.bobot_per_unit_kg !== null && item.bobot_per_unit_kg !== ''
-      ? item.bobot_per_unit_kg
-      : (catBobotKg > 0 ? String(catBobotKg) : '');
 
     return (
       <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-4 pt-4 pb-4 px-4 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-xs items-start">
-        <div className={isKendaraan ? "md:col-span-6" : "md:col-span-3"}>
+        <div className={isKendaraan ? "md:col-span-6" : "md:col-span-4"}>
           <Label>{isKendaraan ? 'Golongan Kendaraan' : 'Nama Muatan'}</Label>
           {isKendaraan ? (
             <Select
@@ -207,19 +184,7 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
                 disabled={!item.id_kategori_muatan}
               />
             </div>
-            <div className="md:col-span-2">
-              <Label>Bobot (kg/unit)</Label>
-              <InputField
-                name="bobot_per_unit_kg"
-                type="text"
-                inputMode="decimal"
-                value={currentBobotValue}
-                onChange={e => handleRowChange(listType, index, e)}
-                placeholder="Opsional"
-                disabled={!item.id_kategori_muatan}
-              />
-            </div>
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               <Label>Estimasi Bobot (Ton)</Label>
               <InputField
                 name="estimated_ton"
@@ -227,7 +192,7 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
                 inputMode="decimal"
                 value={currentTonValue}
                 onChange={e => handleRowChange(listType, index, e)}
-                placeholder="0.00"
+                placeholder={bobotKg > 0 ? "0.00" : "-"}
                 disabled={!item.id_kategori_muatan}
               />
             </div>
@@ -239,7 +204,7 @@ const Step2DataMuatan = ({ formData, setFormData, prevStep, muatanOptions }) => 
           <button
             type="button"
             onClick={() => removeRow(listType, index)}
-            className="bg-red-500 hover:bg-red-600 text-white font-medium px-3 py-2.5 rounded-lg h-11 w-full flex items-center justify-center gap-1.5 transition-colors shadow-xs shrink-0 cursor-pointer"
+            className="bg-red-500 hover:bg-red-600 text-white font-medium px-3 py-2.5 rounded-lg h-11 w-full flex items-center justify-center gap-1.5 transition-colors shadow-xs shrink-0"
             title="Hapus baris"
           >
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

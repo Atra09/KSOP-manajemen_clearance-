@@ -46,13 +46,7 @@ const processSingleMuatan = async (item) => {
     });
 
     const nama_satuan_muatan = String(cat?.satuan_muatan?.nama_satuan_muatan || 'unit').toLowerCase().trim();
-    
-    // Use item-level bobot_per_unit_kg if provided, otherwise fallback to master category default
-    const itemBobot = item.bobot_per_unit_kg !== undefined && item.bobot_per_unit_kg !== null && item.bobot_per_unit_kg !== '' 
-        ? parseFloat(item.bobot_per_unit_kg) 
-        : null;
-    const catBobot = parseFloat(cat?.bobot_per_unit_kg || 0);
-    const bobot_per_unit_kg = (itemBobot !== null && !isNaN(itemBobot) && itemBobot > 0) ? itemBobot : catBobot;
+    const bobot_per_unit_kg = parseFloat(cat?.bobot_per_unit_kg || 0);
 
     let rawUnit = item.unit !== undefined && item.unit !== null && item.unit !== '' ? parseFloat(item.unit) : null;
     let rawTon = item.ton !== undefined && item.ton !== null && item.ton !== '' ? parseFloat(item.ton) : (item.estimated_ton !== undefined && item.estimated_ton !== null && item.estimated_ton !== '' ? parseFloat(item.estimated_ton) : null);
@@ -103,8 +97,7 @@ const processSingleMuatan = async (item) => {
         unit: insertUnit,
         ton: insertTon,
         m3: insertM3,
-        liter: insertLiter,
-        bobot_per_unit_kg: bobot_per_unit_kg > 0 ? bobot_per_unit_kg : null
+        liter: insertLiter
     };
 };
 
