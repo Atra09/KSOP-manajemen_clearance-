@@ -61,18 +61,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 (async () => {
   try {
-    // await db.query('SET FOREIGN_KEY_CHECKS = 0');
-    // await db.sync({ force: true });
-    // await db.query('SET FOREIGN_KEY_CHECKS = 1');
-    configDb()
-    await spbAsalModel.sync({ alter: true });
-    const muatanModel = require('./model/muatanModel');
-    await muatanModel.sync({ alter: true });
-    console.log("berhasil sync spb_asal & muatan")
+    configDb();
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-})()
+})();
 
 app.use('/users', usersRouter);
 
